@@ -6,6 +6,7 @@ import {
   BookOpen, Clock, Map, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { POPULAR_LOCATIONS, POPULAR_ROUTES } from "@/constants/data";
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,7 +25,6 @@ export default function Home() {
   const originRef = useRef<HTMLDivElement>(null);
   const destRef = useRef<HTMLDivElement>(null);
 
-  // VALIDASI TANGGAL: Dapatkan tanggal hari ini dalam format YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0];
 
   const isFormValid = origin.length > 0 && destination.length > 0 && departDate.length > 0 && passengers > 0;
@@ -105,9 +105,18 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-900 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+      <section className="relative px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start overflow-hidden min-h-[600px]">
+        <div className="absolute inset-0 z-0">
+            <Image
+                src="/img/hero-bus.jpg"
+                alt="SkyBus Hero Background"
+                fill
+                priority
+                className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/60 dark:from-slate-950/90 dark:to-slate-900/60"></div>
+        </div>
+
         <div className="text-white space-y-6 relative z-10 pt-10 md:pt-16">
           <div className="inline-block bg-white/10 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase backdrop-blur-sm border border-white/20">
             #1 Partner Perjalanan Anda
@@ -130,7 +139,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl shadow-blue-900/20 dark:shadow-black/50 max-w-md w-full ml-auto relative z-10 transition-colors border border-transparent dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 max-w-md w-full ml-auto relative z-10 transition-colors border border-transparent dark:border-slate-800">
           <div className="flex border-b border-slate-100 dark:border-slate-700 mb-6">
             <button onClick={() => setTripType('one-way')} className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'one-way' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Sekali Jalan</button>
             <button onClick={() => setTripType('round-trip')} className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'round-trip' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Pulang Pergi</button>
@@ -185,7 +194,6 @@ export default function Home() {
                 <div className="flex gap-4 w-full">
                     <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full">
                         <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pergi</label>
-                        {/* VALIDASI: min={today} agar tidak bisa pilih tanggal kemarin */}
                         <input
                             type="date"
                             min={today}
@@ -298,8 +306,14 @@ export default function Home() {
                 {POPULAR_ROUTES.map((route, idx) => (
                     <Link href={`/search?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
-                            <Map className="w-16 h-16 text-slate-400 dark:text-slate-500 group-hover:scale-110 group-hover:text-blue-500 transition duration-500" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition"></div>
+                            <Image
+                                src={`/img/rute-populer-0${idx + 1}.jpg`}
+                                alt={`${route.from} ke ${route.to}`}
+                                fill
+                                className="object-cover transition duration-500 group-hover:scale-110"
+                            />
+                            {/* Overlay Gradient agar teks terbaca */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-60 transition"></div>
                         </div>
                         <div className="absolute bottom-0 left-0 p-4 w-full">
                             <div className="text-[10px] font-bold text-amber-400 mb-1 tracking-wide uppercase bg-slate-900/50 backdrop-blur-sm inline-block px-2 py-0.5 rounded">{route.price}</div>
@@ -313,13 +327,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MITRA PARTNER */}
-      <section className="pt-32 pb-12 px-6 bg-slate-50 dark:bg-slate-950">
+      <section className="py-14 px-6 bg-slate-50 dark:bg-slate-950">
          <div className="max-w-7xl mx-auto text-center">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-12">Partner Resmi Kami</p>
-            <div className="flex flex-wrap justify-center items-center gap-8">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Partner Resmi Kami</p>
+            {/* Logo lebih rapat (gap-6) dan justify center */}
+            <div className="flex flex-wrap justify-center items-center gap-6">
                 {PARTNER_LOGOS.map((logo, i) => (
-                    <div key={i} className="h-24 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-4">
+                    <div key={i} className="h-28 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-2">
                         <img
                             src={`/img/${logo}`}
                             alt={`Mitra ${i}`}
@@ -331,12 +345,10 @@ export default function Home() {
          </div>
       </section>
 
-      {/* SEPARATOR DIVIDER */}
       <div className="max-w-7xl mx-auto px-6">
           <div className="border-t border-slate-200 dark:border-slate-800"></div>
       </div>
 
-      {/* FAQ SECTION */}
       <section id="faq-section" className="py-20 px-6 max-w-4xl mx-auto">
         <div className="text-center mb-10">
             <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase">Pertanyaan Umum</h2>
