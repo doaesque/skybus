@@ -8,20 +8,18 @@ export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800 font-sans">
       <div className="max-w-7xl mx-auto px-6">
-        
-        {/* Grid Utama Footer */}
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          
-          {/* Kolom 1: Brand */}
+
           <div>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-2xl font-black tracking-tighter flex items-center gap-2 italic text-white mb-6 hover:opacity-80 transition"
               style={{ fontFamily: 'var(--font-geist-sans)' }}
             >
               SkyBus<span className="text-amber-500">.</span>
             </Link>
-            
+
             <p className="text-sm leading-relaxed mb-6">
               Platform pemesanan tiket bus antarkota #1 di Indonesia. Nikmati perjalanan aman, nyaman, dan terpercaya bersama mitra otobus terbaik kami.
             </p>
@@ -33,7 +31,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Kolom 2: Perusahaan */}
           <div>
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider">Perusahaan</h4>
             <ul className="space-y-3 text-sm">
@@ -44,20 +41,18 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Kolom 3: Dukungan */}
           <div>
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider">Dukungan</h4>
             <ul className="space-y-3 text-sm">
               <li><Link href="/help" className="hover:text-amber-500 transition">Pusat Bantuan</Link></li>
               <li><Link href="/guide" className="hover:text-amber-500 transition">Cara Pesan</Link></li>
-              {/* Menggunakan ID hash link untuk FAQ di homepage */}
               <li><Link href="/#faq-section" className="hover:text-amber-500 transition">FAQ</Link></li>
               <li><Link href="/privacy" className="hover:text-amber-500 transition">Kebijakan Privasi</Link></li>
+              <li><Link href="/cookie-policy" className="hover:text-amber-500 transition">Kebijakan Kuki</Link></li>
               <li><Link href="/terms" className="hover:text-amber-500 transition">Syarat & Ketentuan</Link></li>
             </ul>
           </div>
 
-          {/* Kolom 4: Kontak */}
           <div>
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider">Hubungi Kami</h4>
             <ul className="space-y-4 text-sm">

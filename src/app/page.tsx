@@ -6,7 +6,7 @@ import {
   BookOpen, Clock, Map, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair
 } from "lucide-react";
 import Link from "next/link";
-import { POPULAR_LOCATIONS, POPULAR_ROUTES, PARTNERS } from "@/constants/data";
+import { POPULAR_LOCATIONS, POPULAR_ROUTES } from "@/constants/data";
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
@@ -23,6 +23,9 @@ export default function Home() {
 
   const originRef = useRef<HTMLDivElement>(null);
   const destRef = useRef<HTMLDivElement>(null);
+
+  // VALIDASI TANGGAL: Dapatkan tanggal hari ini dalam format YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
 
   const isFormValid = origin.length > 0 && destination.length > 0 && departDate.length > 0 && passengers > 0;
 
@@ -65,10 +68,17 @@ export default function Home() {
   };
 
   const faqs = [
-    { q: "Bagaimana cara melakukan refund?", a: "Refund dapat dilakukan maksimal 24 jam sebelum keberangkatan melalui menu 'Cek Pesanan'. Pilih tiket, klik 'Ajukan Refund', dan dana akan kembali dalam 3-14 hari kerja." },
-    { q: "Apakah bisa ganti jadwal (reschedule)?", a: "Bisa, reschedule tergantung kebijakan masing-masing PO Bus. Silakan cek detail tiket pada menu Pesanan Saya. Biaya admin mungkin berlaku." },
-    { q: "Apa itu kode booking?", a: "Kode booking adalah kode unik (misal: TRX-123) yang digunakan untuk menukarkan tiket di terminal atau check-in online." },
-    { q: "Apakah perlu cetak tiket?", a: "Tidak perlu. Cukup tunjukkan QR Code pada E-Ticket di HP Anda kepada petugas di titik keberangkatan." },
+    { q: "Apakah pelanggan diwajibkan untuk mencetak tiket?", a: "Ya, sebaiknya dicetak. Namun, sebagian besar operator kini menerima e-ticket di HP. Pastikan membawa kartu identitas yang sesuai dengan pemesanan." },
+    { q: "Tiket saya hilang. Apa yang harus saya lakukan?", a: "Salinan tiket dikirim ke email Anda. Anda bisa mencetak ulang dari sana. Jika email tidak masuk, hubungi layanan bantuan kami." },
+    { q: "Apa saja jenis pembayaran yang tersedia?", a: "Anda dapat membayar menggunakan Transfer Bank (Virtual Account), E-Wallet (GoPay, OVO, Dana), dan Kartu Kredit/Debit." },
+    { q: "Dapatkah saya membatalkan tiket yang dibeli?", a: "Pembatalan dan pengembalian dana bergantung pada kebijakan masing-masing PO Bus. Umumnya bisa dilakukan H-1 dengan potongan biaya administrasi." },
+    { q: "Apakah saya bisa mengubah jadwal (Reschedule)?", a: "Pada sebagian besar kasus, tiket yang sudah dikonfirmasi tidak dapat dijadwal ulang secara instan. Anda perlu mengajukan permohonan ke CS kami maksimal 7 hari sebelum keberangkatan." },
+    { q: "Saya ketinggalan bus. Apakah dana bisa kembali?", a: "Mohon maaf, jika ketinggalan bus karena kesalahan penumpang, tiket dianggap hangus dan dana tidak dapat dikembalikan." },
+  ];
+
+  const PARTNER_LOGOS = [
+    "efisiensi.png", "kramatdjati.png", "nusantara.png",
+    "pahala-kencana.png", "sinar-jaya.png", "xtrans.png", "san-group.png"
   ];
 
   return (
@@ -95,6 +105,7 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-blue-600 to-blue-900 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
         <div className="text-white space-y-6 relative z-10 pt-10 md:pt-16">
@@ -110,7 +121,7 @@ export default function Home() {
           <div className="flex gap-4 pt-4">
              <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-green-400" />
-                <span className="text-sm font-bold">Jaminan Uang Kembali</span>
+                <span className="text-sm font-bold">Jaminan Tiket Resmi</span>
              </div>
              <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-yellow-400" />
@@ -174,12 +185,23 @@ export default function Home() {
                 <div className="flex gap-4 w-full">
                     <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full">
                         <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pergi</label>
-                        <input type="date" value={departDate} onChange={(e) => setDepartDate(e.target.value)} className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]" />
+                        {/* VALIDASI: min={today} agar tidak bisa pilih tanggal kemarin */}
+                        <input
+                            type="date"
+                            min={today}
+                            value={departDate}
+                            onChange={(e) => setDepartDate(e.target.value)}
+                            className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                        />
                     </div>
                     {tripType === 'round-trip' && (
                         <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full animate-in fade-in slide-in-from-left-4">
                             <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pulang</label>
-                            <input type="date" className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]" />
+                            <input
+                                type="date"
+                                min={departDate || today}
+                                className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                            />
                         </div>
                     )}
                 </div>
@@ -272,7 +294,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
                 {POPULAR_ROUTES.map((route, idx) => (
                     <Link href={`/search?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
@@ -291,18 +313,31 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 px-6 bg-slate-50 dark:bg-slate-950">
+      {/* MITRA PARTNER */}
+      <section className="pt-32 pb-12 px-6 bg-slate-50 dark:bg-slate-950">
          <div className="max-w-7xl mx-auto text-center">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10">Partner Resmi Kami</p>
-            <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition duration-500">
-                {PARTNERS.map((partner, i) => (
-                    <span key={i} className="text-xl md:text-2xl font-black text-slate-400 hover:text-blue-600 dark:hover:text-white cursor-default transition select-none">{partner}</span>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-12">Partner Resmi Kami</p>
+            <div className="flex flex-wrap justify-center items-center gap-8">
+                {PARTNER_LOGOS.map((logo, i) => (
+                    <div key={i} className="h-24 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-4">
+                        <img
+                            src={`/img/${logo}`}
+                            alt={`Mitra ${i}`}
+                            className="max-h-full max-w-full object-contain"
+                        />
+                    </div>
                 ))}
             </div>
          </div>
       </section>
 
-      <section id="faq-section" className="py-20 px-6 max-w-3xl mx-auto">
+      {/* SEPARATOR DIVIDER */}
+      <div className="max-w-7xl mx-auto px-6">
+          <div className="border-t border-slate-200 dark:border-slate-800"></div>
+      </div>
+
+      {/* FAQ SECTION */}
+      <section id="faq-section" className="py-20 px-6 max-w-4xl mx-auto">
         <div className="text-center mb-10">
             <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase">Pertanyaan Umum</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-2">Punya pertanyaan? Cek di sini dulu.</p>
@@ -315,7 +350,7 @@ export default function Home() {
                         {faqOpenIndex === idx ? <ChevronUp className="w-4 h-4 text-blue-600" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                     </div>
                     {faqOpenIndex === idx && (
-                        <div className="p-6 pt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                        <div className="px-6 py-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-left">
                             {faq.a}
                         </div>
                     )}
