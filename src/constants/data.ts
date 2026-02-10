@@ -1,5 +1,4 @@
-export const BUS_DATA = [
-  {
+export const BUS_DATA = [{
     id: "1",
     name: "SkyBus Executive",
     operator: "PO. Sinar Jaya",
@@ -110,4 +109,67 @@ export const POPULAR_LOCATIONS = [
   "Semarang", "Solo", "Denpasar", "Medan", "Palembang", 
   "Terminal Pulo Gebang (JKT)", "Terminal Leuwi Panjang (BDG)", 
   "Terminal Bungurasih (SBY)", "Terminal Giwangan (YOG)"
+];
+
+export const POPULAR_ROUTES = [
+  { from: "Jakarta", to: "Bandung", price: "Mulai Rp 85rb", image: "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&q=80&w=300&h=200" },
+  { from: "Jakarta", to: "Yogyakarta", price: "Mulai Rp 180rb", image: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&q=80&w=300&h=200" },
+  { from: "Surabaya", to: "Bali", price: "Mulai Rp 250rb", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=300&h=200" },
+  { from: "Bandung", to: "Semarang", price: "Mulai Rp 140rb", image: "https://images.unsplash.com/photo-1596401057633-565652ca65a0?auto=format&fit=crop&q=80&w=300&h=200" },
+];
+
+export const PARTNERS = [
+  "Sinar Jaya", "Rosalia Indah", "Primajasa", "Harapan Jaya", 
+  "Gunung Harta", "Pahala Kencana", "Damri", "Agra Mas"
+];
+
+export const PARTNER_DETAILED_DATA = [
+  {
+    id: 1,
+    name: "PO. Sinar Jaya",
+    code: "SJ",
+    rating: 4.8,
+    reviews: "12rb+",
+    since: "1982",
+    routes: ["Jakarta - Bandung", "Jakarta - Surabaya", "Bekasi - Yogyakarta"],
+    fleets: ["Executive", "Suite Class", "Double Decker"],
+    desc: "Pilihan utama perjalanan hemat dan nyaman dengan armada modern.",
+    color: "bg-gradient-to-br from-red-500 to-red-700"
+  },
+  {
+    id: 2,
+    name: "PO. Rosalia Indah",
+    code: "RI",
+    rating: 4.9,
+    reviews: "8.5rb+",
+    since: "1983",
+    routes: ["Jakarta - Solo", "Bogor - Malang", "Merak - Madiun"],
+    fleets: ["Super Top", "First Class", "Sleeper"],
+    desc: "Rajanya layanan premium dengan fasilitas kelas atas dan pramugari.",
+    color: "bg-gradient-to-br from-orange-500 to-orange-700"
+  },
+  {
+    id: 3,
+    name: "PO. Harapan Jaya",
+    code: "HJ",
+    rating: 4.7,
+    reviews: "5rb+",
+    since: "1977",
+    routes: ["Tulungagung - Jakarta", "Blitar - Bandung"],
+    fleets: ["Scania K410", "Avante HDD", "Luxury Class"],
+    desc: "Kuda oranye dari Tulungagung yang mengutamakan ketepatan waktu.",
+    color: "bg-gradient-to-br from-white to-slate-200 text-slate-800 border"
+  },
+  {
+    id: 4,
+    name: "PO. Gunung Harta",
+    code: "GH",
+    rating: 4.8,
+    reviews: "6.2rb+",
+    since: "1993",
+    routes: ["Malang - Jakarta", "Denpasar - Yogyakarta"],
+    fleets: ["Triple Axle", "Jetbus 3+ SHD"],
+    desc: "Spesialis rute jarak jauh dengan kenyamanan suspensi udara.",
+    color: "bg-gradient-to-br from-green-500 to-green-700"
+  }
 ];
