@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  MapPin, Calendar, Users, ArrowRight, 
-  CreditCard, Armchair, Ticket, 
-  ShieldCheck, MessageCircle, BookOpen, Clock, Star, Map, Bus, Copy, Check
+import {
+  MapPin, Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
+  BookOpen, Clock, Map, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair
 } from "lucide-react";
 import Link from "next/link";
-import { POPULAR_LOCATIONS, POPULAR_ROUTES, PARTNERS, PROMO_DATA } from "@/constants/data";
+import { POPULAR_LOCATIONS, POPULAR_ROUTES, PARTNERS } from "@/constants/data";
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
@@ -17,7 +16,8 @@ export default function Home() {
   const [destination, setDestination] = useState("");
   const [departDate, setDepartDate] = useState("");
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  
+  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
+
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestDropdown, setShowDestDropdown] = useState(false);
 
@@ -58,34 +58,46 @@ export default function Home() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const swapLocations = () => {
+      const temp = origin;
+      setOrigin(destination);
+      setDestination(temp);
+  };
+
+  const faqs = [
+    { q: "Bagaimana cara melakukan refund?", a: "Refund dapat dilakukan maksimal 24 jam sebelum keberangkatan melalui menu 'Cek Pesanan'. Pilih tiket, klik 'Ajukan Refund', dan dana akan kembali dalam 3-14 hari kerja." },
+    { q: "Apakah bisa ganti jadwal (reschedule)?", a: "Bisa, reschedule tergantung kebijakan masing-masing PO Bus. Silakan cek detail tiket pada menu Pesanan Saya. Biaya admin mungkin berlaku." },
+    { q: "Apa itu kode booking?", a: "Kode booking adalah kode unik (misal: TRX-123) yang digunakan untuk menukarkan tiket di terminal atau check-in online." },
+    { q: "Apakah perlu cetak tiket?", a: "Tidak perlu. Cukup tunjukkan QR Code pada E-Ticket di HP Anda kepada petugas di titik keberangkatan." },
+  ];
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
-      
-      {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 text-blue-600 sticky top-0 z-50 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
-        <div className="text-2xl font-black tracking-tighter flex items-center gap-2 italic">
+
+      <nav className="flex items-center px-6 py-4 bg-white dark:bg-slate-900 text-blue-600 sticky top-0 z-50 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
+        <Link href="/" className="text-2xl font-black tracking-tighter flex items-center gap-2 italic hover:opacity-80 transition mr-8">
            SkyBus<span className="text-amber-500">.</span>
-        </div>
-        <div className="hidden md:flex space-x-8 text-sm font-bold text-slate-500 dark:text-slate-400">
-          <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Beranda</Link>
-          <Link href="/search" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Cari Tiket</Link>
-          <Link href="/my-orders" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Pesanan Saya</Link>
-          <Link href="/help" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Bantuan</Link>
-        </div>
-        <div className="flex space-x-3">
-          <Link href="/login">
-            <button className="px-5 py-2 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 transition">Masuk</button>
-          </Link>
-          <Link href="/signup">
-            <button className="px-5 py-2 bg-blue-600 text-white text-sm rounded-full font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 dark:shadow-none">Daftar</button>
-          </Link>
+        </Link>
+        <div className="ml-auto flex items-center gap-8">
+            <div className="hidden md:flex space-x-6 text-sm font-bold text-slate-500 dark:text-slate-400">
+              <Link href="/search" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Cari Tiket</Link>
+              <Link href="/mitra" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Mitra Operator</Link>
+              <Link href="/help" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Bantuan</Link>
+            </div>
+            <div className="flex space-x-3">
+              <Link href="/login">
+                <button className="px-5 py-2 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 transition">Masuk</button>
+              </Link>
+              <Link href="/signup">
+                <button className="px-5 py-2 bg-blue-600 text-white text-sm rounded-full font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 dark:shadow-none">Daftar</button>
+              </Link>
+            </div>
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-900 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center relative overflow-hidden">
+      <section className="bg-gradient-to-br from-blue-600 to-blue-900 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-        <div className="text-white space-y-6 relative z-10">
+        <div className="text-white space-y-6 relative z-10 pt-10 md:pt-16">
           <div className="inline-block bg-white/10 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase backdrop-blur-sm border border-white/20">
             #1 Partner Perjalanan Anda
           </div>
@@ -107,16 +119,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* BOOKING WIDGET */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl shadow-blue-900/20 dark:shadow-black/50 max-w-md w-full ml-auto relative z-10 transition-colors border border-transparent dark:border-slate-800">
           <div className="flex border-b border-slate-100 dark:border-slate-700 mb-6">
             <button onClick={() => setTripType('one-way')} className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'one-way' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Sekali Jalan</button>
             <button onClick={() => setTripType('round-trip')} className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'round-trip' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Pulang Pergi</button>
           </div>
 
-          <div className="space-y-4">
-            {/* Input Dari */}
-            <div className="relative" ref={originRef}>
+          <div className="flex flex-col gap-0">
+            <div className="relative mb-2" ref={originRef}>
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                   <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                   <div className="w-full">
@@ -132,17 +142,23 @@ export default function Home() {
                     </div>
                 )}
             </div>
-            
-            {/* Input Tujuan */}
-            <div className="relative" ref={destRef}>
+
+            <div className="relative h-0 z-20 flex justify-center items-center">
+                <button
+                    onClick={swapLocations}
+                    className="bg-white dark:bg-slate-800 shadow-md border border-slate-100 dark:border-slate-700 rounded-full p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 transition transform hover:rotate-180 active:scale-95"
+                    title="Tukar Lokasi"
+                >
+                    <ArrowUpDown className="w-4 h-4" />
+                </button>
+            </div>
+
+            <div className="relative mt-2 mb-4" ref={destRef}>
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 relative group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                   <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                   <div className="w-full">
                      <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Mau Ke Mana?</label>
                      <input type="text" placeholder="Ketik kota tujuan..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={destination} onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); }} onFocus={() => setShowDestDropdown(true)} />
-                  </div>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-700 p-2 rounded-full border border-slate-100 dark:border-slate-600 shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-600 transition z-10" onClick={() => { const temp = origin; setOrigin(destination); setDestination(temp); }}>
-                     <ArrowRight className="w-4 h-4 rotate-90 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 {showDestDropdown && (
@@ -154,8 +170,7 @@ export default function Home() {
                 )}
             </div>
 
-            {/* Date & Passenger */}
-            <div className={`grid gap-4 ${tripType === 'round-trip' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className={`grid gap-4 mb-4 ${tripType === 'round-trip' ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 <div className="flex gap-4 w-full">
                     <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full">
                         <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pergi</label>
@@ -174,8 +189,7 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* BUTTON SEARCH */}
-            <Link href={isFormValid ? "/search" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`}>
+            <Link href={isFormValid ? "/search" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
                 <button disabled={!isFormValid} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
                    {isFormValid ? 'CARI TIKET MURAH' : 'LENGKAPI DATA'}
                 </button>
@@ -184,8 +198,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- FEATURES (No Arrow, Icon Only) --- */}
-      <section className="bg-white dark:bg-slate-900 py-16 border-b border-slate-100 dark:border-slate-800">
+      <section className="bg-white dark:bg-slate-900 py-10 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
                 {[
@@ -194,12 +207,12 @@ export default function Home() {
                     {icon: <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "Pembayaran Aman", desc: "Jaminan transaksi 100% aman"},
                     {icon: <Ticket className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "E-Ticket Instan", desc: "Tiket terbit instan & bebas cetak"}
                 ].map((item, i) => (
-                    <div key={i} className="flex flex-col items-center gap-4 group">
-                        <div className="bg-blue-50 dark:bg-slate-800 p-6 rounded-full group-hover:scale-110 transition duration-300 shadow-sm">
+                    <div key={i} className="flex flex-col items-center gap-3 group">
+                        <div className="bg-blue-50 dark:bg-slate-800 p-5 rounded-full group-hover:scale-110 transition duration-300 shadow-sm">
                             {item.icon}
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">{item.title}</h3>
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{item.title}</h3>
                             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px] mx-auto">{item.desc}</p>
                         </div>
                     </div>
@@ -208,11 +221,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- PROMO (Ticket Style: Text Left, Ticket Right) --- */}
       <section className="py-20 px-6 bg-slate-50 dark:bg-slate-950">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-            
-            {/* Left Content */}
             <div className="flex-1 text-center md:text-left">
                 <span className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">Penawaran Spesial</span>
                 <h2 className="text-4xl font-black text-slate-900 dark:text-white mt-4 mb-4">Diskon Tiket Bus</h2>
@@ -224,55 +234,35 @@ export default function Home() {
                 </Link>
             </div>
 
-            {/* Right Ticket (Single Card, Sempit/Compact) */}
-            <div className="flex-none w-full max-w-sm">
-                {/* TICKET CONTAINER */}
+            <div className="flex-none w-full md:w-[550px]">
                 <div className="flex bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden relative border border-slate-200 dark:border-slate-800 group hover:-translate-y-2 transition duration-300">
-                    
-                    {/* Main Ticket Area */}
                     <div className="flex-1 p-6 relative">
-                        <div className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wide">Valid s.d. 31 Des 2026</div>
-                        <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Diskon Pengguna Baru</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Potongan 20% untuk transaksi pertama.</p>
-                        
-                        <div className="inline-flex items-center gap-2 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-slate-700">
+                        <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Valid s.d. 31 Des 2026</div>
+                        <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Diskon Pengguna Baru</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Potongan 20% untuk transaksi pertama.</p>
+                        <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-slate-700">
                             <Ticket className="w-3 h-3"/> Tanpa Min. Transaksi
                         </div>
-
-                        {/* Holes Decoration (Upper & Lower) */}
                         <div className="absolute -top-3 right-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full translate-x-3"></div>
                         <div className="absolute -bottom-3 right-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full translate-x-3"></div>
                     </div>
-
-                    {/* Stub Divider (Dashed Line) */}
                     <div className="w-[1px] border-l-2 border-dashed border-slate-300 dark:border-slate-700 relative my-3"></div>
-
-                    {/* Stub Area (Code) */}
-                    <div className="bg-blue-600 dark:bg-blue-600 text-white p-4 flex flex-col items-center justify-center min-w-[100px] text-center relative overflow-hidden">
-                        {/* Background Pattern on Stub */}
+                    <div className="bg-blue-600 dark:bg-blue-600 text-white p-6 flex flex-col items-center justify-center min-w-[140px] text-center relative overflow-hidden">
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
-                        
                         <div className="relative z-10">
-                            <div className="text-2xl font-black mb-1">20%</div>
-                            <div className="text-[8px] font-bold uppercase opacity-80 mb-3 tracking-widest">OFF</div>
-                            
-                            <button 
-                                onClick={() => handleCopy(999, 'SKYNEW26')} 
-                                className="bg-white/20 backdrop-blur-sm text-[10px] font-bold px-3 py-1.5 rounded hover:bg-white/30 transition uppercase tracking-wide border border-white/30 flex items-center gap-1"
-                            >
-                                {copiedId === 999 ? <Check className="w-3 h-3" /> : 'Salin'}
+                            <div className="text-3xl font-black mb-1">20%</div>
+                            <div className="text-[10px] font-bold uppercase opacity-80 mb-3 tracking-widest">OFF</div>
+                            <button onClick={() => handleCopy(999, 'SKYNEW26')} className="bg-white/20 backdrop-blur-sm text-[10px] font-bold px-0 py-2 w-20 rounded hover:bg-white/30 transition uppercase tracking-wide border border-white/30 flex items-center justify-center gap-1">
+                                {copiedId === 999 ? <Check className="w-4 h-4" /> : 'Salin'}
                             </button>
                         </div>
                     </div>
                 </div>
-                {/* Shadow Effect beneath ticket */}
                 <div className="mx-4 h-2 bg-slate-200 dark:bg-slate-800 rounded-b-xl mt-[-2px] mx-auto w-[90%]"></div>
             </div>
-
         </div>
       </section>
 
-      {/* --- RUTE POPULER (Placeholder Map Icon) --- */}
       <section className="py-20 px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-end mb-10">
@@ -281,31 +271,26 @@ export default function Home() {
                     <p className="text-slate-500 dark:text-slate-400 mt-2">Destinasi favorit pelancong bulan ini</p>
                 </div>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {POPULAR_ROUTES.map((route, idx) => (
-                    <div key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
-                        {/* IMAGE PLACEHOLDER (MAP ICON) */}
+                    <Link href={`/search?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
                             <Map className="w-16 h-16 text-slate-400 dark:text-slate-500 group-hover:scale-110 group-hover:text-blue-500 transition duration-500" />
-                            {/* Overlay Gradient */}
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition"></div>
                         </div>
-
-                        {/* Content */}
                         <div className="absolute bottom-0 left-0 p-4 w-full">
                             <div className="text-[10px] font-bold text-amber-400 mb-1 tracking-wide uppercase bg-slate-900/50 backdrop-blur-sm inline-block px-2 py-0.5 rounded">{route.price}</div>
                             <h3 className="font-bold text-white text-sm leading-tight mt-1 drop-shadow-md">
                                 {route.from} <ArrowRight className="w-3 h-3 inline mx-0.5 text-slate-300"/> {route.to}
                             </h3>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>
       </section>
 
-      {/* --- MITRA PARTNER --- */}
       <section className="py-16 px-6 bg-slate-50 dark:bg-slate-950">
          <div className="max-w-7xl mx-auto text-center">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10">Partner Resmi Kami</p>
@@ -317,8 +302,29 @@ export default function Home() {
          </div>
       </section>
 
-      {/* --- INFO CARDS (3rd Item = Mitra) --- */}
-      <section className="py-20 px-6 max-w-7xl mx-auto">
+      <section id="faq-section" className="py-20 px-6 max-w-3xl mx-auto">
+        <div className="text-center mb-10">
+            <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase">Pertanyaan Umum</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Punya pertanyaan? Cek di sini dulu.</p>
+        </div>
+        <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+                <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden cursor-pointer" onClick={() => setFaqOpenIndex(faqOpenIndex === idx ? null : idx)}>
+                    <div className="p-5 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                        <h3 className="font-bold text-sm text-slate-800 dark:text-white">{faq.q}</h3>
+                        {faqOpenIndex === idx ? <ChevronUp className="w-4 h-4 text-blue-600" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    </div>
+                    {faqOpenIndex === idx && (
+                        <div className="p-6 pt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                            {faq.a}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+      </section>
+
+      <section className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-100 dark:border-slate-800">
         <div className="grid md:grid-cols-3 gap-8">
           <Link href="/help">
             <div className="bg-white dark:bg-slate-900 p-8 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm cursor-pointer hover:shadow-lg hover:-translate-y-2 transition h-full group relative overflow-hidden">
@@ -333,10 +339,10 @@ export default function Home() {
               </div>
             </div>
           </Link>
-          
+
           <Link href="/guide">
-            <div className="bg-blue-600 text-white p-8 border border-blue-600 rounded-3xl shadow-sm cursor-pointer hover:shadow-lg hover:-translate-y-2 transition h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-white/10 w-32 h-32 rounded-full -mr-16 -mt-16"></div>
+            <div className="bg-blue-600 text-white p-8 border border-blue-600 rounded-3xl shadow-sm cursor-pointer hover:shadow-lg hover:-translate-y-2 transition h-full group relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-white/10 w-32 h-32 rounded-full -mr-16 -mt-16 transition duration-500 group-hover:scale-150 group-hover:bg-white/20"></div>
               <div className="relative z-10">
                   <div className="mb-6 bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center text-white">
                       <BookOpen className="w-7 h-7" />
@@ -348,7 +354,6 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* ITEM 3: MITRA (Replaced FAQ) */}
           <Link href="/mitra">
             <div className="bg-white dark:bg-slate-900 p-8 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm cursor-pointer hover:shadow-lg hover:-translate-y-2 transition h-full group relative overflow-hidden">
               <div className="absolute top-0 right-0 bg-amber-50 dark:bg-slate-800 w-32 h-32 rounded-full -mr-16 -mt-16 transition group-hover:scale-150 group-hover:bg-amber-100 dark:group-hover:bg-slate-700"></div>
@@ -365,7 +370,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TOAST NOTIFICATION */}
       <AnimatePresence>
         {copiedId !== null && (
             <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-xl flex items-center gap-2 z-50 text-sm font-bold">
