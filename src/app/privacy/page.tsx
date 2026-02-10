@@ -1,35 +1,38 @@
+"use client";
+
 import React from 'react';
-import Link from 'next/link';
 import { ArrowLeft, Shield } from 'lucide-react';
+import Link from 'next/link';
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white text-slate-800 p-8 md:p-16 font-sans">
-      <div className="max-w-3xl mx-auto">
-        <Link href="/" className="inline-flex items-center text-slate-500 hover:text-slate-800 mb-8 font-bold text-sm transition">
-            <ArrowLeft className="w-4 h-4 mr-2" /> KEMBALI KE BERANDA
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
+      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
+        <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </Link>
-        
-        <div className="border-b pb-6 mb-8">
-            <Shield className="w-12 h-12 text-slate-600 mb-4" />
-            <h1 className="text-3xl md:text-4xl font-black uppercase text-slate-800">Kebijakan Privasi</h1>
-            <p className="text-slate-500 mt-2">Terakhir diperbarui: 20 Oktober 2024</p>
+        <h1 className="font-black text-lg">Kebijakan Privasi</h1>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-6 py-12 bg-white dark:bg-slate-900 my-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 bg-blue-100 dark:bg-slate-800 rounded-full text-blue-600"><Shield className="w-8 h-8"/></div>
+            <h2 className="text-2xl font-black">Komitmen Privasi Kami</h2>
         </div>
-
-        <div className="prose prose-slate max-w-none space-y-6 text-sm leading-relaxed text-slate-600">
-            <p>Selamat datang di SkyBus. Kami menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi yang Anda bagikan kepada kami.</p>
+        
+        <div className="space-y-6 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <p><strong>Terakhir Diperbarui:</strong> 10 Februari 2026</p>
+            <p>SkyBus menghargai privasi Anda. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda.</p>
             
-            <h3 className="text-xl font-bold text-slate-800">1. Pengumpulan Informasi</h3>
-            <p>Kami mengumpulkan informasi yang Anda berikan secara langsung saat mendaftar akun, memesan tiket, atau menghubungi layanan pelanggan. Informasi ini meliputi nama lengkap, alamat email, nomor telepon, dan detail pembayaran.</p>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mt-6">1. Data yang Kami Kumpulkan</h3>
+            <ul className="list-disc pl-5 space-y-2">
+                <li>Informasi Identitas: Nama, alamat email, nomor telepon.</li>
+                <li>Informasi Transaksi: Detail pembayaran, riwayat perjalanan.</li>
+                <li>Data Teknis: Alamat IP, tipe perangkat, data lokasi (jika diizinkan).</li>
+            </ul>
 
-            <h3 className="text-xl font-bold text-slate-800">2. Penggunaan Informasi</h3>
-            <p>Informasi yang kami kumpulkan digunakan untuk memproses pemesanan tiket, mengirimkan E-Tiket, memberikan update perjalanan, dan meningkatkan kualitas layanan aplikasi kami.</p>
-
-            <h3 className="text-xl font-bold text-slate-800">3. Keamanan Data</h3>
-            <p>Kami menggunakan enkripsi standar industri dan teknologi keamanan untuk melindungi data pribadi Anda dari akses yang tidak sah.</p>
-
-            <h3 className="text-xl font-bold text-slate-800">4. Pihak Ketiga</h3>
-            <p>Kami tidak akan menjual atau menyewakan data pribadi Anda kepada pihak ketiga. Data hanya dibagikan kepada mitra operator bus untuk keperluan verifikasi tiket saat keberangkatan.</p>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mt-6">2. Penggunaan Data</h3>
+            <p>Kami menggunakan data Anda untuk memproses pemesanan, mengirimkan E-Ticket, dan meningkatkan layanan pelanggan. Kami tidak menjual data Anda kepada pihak ketiga.</p>
         </div>
       </div>
     </div>
