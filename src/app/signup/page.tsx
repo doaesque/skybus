@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,90 +24,89 @@ export default function SignupPage() {
   const isEmailValid = (email: string) => /\S+@\S+\.\S+/.test(email);
   const isFormFilled = formData.name && formData.email && formData.phone && formData.password;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     if (!isEmailValid(formData.email)) {
-        alert("Email tidak valid. Pastikan mengandung '@' dan '.'");
+        setError("Email tidak valid. Pastikan mengandung '@' dan '.'");
         return;
     }
 
-    setIsLoading(true);
-    // Simulasi delay request
+    setLoading(true);
     setTimeout(() => {
-        setIsLoading(false);
+        setLoading(false);
         router.push('/login');
     }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans transition-colors">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-md p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors">
+      <div className="p-6">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
+        </Link>
+      </div>
 
-        <div className="text-center mb-8">
-            <Link href="/" className="text-3xl font-black italic tracking-tighter inline-block mb-2">
-                SkyBus<span className="text-blue-600">.</span>
-            </Link>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Buat akun baru untuk mulai perjalanan Anda.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nama Lengkap</label>
-                <div className="relative">
-                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
-                    <input name="name" onChange={handleChange} type="text" placeholder="John Doe" className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+        <div className="max-w-md w-full space-y-8">
+            <div className="text-center">
+                <div className="inline-block mb-4">
+                    <div className="w-8 h-8 bg-amber-500 rounded-md -skew-x-12 shadow-lg shadow-amber-500/40"></div>
                 </div>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white italic tracking-tight">Buat Akun Baru</h2>
+                <p className="mt-2 text-slate-500 dark:text-slate-400">Bergabung dan nikmati kemudahan memesan tiket.</p>
             </div>
 
-            <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Email</label>
-                <div className="relative">
-                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
-                    <input name="email" onChange={handleChange} type="email" placeholder="name@example.com" className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+            {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl flex items-center gap-2 text-sm font-bold animate-pulse">
+                    <AlertCircle className="w-4 h-4" /> {error}
                 </div>
-            </div>
+            )}
 
-            <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nomor Telepon</label>
-                <div className="relative flex">
-                    <div className="pl-4 pr-3 py-3 bg-slate-100 dark:bg-slate-800 rounded-l-xl font-bold text-slate-500 border-r border-slate-200 dark:border-slate-700 flex items-center">
-                        +62
+            <form onSubmit={handleSignup} className="space-y-6">
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nama Lengkap</label>
+                        <input name="name" type="text" required onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="John Doe" />
                     </div>
-                    <input name="phone" onChange={handleChange} type="tel" placeholder="812345678" className="w-full pl-4 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-r-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Email</label>
+                        <input name="email" type="email" required onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="nama@email.com" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nomor Telepon</label>
+                        <div className="flex">
+                            <span className="px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-800 rounded-l-xl text-sm font-bold text-slate-500 flex items-center">+62</span>
+                            <input name="phone" type="tel" required onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-r-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="812345678" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Password</label>
+                        <div className="relative">
+                            <input name="password" type={showPassword ? "text" : "password"} required onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                {showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Kata Sandi</label>
-                <div className="relative">
-                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
-                    <input name="password" onChange={handleChange} type={showPassword ? "text" : "password"} placeholder="••••••••" className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition">
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                <div className="flex items-start gap-3 mt-1">
+                    <input type="checkbox" className="mt-1.2 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" required />
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
+                        Saya menyetujui <Link href="/terms" target="_blank" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Syarat & Ketentuan</Link> serta <Link href="/privacy" target="_blank" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Kebijakan Privasi</Link>.
+                    </p>
                 </div>
+
+                <button type="submit" disabled={loading || !isFormFilled} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    {loading ? "MEMPROSES..." : "DAFTAR"}
+                </button>
+            </form>
+
+            <div className="text-center text-sm font-bold text-slate-500 dark:text-slate-400">
+                Sudah punya akun? <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Masuk Saja</Link>
             </div>
-
-            <div className="flex items-start gap-2 mt-4">
-                <input type="checkbox" className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" required />
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-                    Saya menyetujui <Link href="/terms" target="_blank" className="text-blue-600 font-bold hover:underline">Syarat & Ketentuan</Link> serta <Link href="/privacy" target="_blank" className="text-blue-600 font-bold hover:underline">Kebijakan Privasi</Link> SkyBus.
-                </p>
-            </div>
-
-            <button
-                type="submit"
-                disabled={!isFormFilled || isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-wide transition shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex justify-center items-center"
-            >
-                {isLoading ? (
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                ) : 'Daftar Akun'}
-            </button>
-        </form>
-
-        <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            Sudah punya akun? <Link href="/login" className="text-blue-600 font-bold hover:underline">Masuk Sekarang</Link>
         </div>
       </div>
     </div>
