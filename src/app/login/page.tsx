@@ -1,4 +1,5 @@
-// src/app/login.tsx
+"use client";
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Facebook, Apple } from 'lucide-react';
