@@ -1,282 +1,297 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Search, MapPin, Calendar, Users, ArrowRight, 
+  MapPin, Calendar, Users, ArrowRight, 
   CreditCard, Armchair, QrCode, Ticket, 
-  MessageCircle, HelpCircle, Phone, Mail, Map, 
-  Facebook, Twitter, Instagram, Linkedin 
+  ShieldCheck 
 } from "lucide-react";
 import Link from "next/link";
+import { POPULAR_LOCATIONS } from "@/constants/data";
 
 export default function Home() {
+  // --- STATE ---
+  const [tripType, setTripType] = useState<'one-way' | 'round-trip'>('one-way');
+  const [passengers, setPassengers] = useState(1);
+  
+  // State Lokasi
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  
+  // State Dropdown
+  const [showOriginDropdown, setShowOriginDropdown] = useState(false);
+  const [showDestDropdown, setShowDestDropdown] = useState(false);
+
+  // Ref untuk mendeteksi klik di luar elemen
+  const originRef = useRef<HTMLDivElement>(null);
+  const destRef = useRef<HTMLDivElement>(null);
+
+  // --- EFFECT: Close Dropdown on Outside Click ---
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (originRef.current && !originRef.current.contains(event.target as Node)) {
+        setShowOriginDropdown(false);
+      }
+      if (destRef.current && !destRef.current.contains(event.target as Node)) {
+        setShowDestDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // --- LOGIC: Filter Locations ---
+  const filteredOrigins = POPULAR_LOCATIONS.filter(loc => 
+    loc.toLowerCase().includes(origin.toLowerCase())
+  );
+  const filteredDests = POPULAR_LOCATIONS.filter(loc => 
+    loc.toLowerCase().includes(destination.toLowerCase())
+  );
+
+  // --- LOGIC: Passenger Validation (Min 1) ---
+  const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 1) {
+        setPassengers(val);
+    } else if (e.target.value === "") {
+        // Izinkan kosong sementara agar user bisa hapus angka, tapi onBlur nanti set ke 1
+        // Untuk UX yang lebih baik di sini kita force min 1 jika kosong saat submit, 
+        // tapi di onChange kita biarkan angka valid saja.
+        // Opsi simpel: Jangan biarkan kosong.
+    }
+  };
+
+  const handlePassengerBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      const val = parseInt(e.target.value);
+      if (isNaN(val) || val < 1) {
+          setPassengers(1);
+      }
+  }
+
   return (
-    <main className="min-h-screen bg-white text-slate-800 font-sans">
+    <main className="min-h-screen bg-slate-50 text-slate-800 font-sans">
       
       {/* --- NAVBAR --- */}
-      <nav className="flex items-center justify-between px-6 py-4 bg-slate-500 text-white sticky top-0 z-50 shadow-md">
-        <div className="text-xl font-black tracking-widest flex items-center gap-2">
-           SKYBUS
+      <nav className="flex items-center justify-between px-6 py-4 bg-white text-blue-600 sticky top-0 z-50 shadow-sm border-b border-slate-100">
+        <div className="text-2xl font-black tracking-tighter flex items-center gap-2 italic">
+           SkyBus<span className="text-amber-500">.</span>
         </div>
-        <div className="hidden md:flex space-x-6 text-sm font-medium">
-          <Link href="/" className="hover:text-slate-200 transition">BERANDA</Link>
-          <Link href="/search" className="hover:text-slate-200 transition">PESAN TIKET</Link>
-          <Link href="/my-orders" className="hover:text-slate-200 transition">PESANAN SAYA</Link>
-          <Link href="/help" className="hover:text-slate-200 transition">BANTUAN</Link>
+        <div className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
+          <Link href="/" className="hover:text-blue-600 transition">Beranda</Link>
+          <Link href="/search" className="hover:text-blue-600 transition">Cari Tiket</Link>
+          <Link href="/my-orders" className="hover:text-blue-600 transition">Pesanan Saya</Link>
+          <Link href="/help" className="hover:text-blue-600 transition">Bantuan</Link>
         </div>
         <div className="flex space-x-3">
           <Link href="/login">
-            <button className="px-4 py-1 border border-white text-sm rounded hover:bg-white hover:text-slate-600 transition">Masuk</button>
+            <button className="px-5 py-2 text-blue-600 font-bold text-sm rounded-full hover:bg-blue-50 transition">Masuk</button>
           </Link>
           <Link href="/signup">
-            <button className="px-4 py-1 bg-white text-slate-600 text-sm rounded font-bold hover:bg-slate-100 transition">Daftar</button>
+            <button className="px-5 py-2 bg-blue-600 text-white text-sm rounded-full font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200">Daftar</button>
           </Link>
         </div>
       </nav>
 
       {/* --- HERO SECTION --- */}
-      <section className="bg-slate-500 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+      <section className="bg-gradient-to-br from-blue-600 to-blue-800 px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center relative overflow-hidden">
+        
+        {/* Abstract Background Shape */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
         {/* Left Text */}
-        <div className="text-white space-y-4">
-          <p className="text-sm tracking-widest opacity-80 uppercase">Partner Perjalanan Terbaik Anda</p>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
-            JELAJAHI KOTA <br /> DENGAN NYAMAN.
+        <div className="text-white space-y-6 relative z-10">
+          <div className="inline-block bg-white/10 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase backdrop-blur-sm border border-white/20">
+            #1 Partner Perjalanan Anda
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight">
+            JELAJAHI <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500">INDONESIA</span>
           </h1>
-          <p className="opacity-90 max-w-md leading-relaxed">
-            Nikmati perjalanan antar kota dengan armada bus eksekutif. Pesan tiket mudah, harga transparan, dan jadwal real-time hanya di SkyBus.
+          <p className="opacity-90 max-w-md leading-relaxed text-lg font-medium text-blue-50">
+            Pesan tiket bus online dengan jaminan harga transparan, jadwal real-time, dan ulasan foto asli dari penumpang.
           </p>
+          
+          <div className="flex gap-4 pt-4">
+             <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-green-400" />
+                <span className="text-sm font-bold">Jaminan Uang Kembali</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-yellow-400" />
+                <span className="text-sm font-bold">2 Juta+ Pengguna</span>
+             </div>
+          </div>
         </div>
 
-        {/* Right Form */}
-        <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-xl max-w-md w-full ml-auto">
-          <h3 className="font-bold text-slate-700 mb-4 uppercase">Cari Tiket Perjalanan</h3>
+        {/* Right Form (BOOKING ENGINE) */}
+        <div className="bg-white p-6 rounded-2xl shadow-2xl shadow-blue-900/20 max-w-md w-full ml-auto relative z-10">
           
-          {/* Tabs */}
-          <div className="flex border-b mb-4 text-sm">
-            <button className="flex-1 pb-2 border-b-2 border-slate-600 font-bold text-slate-800">Sekali Jalan</button>
-            <button className="flex-1 pb-2 text-slate-400 hover:text-slate-600">Pulang Pergi</button>
+          {/* Tabs Trip Type */}
+          <div className="flex border-b mb-6">
+            <button 
+                onClick={() => setTripType('one-way')}
+                className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'one-way' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+            >
+                Sekali Jalan
+            </button>
+            <button 
+                onClick={() => setTripType('round-trip')}
+                className={`flex-1 pb-3 border-b-2 font-bold text-sm transition ${tripType === 'round-trip' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+            >
+                Pulang Pergi
+            </button>
           </div>
 
-          {/* Inputs */}
-          <div className="space-y-3">
-            <div className="bg-white border rounded flex items-center px-3 py-2">
-              <MapPin className="w-5 h-5 text-slate-400 mr-2" />
-              <input type="text" placeholder="Asal (Misal: Jakarta)" className="w-full outline-none text-sm bg-transparent" />
+          <div className="space-y-4">
+            
+            {/* Input: Dari Mana (With Dropdown) */}
+            <div className="relative" ref={originRef}>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl flex items-center px-4 py-3 group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
+                  <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600" />
+                  <div className="w-full">
+                     <label className="block text-[10px] font-bold text-slate-400 uppercase">Dari Mana?</label>
+                     <input 
+                        type="text" 
+                        placeholder="Ketik kota asal..." 
+                        className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 placeholder:font-normal"
+                        value={origin}
+                        onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); }}
+                        onFocus={() => setShowOriginDropdown(true)}
+                     />
+                  </div>
+                </div>
+                
+                {/* Dropdown Suggestion Origin */}
+                {showOriginDropdown && (
+                    <div className="absolute top-full left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl mt-1 z-20 max-h-60 overflow-y-auto">
+                        {filteredOrigins.length > 0 ? filteredOrigins.map((loc, idx) => (
+                            <div 
+                                key={idx} 
+                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm font-medium text-slate-700 border-b border-slate-50 last:border-0"
+                                onClick={() => { setOrigin(loc); setShowOriginDropdown(false); }}
+                            >
+                                {loc}
+                            </div>
+                        )) : (
+                            <div className="px-4 py-3 text-xs text-slate-400">Lokasi tidak ditemukan</div>
+                        )}
+                    </div>
+                )}
             </div>
             
-            <div className="bg-white border rounded flex items-center px-3 py-2 relative">
-              <MapPin className="w-5 h-5 text-slate-400 mr-2" />
-              <input type="text" placeholder="Tujuan (Misal: Bandung)" className="w-full outline-none text-sm bg-transparent" />
-              <div className="absolute right-2 -top-[15px] bg-slate-200 p-1 rounded-full border shadow-sm cursor-pointer hover:bg-slate-300 transition">
-                 <ArrowRight className="w-4 h-4 rotate-90" />
-              </div>
-            </div>
-
-            <div className="bg-white border rounded flex items-center px-3 py-2">
-              <Calendar className="w-5 h-5 text-slate-400 mr-2" />
-              <input type="date" className="w-full outline-none text-sm bg-transparent text-slate-500" />
-            </div>
-
-            <div className="bg-white border rounded flex items-center px-3 py-2">
-              <Users className="w-5 h-5 text-slate-400 mr-2" />
-              <input type="number" placeholder="1 Penumpang" className="w-full outline-none text-sm bg-transparent" />
-            </div>
-
-            <Link href="/search" className="block w-full">
-                <button className="w-full bg-slate-600 text-white py-3 rounded font-bold mt-4 hover:bg-slate-700 transition flex justify-center items-center gap-2 shadow-lg">
-                CARI TIKET
-                </button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* --- FEATURES GRID --- */}
-      <section className="bg-neutral-900 text-white grid grid-cols-1 md:grid-cols-4">
-        {[
-          { title: "JADWAL REAL-TIME", icon: <Calendar />, desc: "Cek ketersediaan kursi dan jam keberangkatan terupdate secara langsung." },
-          { title: "PILIH KURSI SENDIRI", icon: <Armchair />, desc: "Tentukan posisi duduk ternyaman anda, di dekat jendela atau lorong." },
-          { title: "PEMBAYARAN AMAN", icon: <CreditCard />, desc: "Transaksi terenkripsi dengan berbagai pilihan metode pembayaran instan." },
-          { title: "TIKET DIGITAL", icon: <QrCode />, desc: "Tidak perlu cetak tiket. Cukup scan kode QR di HP anda saat boarding." },
-        ].map((item, idx) => (
-          <div key={idx} className={`p-8 border-r border-neutral-800 ${idx === 0 ? 'bg-black' : ''}`}>
-            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">{item.title}</h3>
-            <p className="text-gray-400 text-sm mb-6 leading-relaxed">{item.desc}</p>
-            <ArrowRight className="w-5 h-5 text-white cursor-pointer hover:translate-x-2 transition" />
-          </div>
-        ))}
-      </section>
-
-      {/* --- PROMO SECTION --- */}
-      <section className="bg-gray-200 py-16 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-lg">
-            <h2 className="text-3xl font-extrabold mb-4 uppercase text-slate-800">Liburan Lebih Hemat</h2>
-            <p className="text-slate-600 mb-6">Dapatkan potongan harga spesial untuk perjalanan pertama anda menggunakan SkyBus. Kuota terbatas!</p>
-            <Link href="/promo">
-                <button className="bg-slate-600 text-white px-6 py-3 rounded text-sm font-bold tracking-wider hover:bg-slate-700 shadow-md">
-                LIHAT PROMO
-                </button>
-            </Link>
-          </div>
-          {/* Coupon Visual */}
-          <div className="border-2 border-dashed border-slate-400 p-6 w-full max-w-md rounded-lg flex items-center justify-between bg-slate-300/50 relative overflow-hidden">
-            <div className="-rotate-90 font-bold text-slate-500 tracking-widest text-xs whitespace-nowrap absolute left-2 top-10">VOUCHER</div>
-            <div className="pl-8 w-full">
-              <div className="text-right">
-                <div className="text-lg font-bold text-slate-600">KODE: SKYNEW24</div>
-                <div className="text-4xl font-extrabold text-slate-800 drop-shadow-sm">DISKON 20%</div>
-                <div className="text-xs text-slate-500 mt-1">*Syarat & ketentuan berlaku</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- POPULAR ROUTES --- */}
-      <section className="py-16 px-6 max-w-7xl mx-auto">
-        <h2 className="text-center text-2xl font-black mb-10 uppercase tracking-wide text-slate-800">Rute Populer</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { from: 'Jakarta', to: 'Bandung', price: 'Rp 110.000' },
-            { from: 'Surabaya', to: 'Malang', price: 'Rp 45.000' },
-            { from: 'Yogyakarta', to: 'Semarang', price: 'Rp 85.000' },
-            { from: 'Jakarta', to: 'Solo', price: 'Rp 210.000' },
-          ].map((item, idx) => (
-            <Link key={idx} href="/search">
-                <div className="bg-gray-100 p-4 rounded-lg shadow-sm hover:shadow-lg transition cursor-pointer border border-transparent hover:border-slate-300">
-                <div className="bg-slate-200 h-32 rounded mb-4 flex items-center justify-center text-slate-400">
-                    <Map className="w-12 h-12 opacity-50" />
+            {/* Input: Mau Ke Mana (With Dropdown & Swap) */}
+            <div className="relative" ref={destRef}>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl flex items-center px-4 py-3 relative group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
+                  <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600" />
+                  <div className="w-full">
+                     <label className="block text-[10px] font-bold text-slate-400 uppercase">Mau Ke Mana?</label>
+                     <input 
+                        type="text" 
+                        placeholder="Ketik kota tujuan..." 
+                        className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 placeholder:font-normal" 
+                        value={destination}
+                        onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); }}
+                        onFocus={() => setShowDestDropdown(true)}
+                     />
+                  </div>
+                  
+                  {/* Swap Button */}
+                  <div 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full border shadow-sm cursor-pointer hover:bg-slate-50 transition z-10"
+                    onClick={() => {
+                        const temp = origin;
+                        setOrigin(destination);
+                        setDestination(temp);
+                    }}
+                  >
+                     <ArrowRight className="w-4 h-4 rotate-90 text-blue-600" />
+                  </div>
                 </div>
-                <div className="flex justify-between items-end">
-                    <div>
-                    <h4 className="font-bold text-sm text-slate-800">{item.from} <ArrowRight className="inline w-3 h-3" /> {item.to}</h4>
-                    <p className="text-xs text-gray-500 mt-1">SkyBus Executive • ⭐ 4.8</p>
+
+                {/* Dropdown Suggestion Destination */}
+                {showDestDropdown && (
+                    <div className="absolute top-full left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl mt-1 z-20 max-h-60 overflow-y-auto">
+                        {filteredDests.length > 0 ? filteredDests.map((loc, idx) => (
+                            <div 
+                                key={idx} 
+                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm font-medium text-slate-700 border-b border-slate-50 last:border-0"
+                                onClick={() => { setDestination(loc); setShowDestDropdown(false); }}
+                            >
+                                {loc}
+                            </div>
+                        )) : (
+                            <div className="px-4 py-3 text-xs text-slate-400">Lokasi tidak ditemukan</div>
+                        )}
                     </div>
+                )}
+            </div>
+
+            {/* Date & Passenger Inputs */}
+            <div className={`grid gap-4 ${tripType === 'round-trip' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                
+                <div className="flex gap-4 w-full">
+                    {/* Tanggal Pergi */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pergi</label>
+                        <input type="date" className="w-full outline-none text-sm font-bold bg-transparent text-slate-800" />
+                    </div>
+                    
+                    {/* Tanggal Pulang (Hanya Muncul jika Round Trip) */}
+                    {tripType === 'round-trip' && (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full animate-in fade-in slide-in-from-left-4">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pulang</label>
+                            <input type="date" className="w-full outline-none text-sm font-bold bg-transparent text-slate-800" />
+                        </div>
+                    )}
                 </div>
-                <div className="mt-3 font-bold text-slate-700 text-lg">{item.price}</div>
+
+                {/* Jumlah Penumpang */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kursi</label>
+                    <input 
+                        type="number" 
+                        placeholder="1" 
+                        min="1"
+                        value={passengers}
+                        onChange={handlePassengerChange}
+                        onBlur={handlePassengerBlur}
+                        className="w-full outline-none text-sm font-bold bg-transparent text-slate-800" 
+                    />
                 </div>
+            </div>
+
+            <Link href="/search" className="block w-full pt-2">
+                <button className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2">
+                CARI TIKET MURAH
+                </button>
             </Link>
-          ))}
+          </div>
         </div>
       </section>
 
-      {/* --- INFO / HOW WE WORK --- */}
-      <section className="py-16 px-6 max-w-7xl mx-auto border-t">
-        <div className="text-xs font-bold text-gray-400 uppercase mb-2">Layanan Kami</div>
-        <h2 className="text-3xl font-extrabold mb-10 uppercase text-slate-800">Info SkyBus</h2>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          <Link href="/help">
-            <div className="bg-white p-8 border rounded-lg shadow-sm cursor-pointer hover:shadow-md transition h-full group">
-              <div className="mb-4"><MessageCircle className="w-8 h-8 text-slate-700 group-hover:text-slate-500" /></div>
-              <h3 className="font-bold text-lg mb-2 text-slate-800">BANTUAN 24/7</h3>
-              <p className="text-sm text-gray-500">
-                Ada kendala saat pemesanan? Tim customer service kami siap membantu anda kapan saja melalui live chat.
-              </p>
-            </div>
-          </Link>
-          
-          <Link href="/search">
-            <div className="bg-slate-600 text-white p-8 border border-slate-600 rounded-lg shadow-sm cursor-pointer hover:bg-slate-700 transition h-full">
-              <div className="mb-4"><Ticket className="w-8 h-8 text-white" /></div>
-              <h3 className="font-bold text-lg mb-2">CARA PESAN TIKET</h3>
-              <p className="text-sm text-slate-200">
-                Pilih rute, tentukan jadwal, pilih kursi favorit, lakukan pembayaran, dan tiket digital siap digunakan.
-              </p>
-            </div>
-          </Link>
-
-          <Link href="/help">
-            <div className="bg-white p-8 border rounded-lg shadow-sm cursor-pointer hover:shadow-md transition h-full group">
-              <div className="mb-4"><HelpCircle className="w-8 h-8 text-slate-700 group-hover:text-slate-500" /></div>
-              <h3 className="font-bold text-lg mb-2 text-slate-800">PERTANYAAN UMUM</h3>
-              <p className="text-sm text-gray-500">
-                Bingung soal refund atau reschedule? Temukan jawaban lengkapnya di halaman pusat bantuan kami.
-              </p>
-            </div>
-          </Link>
+      {/* --- VALUE PROPOSITION (Icons) --- */}
+      <section className="bg-white py-12 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+                {icon: <Calendar className="w-8 h-8 text-blue-600"/>, title: "Jadwal Real-Time", desc: "Anti ketinggalan bus"},
+                {icon: <Armchair className="w-8 h-8 text-blue-600"/>, title: "Pilih Kursi Sendiri", desc: "Duduk nyaman sesuai selera"},
+                {icon: <ShieldCheck className="w-8 h-8 text-blue-600"/>, title: "Pembayaran Aman", desc: "Garansi transaksi 100%"},
+                {icon: <Ticket className="w-8 h-8 text-blue-600"/>, title: "E-Ticket Instan", desc: "Tanpa antre cetak tiket"}
+            ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center gap-3">
+                    <div className="bg-blue-50 p-4 rounded-full mb-2">{item.icon}</div>
+                    <h3 className="font-bold text-slate-800">{item.title}</h3>
+                    <p className="text-xs text-slate-500">{item.desc}</p>
+                </div>
+            ))}
         </div>
-      </section>
-
-      {/* --- PARTNERS --- */}
-      <section className="py-10 text-center bg-gray-50">
-        <p className="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest">Partner Resmi Pembayaran</p>
-        <div className="flex justify-center items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition duration-500">
-             {/* Simulasi Logo Bank */}
-            <div className="font-black text-xl italic text-slate-400">BCA</div>
-            <div className="font-black text-xl italic text-slate-400">MANDIRI</div>
-            <div className="font-black text-xl italic text-slate-400">GOPAY</div>
-            <div className="font-black text-xl italic text-slate-400">DANA</div>
-        </div>
-      </section>
-
-      {/* --- CTA BOTTOM --- */}
-      <section className="bg-slate-500 text-white py-20 px-6 text-center">
-        <h2 className="text-2xl md:text-4xl font-extrabold max-w-3xl mx-auto leading-tight mb-8">
-          JANGAN TUNDA PERJALANAN ANDA. <br/> PESAN TIKET SKYBUS SEKARANG.
-        </h2>
-        <Link href="/help">
-            <button className="bg-neutral-900 text-white px-10 py-4 rounded text-sm font-bold hover:bg-black transition shadow-lg tracking-widest">
-            HUBUNGI KAMI
-            </button>
-        </Link>
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="bg-neutral-950 text-gray-400 py-16 px-6 text-sm">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-          
-          {/* Col 1 */}
-          <div>
-            <h4 className="text-white font-bold mb-4 uppercase text-lg">SkyBus</h4>
-            <p className="mb-4 leading-relaxed">Platform pemesanan tiket bus nomor #1 di Indonesia yang mengutamakan kenyamanan dan keamanan penumpang.</p>
-            <div className="flex gap-4 mt-6">
-              <Facebook className="w-5 h-5 cursor-pointer hover:text-white transition" />
-              <Twitter className="w-5 h-5 cursor-pointer hover:text-white transition" />
-              <Instagram className="w-5 h-5 cursor-pointer hover:text-white transition" />
-              <Linkedin className="w-5 h-5 cursor-pointer hover:text-white transition" />
-            </div>
-          </div>
-
-          {/* Col 2 */}
-          <div>
-             <h4 className="text-white font-bold mb-4 uppercase">Navigasi</h4>
-             <ul className="space-y-3">
-               <li><Link href="/" className="hover:text-white transition">Beranda</Link></li>
-               <li><Link href="/search" className="hover:text-white transition">Cari Tiket</Link></li>
-               <li><Link href="/my-orders" className="hover:text-white transition">Cek Pesanan</Link></li>
-               <li><Link href="/promo" className="hover:text-white transition">Promo Terbaru</Link></li>
-             </ul>
-          </div>
-
-          {/* Col 3 & 4 (Contact & Subscribe) */}
-          <div className="md:col-span-2">
-            <h4 className="text-white font-bold mb-4 uppercase">Hubungi Kami</h4>
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-slate-500"/> Jl. Raya Perjalanan No. 88, Jakarta Selatan</div>
-              <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-slate-500"/> +62 21 5555 8888</div>
-              <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-slate-500"/> support@skybus.id</div>
-            </div>
-
-            <div className="flex flex-col gap-3 max-w-sm">
-              <label className="text-xs font-bold uppercase">Berlangganan Newsletter</label>
-              <div className="flex gap-2">
-                <input type="email" placeholder="Email Anda" className="p-3 bg-neutral-800 rounded border border-neutral-700 w-full focus:outline-none focus:border-slate-500 text-white" />
-                <button className="bg-slate-600 text-white px-6 rounded font-bold hover:bg-slate-500 transition text-xs">SUBSCRIBE</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="border-t border-neutral-800 mt-12 pt-8 flex flex-col md:flex-row justify-between text-xs text-neutral-500 items-center">
-          <p>&copy; 2024 SKYBUS TRAVEL INDONESIA. ALL RIGHTS RESERVED.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link href="/disclaimer" className="hover:text-white transition">DISCLAIMER</Link>
-            <Link href="/privacy" className="hover:text-white transition">PRIVACY POLICY</Link>
-            <Link href="/terms" className="hover:text-white transition">TERMS OF USE</Link>
-          </div>
+      <footer className="bg-slate-900 text-slate-400 py-16 px-6 text-sm">
+        <div className="max-w-7xl mx-auto border-t border-slate-800 mt-12 pt-8 text-center text-xs text-slate-600">
+           &copy; 2026 SkyBus Indonesia. Hak Cipta Dilindungi.
         </div>
       </footer>
-
     </main>
   );
 }

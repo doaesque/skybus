@@ -1,120 +1,124 @@
-import React from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+"use client";
+
+import React, { useState } from 'react';
+import { ChevronDown, ArrowLeft, User, CreditCard, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function BookingPage() {
+  const router = useRouter();
+  const [copyData, setCopyData] = useState(false);
+
   return (
-    <div className="min-h-screen bg-gray-200 text-slate-800 py-10 px-4">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-20">
       
-      {/* HEADER TITLE */}
-      <div className="max-w-6xl mx-auto mb-8">
-        <h1 className="text-3xl font-extrabold uppercase text-slate-800">Pemesanan Anda</h1>
-        <p className="text-slate-500">Isi data diri penumpang</p>
+      {/* Header */}
+      <div className="bg-white p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4">
+        <Link href="/search" className="p-2 hover:bg-slate-100 rounded-full transition">
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
+        </Link>
+        <div>
+            <h1 className="font-black text-lg text-slate-800">Pengisian Data</h1>
+            <p className="text-xs text-slate-500">Jakarta → Bandung • 20 Okt 2024</p>
+        </div>
       </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-3xl mx-auto px-4 py-6 grid gap-6">
         
-        {/* --- LEFT COLUMN (FORMS) --- */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* SECTION: DATA PEMESAN */}
-          <div>
-            <h2 className="text-xl font-black uppercase mb-4 tracking-wide text-slate-800">Data Pemesan</h2>
-            <div className="bg-white rounded-lg shadow-sm p-6 relative">
-              <button className="absolute top-4 right-6 text-xs font-bold text-slate-800 uppercase tracking-wider hover:text-slate-600">Simpan</button>
-              
-              <div className="space-y-4 mt-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Titel <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select className="w-full bg-slate-100 border-none rounded p-2.5 text-sm appearance-none outline-none focus:ring-2 focus:ring-slate-300">
-                      <option>Tuan</option>
-                      <option>Nyonya</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap <span className="text-red-500">*</span></label>
-                  <input type="text" className="w-full bg-slate-100 rounded p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-300" />
-                  <p className="text-[10px] text-slate-400 mt-1">Sesuai KTP/paspor/SIM (tanpa tanda baca atau gelar)</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">No. Handphone <span className="text-red-500">*</span></label>
-                    <div className="flex gap-2">
-                       <div className="bg-slate-100 rounded p-2.5 flex items-center gap-1 w-24">
-                          <img src="https://flagcdn.com/w20/id.png" width="20" alt="ID" />
-                          <span className="text-sm text-slate-600">+62</span>
-                       </div>
-                       <input type="tel" className="w-full bg-slate-100 rounded p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-300" />
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">Contoh: +62812345678</p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Email <span className="text-red-500">*</span></label>
-                    <input type="email" className="w-full bg-slate-100 rounded p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-300" placeholder="email@gmail.com" />
-                  </div>
-                </div>
-              </div>
+        {/* Step Indicator */}
+        <div className="flex items-center justify-between px-8 text-xs font-bold text-slate-400 mb-2">
+            <div className="text-primary flex flex-col items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center">1</div>
+                <span>Data</span>
             </div>
-          </div>
-
-          {/* SECTION: DATA TRAVELER */}
-          <div>
-            <h2 className="text-xl font-black uppercase mb-4 tracking-wide text-slate-800">Data Traveler</h2>
-            <div className="bg-white rounded-lg shadow-sm p-6 relative">
-              <button className="absolute top-4 right-6 text-xs font-bold text-slate-800 uppercase tracking-wider hover:text-slate-600">Simpan</button>
-              
-              <div className="space-y-4 mt-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Titel <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select className="w-full bg-slate-100 border-none rounded p-2.5 text-sm appearance-none outline-none focus:ring-2 focus:ring-slate-300">
-                      <option>Tuan</option>
-                      <option>Nyonya</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap <span className="text-red-500">*</span></label>
-                  <input type="text" className="w-full bg-slate-100 rounded p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-300" />
-                  <p className="text-[10px] text-slate-400 mt-1">Sesuai KTP/paspor/SIM (tanpa tanda baca atau gelar)</p>
-                </div>
-              </div>
+            <div className="h-[2px] flex-1 bg-slate-200 mx-2"></div>
+            <div className="flex flex-col items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">2</div>
+                <span>Bayar</span>
             </div>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <button className="bg-slate-500 text-white font-bold uppercase tracking-wider py-3 px-10 rounded shadow-lg hover:bg-slate-600 transition">
-              Lanjutkan
-            </button>
-          </div>
-
+            <div className="h-[2px] flex-1 bg-slate-200 mx-2"></div>
+            <div className="flex flex-col items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">3</div>
+                <span>Tiket</span>
+            </div>
         </div>
 
-        {/* --- RIGHT COLUMN (SUMMARY CARD) --- */}
-        <div className="lg:col-span-1">
-          <div className="bg-gray-300 rounded-lg p-6 sticky top-8">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-700">Asal <span className="text-slate-500">→</span> Tujuan</h3>
-                <p className="text-xs text-slate-500 font-medium">Tanggal Berangkat</p>
-              </div>
-              <ChevronUp className="w-5 h-5 text-slate-500" />
+        {/* DATA PEMESAN */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" /> Data Pemesan
+            </h2>
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nama Lengkap</label>
+                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="Sesuai KTP" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">No. HP / WA</label>
+                        <input type="tel" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="0812..." />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Email</label>
+                        <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="email@..." />
+                    </div>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg flex gap-3 items-start">
+                    <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                        E-Ticket akan dikirim ke email dan WhatsApp di atas. Pastikan data benar.
+                    </p>
+                </div>
             </div>
+        </div>
 
-            <div className="space-y-1 mb-6">
-              <div className="text-sm font-bold text-slate-800">Nama Bus</div>
-              <div className="text-xs text-slate-500">Tipe Bus Executive</div>
+        {/* DATA PENUMPANG */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                    <User className="w-4 h-4 text-primary" /> Data Penumpang 1
+                </h2>
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        className="rounded text-primary focus:ring-primary"
+                        checked={copyData}
+                        onChange={(e) => setCopyData(e.target.checked)}
+                    />
+                    <span className="text-xs font-bold text-slate-500">Sama dengan Pemesan</span>
+                </label>
             </div>
             
-            <div className="h-64 border-t border-slate-400/30"></div> {/* Spacer for visual like design */}
-          </div>
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nama Lengkap</label>
+                    <input 
+                        type="text" 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" 
+                        placeholder="Sesuai KTP"
+                        defaultValue={copyData ? "Budi Santoso" : ""}
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nomor Kursi</label>
+                    <div className="w-full bg-slate-100 border border-slate-200 rounded-lg p-3 text-sm font-bold text-slate-500">
+                        1A (Executive)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* BOTTOM ACTION */}
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-50">
+            <div>
+                <div className="text-xs text-slate-500">Total Pembayaran</div>
+                <div className="text-xl font-black text-primary">Rp 245.000</div>
+            </div>
+            <Link href="/payment">
+                <button className="bg-accent text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-amber-600 transition shadow-lg shadow-amber-200">
+                    Lanjut Bayar
+                </button>
+            </Link>
         </div>
 
       </div>

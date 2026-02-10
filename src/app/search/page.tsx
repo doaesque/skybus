@@ -1,131 +1,142 @@
-import React from 'react';
-import { Filter, ArrowRightLeft, Bus, Star, ChevronDown, RefreshCcw } from 'lucide-react';
+"use client";
+
+import React, { useState } from 'react';
+import { Filter, ArrowRightLeft, Bus, Star, ChevronDown, MapPin, Camera, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { BUS_DATA } from '@/constants/data';
+import { motion } from 'framer-motion';
 
 export default function SearchPage() {
   return (
-    <div className="min-h-screen bg-gray-100 text-slate-800 pb-20">
+    <div className="min-h-screen bg-slate-50 text-slate-800 pb-20 font-sans">
       
-      {/* --- TOP HEADER (SEARCH SUMMARY) --- */}
-      <div className="bg-white shadow-sm sticky top-0 z-40 border-b">
+      {/* --- TOP HEADER --- */}
+      <div className="bg-primary text-white sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <div className="flex items-center gap-2 font-bold text-lg text-slate-700">
-              Asal <ArrowRightLeft className="w-4 h-4 text-slate-400" /> Tujuan
+            <div className="flex items-center gap-2 font-black text-lg">
+              Jakarta <ArrowRightLeft className="w-4 h-4 opacity-70" /> Bandung
             </div>
-            <div className="text-sm text-slate-500 mt-1">
-              Senin, 20 Okt 2024 | 1 Penumpang
+            <div className="text-xs font-medium opacity-90 mt-1 flex items-center gap-2">
+              <Calendar className="w-3 h-3" /> Senin, 20 Okt 2024 &bull; 1 Penumpang
             </div>
           </div>
-          <button className="w-full md:w-auto px-6 py-2 bg-slate-600 text-white text-sm font-bold rounded hover:bg-slate-700 transition uppercase">
+          <button className="w-full md:w-auto px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-xs font-bold rounded-lg hover:bg-white/30 transition uppercase border border-white/30">
             Ubah Pencarian
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         
         {/* --- SIDEBAR FILTERS --- */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <Filter className="w-4 h-4" /> Filter
+        <div className="lg:col-span-1 hidden lg:block">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2 text-sm">
+                <Filter className="w-4 h-4 text-primary" /> Filter
               </h3>
-              <button className="text-xs text-blue-600 font-bold hover:underline">Reset</button>
+              <button className="text-xs text-primary font-bold hover:underline">Reset</button>
             </div>
 
-            {/* Accordion 1: Fasilitas */}
-            <details className="group mb-4" open>
-              <summary className="flex justify-between items-center font-bold text-sm cursor-pointer list-none py-2 border-b">
-                <span>Fasilitas</span>
-                <ChevronDown className="w-4 h-4 transition group-open:rotate-180" />
-              </summary>
-              <div className="mt-3 space-y-2 text-sm text-slate-600 pl-2">
-                {['AC', 'Porta USB', 'Sandaran Kaki', 'Bagasi', 'Tempat Istirahat', 'Air Minum', 'Toilet'].map((item) => (
-                  <label key={item} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-slate-600 focus:ring-slate-500" />
-                    {item}
-                  </label>
-                ))}
-              </div>
-            </details>
-
-            {/* Accordion 2: Tipe Bus */}
-            <details className="group">
-              <summary className="flex justify-between items-center font-bold text-sm cursor-pointer list-none py-2 border-b">
-                <span>Tipe Bus</span>
-                <ChevronDown className="w-4 h-4 transition group-open:rotate-180" />
-              </summary>
-              <div className="mt-3 space-y-2 text-sm text-slate-600 pl-2">
-                {['Executive', 'Super Executive', 'Sleeper', 'Economy'].map((item) => (
-                  <label key={item} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded text-slate-600 focus:ring-slate-500" />
-                    {item}
-                  </label>
-                ))}
-              </div>
-            </details>
+            <div className="space-y-6">
+                <div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">Waktu</h4>
+                    <div className="flex gap-2">
+                        <button className="flex-1 py-2 border rounded text-xs font-bold hover:border-primary hover:text-primary transition">Pagi</button>
+                        <button className="flex-1 py-2 border rounded text-xs font-bold hover:border-primary hover:text-primary transition">Malam</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">Fasilitas</h4>
+                    {['Bisa Refund', 'Foto Asli', 'USB Port', 'Toilet'].map(f => (
+                        <label key={f} className="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" className="rounded text-primary focus:ring-primary" /> {f}
+                        </label>
+                    ))}
+                </div>
+            </div>
           </div>
         </div>
 
         {/* --- MAIN CONTENT (BUS LIST) --- */}
         <div className="lg:col-span-3 space-y-4">
           
-          {/* Card Item */}
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition">
-              <div className="flex flex-col md:flex-row justify-between mb-6">
-                
-                {/* Bus Info */}
-                <div className="mb-4 md:mb-0">
-                  <h3 className="text-xl font-bold text-slate-800">Nama Bus</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded font-bold flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-slate-700" /> 4.9/5
+          {BUS_DATA.map((bus) => (
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={bus.id} 
+                className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:border-primary/50 transition group"
+            >
+              <div className="flex flex-col md:flex-row justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">{bus.name}</h3>
+                  <div className="text-xs text-slate-500 font-medium mb-2">{bus.operator}</div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="bg-accent/10 text-accent text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-accent" /> {bus.rating}
                     </span>
-                    <span className="text-xs text-slate-400">• Executive Class</span>
+                    <span className="text-[10px] text-slate-400 font-medium">({bus.totalReviews} Ulasan)</span>
+                    
+                    {/* FITUR UNGGULAN: REVIEW FOTO ASLI (Survey Insight) */}
+                    {bus.reviews.length > 0 && bus.reviews[0].images.length > 0 && (
+                        <span className="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200 cursor-pointer hover:bg-green-200">
+                           <Camera className="w-3 h-3" /> Ada Foto Asli
+                        </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Price & Action */}
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-slate-800">Rp 245.000<span className="text-sm font-normal text-slate-500">/kursi</span></div>
+                <div className="text-right mt-4 md:mt-0">
+                  <div className="text-xl font-black text-primary">
+                    Rp {bus.price.toLocaleString('id-ID')}
+                  </div>
+                  <div className="text-xs text-slate-400 mb-2">/pax</div>
                   <Link href="/booking">
-                    <button className="mt-2 bg-slate-500 text-white px-8 py-2 rounded font-bold text-sm hover:bg-slate-600 transition w-full md:w-auto">
-                      PILIH
+                    <button className="bg-primary text-white px-6 py-2 rounded-lg font-bold text-xs uppercase tracking-wide hover:bg-primary-dark transition shadow-lg shadow-blue-200 active:scale-95">
+                      Pilih Kursi
                     </button>
                   </Link>
                 </div>
               </div>
 
-              {/* Schedule Route */}
-              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-12 mb-6 border-t border-b py-4 bg-slate-50/50 rounded px-2">
-                <div className="text-center md:text-left">
-                  <div className="text-lg font-bold text-slate-800">22.00</div>
-                  <div className="text-xs text-slate-500">Dipatiukur</div>
+              {/* Rute Visual */}
+              <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-lg border border-slate-100 mb-4">
+                <div className="text-center w-16">
+                  <div className="text-sm font-black text-slate-800">{bus.departureTime}</div>
+                  <div className="text-[10px] text-slate-500 uppercase">JKT</div>
                 </div>
-                
-                <div className="flex-1 flex items-center gap-2 w-full justify-center">
-                   <div className="-h[2px] w-full bg-slate-300 relative flex items-center justify-center">
-                      <Bus className="w-4 h-4 text-slate-400 bg-white px-1 absolute" />
+                <div className="flex-1 flex flex-col items-center">
+                   <div className="text-[10px] text-slate-400 mb-1">{bus.duration}</div>
+                   <div className="w-full h-[2px] bg-slate-200 relative">
+                      <div className="absolute top-1/2 left-0 w-2 h-2 bg-slate-300 rounded-full -translate-y-1/2"></div>
+                      <div className="absolute top-1/2 right-0 w-2 h-2 bg-primary rounded-full -translate-y-1/2"></div>
                    </div>
-                   <div className="text-xs text-slate-400 whitespace-nowrap font-medium">4j 5m</div>
                 </div>
-
-                <div className="text-center md:text-right">
-                  <div className="text-lg font-bold text-slate-800">02.05</div>
-                  <div className="text-xs text-slate-500">Hotel Tujuan</div>
+                <div className="text-center w-16">
+                  <div className="text-sm font-black text-slate-800">{bus.arrivalTime}</div>
+                  <div className="text-[10px] text-slate-500 uppercase">BDG</div>
                 </div>
               </div>
 
-              {/* Card Footer Links */}
-              <div className="flex gap-6 text-sm font-bold text-slate-500 border-t pt-4">
-                <button className="hover:text-slate-800 transition">Fitur</button>
-                <button className="hover:text-slate-800 transition">Rute</button>
-                <button className="hover:text-slate-800 transition">Rating & Review</button>
+              {/* Fasilitas & Info Detail */}
+              <div className="flex justify-between items-center border-t pt-3">
+                 <div className="flex gap-2">
+                    {bus.facilities.slice(0, 3).map(f => (
+                        <span key={f} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                            {f}
+                        </span>
+                    ))}
+                    <span className="text-[10px] text-slate-400 px-2 py-1">+2 Lainnya</span>
+                 </div>
+                 <button className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                    Lihat Detail <ChevronDown className="w-3 h-3" />
+                 </button>
               </div>
-            </div>
+
+            </motion.div>
           ))}
 
         </div>
