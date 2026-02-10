@@ -2,15 +2,17 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  MapPin, Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
-  BookOpen, Clock, Map, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair
+  Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
+  BookOpen, Clock, Map, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, MapPin
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { POPULAR_LOCATIONS, POPULAR_ROUTES } from "@/constants/data";
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
   const [tripType, setTripType] = useState<'one-way' | 'round-trip'>('one-way');
   const [passengers, setPassengers] = useState(1);
   const [origin, setOrigin] = useState("");
@@ -19,24 +21,42 @@ export default function Home() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
 
+  // State untuk Dropdown User
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestDropdown, setShowDestDropdown] = useState(false);
 
   const originRef = useRef<HTMLDivElement>(null);
   const destRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
   const isFormValid = origin.length > 0 && destination.length > 0 && departDate.length > 0 && passengers > 0;
 
   useEffect(() => {
+    // Cek Login Status
+    const role = localStorage.getItem("userRole");
+    if (role) setIsLoggedIn(true);
+
     function handleClickOutside(event: MouseEvent) {
       if (originRef.current && !originRef.current.contains(event.target as Node)) setShowOriginDropdown(false);
       if (destRef.current && !destRef.current.contains(event.target as Node)) setShowDestDropdown(false);
+      // Close User Dropdown
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setShowUserDropdown(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+      localStorage.removeItem("userRole");
+      setIsLoggedIn(false);
+      setShowUserDropdown(false);
+      router.refresh();
+  }
 
   const filteredOrigins = POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(origin.toLowerCase()));
   const filteredDests = POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(destination.toLowerCase()));
@@ -89,24 +109,60 @@ export default function Home() {
            SkyBus<span className="text-amber-500">.</span>
         </Link>
         <div className="ml-auto flex items-center gap-8">
-            <div className="hidden md:flex space-x-6 text-sm font-bold text-slate-500 dark:text-slate-400">
-              <Link href="/search" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Cari Tiket</Link>
+            <div className="hidden md:flex items-center space-x-6 text-sm font-bold text-slate-500 dark:text-slate-400">
+              <Link href="/ticket" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Cari Tiket</Link>
               <Link href="/mitra" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Mitra Operator</Link>
               <Link href="/help" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Bantuan</Link>
+
+              {/* Jika Login, Tampilkan Tiket Saya di sini */}
+              {isLoggedIn && (
+                  <Link href="/my-orders" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Tiket Saya</Link>
+              )}
             </div>
-            <div className="flex space-x-3">
-              <Link href="/login">
-                <button className="px-5 py-2 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 transition">Masuk</button>
-              </Link>
-              <Link href="/signup">
-                <button className="px-5 py-2 bg-blue-600 text-white text-sm rounded-full font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 dark:shadow-none">Daftar</button>
-              </Link>
+
+            <div className="flex space-x-3 items-center">
+              {/* LOGIKA LOGIN / LOGOUT */}
+              {!isLoggedIn ? (
+                  <>
+                    <Link href="/login">
+                        <button className="px-5 py-2 text-blue-600 dark:text-blue-400 font-bold text-sm rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 transition">Masuk</button>
+                    </Link>
+                    <Link href="/signup">
+                        <button className="px-5 py-2 bg-blue-600 text-white text-sm rounded-full font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 dark:shadow-none">Daftar</button>
+                    </Link>
+                  </>
+              ) : (
+                  // DROPDOWN AKUN
+                  <div className="relative" ref={userMenuRef}>
+                      <button
+                        onClick={() => setShowUserDropdown(!showUserDropdown)}
+                        className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center hover:bg-blue-200 transition"
+                      >
+                          <User className="w-5 h-5" />
+                      </button>
+
+                      {showUserDropdown && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50">
+                              <Link href="#" className="block px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2">
+                                  <Settings className="w-4 h-4" /> Pengaturan
+                              </Link>
+                              <button
+                                onClick={handleLogout}
+                                className="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800"
+                              >
+                                  <LogOut className="w-4 h-4" /> Keluar
+                              </button>
+                          </div>
+                      )}
+                  </div>
+              )}
             </div>
         </div>
       </nav>
 
+      {/* ... SISANYA SAMA SEPERTI SEBELUMNYA ... */}
       <section className="relative px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start overflow-hidden min-h-[600px]">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
             <Image
                 src="/img/hero-bus.jpg"
                 alt="SkyBus Hero Background"
@@ -219,7 +275,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <Link href={isFormValid ? "/search" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
+            <Link href={isFormValid ? "/ticket" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
                 <button disabled={!isFormValid} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
                    {isFormValid ? 'CARI TIKET MURAH' : 'LENGKAPI DATA'}
                 </button>
@@ -251,7 +307,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-slate-50 dark:bg-slate-950">
+      <section className="py-20 px-6 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 text-center md:text-left">
                 <span className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">Penawaran Spesial</span>
@@ -304,7 +360,7 @@ export default function Home() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
                 {POPULAR_ROUTES.map((route, idx) => (
-                    <Link href={`/search?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
+                    <Link href={`/ticket?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                         <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
                             <Image
                                 src={`/img/rute-populer-0${idx + 1}.jpg`}
@@ -312,7 +368,6 @@ export default function Home() {
                                 fill
                                 className="object-cover transition duration-500 group-hover:scale-110"
                             />
-                            {/* Overlay Gradient agar teks terbaca */}
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-60 transition"></div>
                         </div>
                         <div className="absolute bottom-0 left-0 p-4 w-full">
@@ -327,10 +382,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-14 px-6 bg-slate-50 dark:bg-slate-950">
+      <section className="py-8 px-6 bg-slate-50 dark:bg-slate-950">
          <div className="max-w-7xl mx-auto text-center">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Partner Resmi Kami</p>
-            {/* Logo lebih rapat (gap-6) dan justify center */}
             <div className="flex flex-wrap justify-center items-center gap-6">
                 {PARTNER_LOGOS.map((logo, i) => (
                     <div key={i} className="h-28 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-2">

@@ -1,15 +1,17 @@
 "use client";
 
 import React from 'react';
-import { ArrowLeft, Search, User, CreditCard, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, UserPlus, Search, User, CreditCard, CheckCircle, Ticket, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function GuidePage() {
   const steps = [
-    { icon: <Search className="w-6 h-6 text-white"/>, title: "1. Cari Rute", desc: "Masukkan kota asal, tujuan, dan tanggal keberangkatan di halaman utama." },
-    { icon: <User className="w-6 h-6 text-white"/>, title: "2. Isi Data", desc: "Pilih bus yang sesuai, lalu isi data pemesan dan penumpang dengan benar." },
-    { icon: <CreditCard className="w-6 h-6 text-white"/>, title: "3. Bayar", desc: "Pilih metode pembayaran (Transfer/E-Wallet) dan selesaikan sebelum waktu habis." },
-    { icon: <CheckCircle className="w-6 h-6 text-white"/>, title: "4. Selesai", desc: "E-Ticket akan dikirim ke email dan tersedia di menu 'Cek Pesanan'." },
+    { icon: <UserPlus className="w-6 h-6 text-white"/>, title: "1. Login / Daftar", desc: "Buat akun baru atau masuk ke akun Anda agar riwayat pesanan tersimpan." },
+    { icon: <Search className="w-6 h-6 text-white"/>, title: "2. Cari Rute", desc: "Masukkan kota asal, tujuan, dan tanggal keberangkatan di halaman utama." },
+    { icon: <Ticket className="w-6 h-6 text-white"/>, title: "3. Pilih Tiket", desc: "Pilih bus yang sesuai dengan jadwal dan fasilitas yang Anda inginkan." },
+    { icon: <User className="w-6 h-6 text-white"/>, title: "4. Isi Data", desc: "Lengkapi data pemesan dan penumpang dengan benar sesuai kartu identitas." },
+    { icon: <CreditCard className="w-6 h-6 text-white"/>, title: "5. Bayar", desc: "Pilih metode pembayaran (Transfer/E-Wallet) dan selesaikan sebelum waktu habis." },
+    { icon: <CheckCircle className="w-6 h-6 text-white"/>, title: "6. Selesai", desc: "E-Ticket akan dikirim ke email dan dapat diakses di menu 'Pesanan Saya'." },
   ];
 
   return (
