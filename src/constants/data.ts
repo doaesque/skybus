@@ -71,55 +71,59 @@ export const MITRA_STATS = {
   occupancyRate: "85%"
 };
 
+export const POPULAR_LOCATIONS = [
+  "Jakarta", "Bandung", "Semarang", "Yogyakarta", "Solo", "Surabaya", "Malang", "Denpasar", 
+  "Medan", "Palembang", "Lampung", "Makassar"
+];
+
+export const POPULAR_ROUTES = [
+  { from: "Jakarta", to: "Bandung", price: "Rp 85.000", image: "/img/rute-populer-01.jpg" },
+  { from: "Bandung", to: "Yogyakarta", price: "Rp 120.000", image: "/img/rute-populer-02.jpg" },
+  { from: "Jakarta", to: "Semarang", price: "Rp 150.000", image: "/img/rute-populer-03.jpg" },
+  { from: "Surabaya", to: "Malang", price: "Rp 40.000", image: "/img/rute-populer-04.jpg" },
+];
+
 export const PROMO_DATA = [
   {
     id: 1,
     code: "SKYNEW26",
     title: "Diskon Pengguna Baru",
-    desc: "Potongan hingga 20% untuk transaksi pertama.",
+    desc: "Potongan harga 20% tanpa minimum transaksi untuk pembelian tiket pertama kali di SkyBus.",
     discount: "20%",
     validUntil: "31 Des 2026",
-    minTrans: "Tanpa Min. Transaksi",
-    color: "bg-blue-600"
+    minTrans: "Rp 0",
+    color: "blue",
+    type: "New User",
+    limited: false
   },
   {
     id: 2,
-    code: "MUDIK26",
-    title: "Promo Mudik Lebaran",
-    desc: "Hemat Rp 50.000 ke semua tujuan Jawa-Bali.",
-    discount: "Rp 50rb",
-    validUntil: "15 Apr 2026",
-    minTrans: "Min. Rp 200.000",
-    color: "bg-green-600"
+    code: "WEEKEND10",
+    title: "Liburan Hemat Akhir Pekan",
+    desc: "Diskon 10% untuk keberangkatan hari Jumat, Sabtu, dan Minggu ke semua tujuan.",
+    discount: "10%",
+    validUntil: "31 Mar 2026",
+    minTrans: "Rp 100.000",
+    color: "orange",
+    type: "Weekend",
+    limited: true
   },
   {
     id: 3,
-    code: "WEEKEND26",
-    title: "Liburan Akhir Pekan",
-    desc: "Cashback 10% khusus keberangkatan Jumat-Minggu.",
-    discount: "10%",
-    validUntil: "Des 2026",
-    minTrans: "Min. Rp 150.000",
-    color: "bg-orange-500"
+    code: "MUDIKASIK",
+    title: "Early Bird Mudik Lebaran",
+    desc: "Amankan tiket mudikmu lebih awal dan dapatkan potongan Rp 50.000.",
+    discount: "Rp 50rb",
+    validUntil: "15 Apr 2026",
+    minTrans: "Rp 500.000",
+    color: "green",
+    type: "Seasonal",
+    limited: true
   }
 ];
 
-export const POPULAR_LOCATIONS = [
-  "Jakarta", "Bandung", "Surabaya", "Malang", "Yogyakarta", 
-  "Semarang", "Solo", "Denpasar", "Medan", "Palembang", 
-  "Terminal Pulo Gebang (JKT)", "Terminal Leuwi Panjang (BDG)", 
-  "Terminal Bungurasih (SBY)", "Terminal Giwangan (YOG)"
-];
-
-export const POPULAR_ROUTES = [
-  { from: "Jakarta", to: "Bandung", price: "Mulai Rp 85rb", image: "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&q=80&w=300&h=200" },
-  { from: "Jakarta", to: "Yogyakarta", price: "Mulai Rp 180rb", image: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&q=80&w=300&h=200" },
-  { from: "Surabaya", to: "Bali", price: "Mulai Rp 250rb", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=300&h=200" },
-  { from: "Bandung", to: "Semarang", price: "Mulai Rp 140rb", image: "https://images.unsplash.com/photo-1596401057633-565652ca65a0?auto=format&fit=crop&q=80&w=300&h=200" },
-];
-
 export const PARTNERS = [
-  "Sinar Jaya", "Rosalia Indah", "Primajasa", "Harapan Jaya", 
+  "Sinar Jaya", "Rosalia Indah", "Primajasa", "Harapan Jaya",
   "Gunung Harta", "Pahala Kencana", "Damri", "Agra Mas"
 ];
 
