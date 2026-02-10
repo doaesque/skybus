@@ -1,103 +1,91 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // --- LOGIKA LOGIN (UPDATE) ---
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setIsLoading(true);
 
+    // Simulasi Login
     setTimeout(() => {
-        if (email === "admin@skybus.id" && password === "admin123") {
-            localStorage.setItem("userRole", "admin"); // SIMPAN ROLE
-            router.push("/admin/dashboard");
-        } else if (email === "mitra@sinarjaya.com" && password === "mitra123") {
-            localStorage.setItem("userRole", "mitra"); // SIMPAN ROLE
-            router.push("/admin/partner");
-        } else if (email === "user@gmail.com" && password === "user123") {
-            localStorage.setItem("userRole", "user"); // SIMPAN ROLE
-            router.push("/");
-        } else {
-            setError("Email atau password salah!");
-            setLoading(false);
-        }
-    }, 1000);
+        setIsLoading(false);
+        // Simpan token dummy agar dianggap login (opsional)
+        // localStorage.setItem("userRole", "user");
+        router.push('/');
+    }, 1500);
   };
 
-  // Helper untuk auto-fill
-  const autoFill = (role: 'admin' | 'mitra' | 'user') => {
-      if(role === 'admin') { setEmail("admin@skybus.id"); setPassword("admin123"); }
-      if(role === 'mitra') { setEmail("mitra@sinarjaya.com"); setPassword("mitra123"); }
-      if(role === 'user') { setEmail("user@gmail.com"); setPassword("user123"); }
-  }
-
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors">
-      
-      <div className="p-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
-            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
-        </Link>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans transition-colors">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
-        <div className="max-w-md w-full space-y-8">
-            <div className="text-center">
-                <div className="inline-block p-3 bg-blue-100 dark:bg-slate-800 rounded-full mb-4">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
-                </div>
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white">Selamat Datang</h2>
-                <p className="mt-2 text-slate-500 dark:text-slate-400">Masuk untuk mengelola perjalananmu.</p>
-            </div>
+        <div className="text-center mb-8">
+            <Link href="/" className="text-3xl font-black italic tracking-tighter inline-block mb-2">
+                SkyBus<span className="text-blue-600">.</span>
+            </Link>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Selamat datang kembali!</p>
+        </div>
 
-            {/* DEMO ACCOUNT HELPER */}
-            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                <p className="font-bold mb-2 text-slate-400 uppercase tracking-widest">Demo Accounts (Klik untuk isi)</p>
-                <div className="grid grid-cols-3 gap-2">
-                    <button type="button" onClick={() => autoFill('admin')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">Admin Web</button>
-                    <button type="button" onClick={() => autoFill('mitra')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">Admin Mitra</button>
-                    <button type="button" onClick={() => autoFill('user')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">User Biasa</button>
+        <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Email</label>
+                <div className="relative">
+                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white"
+                        required
+                    />
                 </div>
             </div>
 
-            {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl flex items-center gap-2 text-sm font-bold animate-pulse">
-                    <AlertCircle className="w-4 h-4" /> {error}
+            <div>
+                <div className="flex justify-between items-center mb-2">
+                    <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Kata Sandi</label>
+                    <Link href="#" className="text-xs font-bold text-blue-600 hover:underline">Lupa Sandi?</Link>
                 </div>
-            )}
+                <div className="relative">
+                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white"
+                        required
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition">
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
 
-            <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Email</label>
-                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="nama@email.com" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Password</label>
-                        <div className="relative">
-                            <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="••••••••" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                                {showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" disabled={loading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? "MEMPROSES..." : "MASUK"}
-                </button>
-            </form>
+            <button
+                type="submit"
+                disabled={isLoading || !email || !password}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-wide transition shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex justify-center items-center"
+            >
+                {isLoading ? (
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : 'Masuk'}
+            </button>
+        </form>
+
+        <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            Belum punya akun? <Link href="/signup" className="text-blue-600 font-bold hover:underline">Daftar Sekarang</Link>
         </div>
       </div>
     </div>

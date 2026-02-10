@@ -1,152 +1,114 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { Eye, EyeOff, ChevronDown, Info } from 'lucide-react';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Logika validasi password ( Checklist di bawah input )
-  const hasMinLength = password.length >= 8;
-  const hasUpperLowerCase = /[a-z]/.test(password) && /[A-Z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const isEmailValid = (email: string) => /\S+@\S+\.\S+/.test(email);
+  const isFormFilled = formData.name && formData.email && formData.phone && formData.password;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isEmailValid(formData.email)) {
+        alert("Email tidak valid. Pastikan mengandung '@' dan '.'");
+        return;
+    }
+
+    setIsLoading(true);
+    // Simulasi delay request
+    setTimeout(() => {
+        setIsLoading(false);
+        router.push('/login');
+    }, 1500);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 font-sans text-slate-800">
-      
-      {/* Header Link (Top Right) */}
-      <div className="absolute top-8 right-8 text-right hidden md:block">
-        <p className="text-sm text-slate-500">
-          Sudah punya akun? <Link href="/login" className="font-bold text-slate-800 hover:underline">Masuk</Link>
-        </p>
-        <a href="#" className="text-xs text-slate-400 block mt-1">Lupa user ID atau password?</a>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans transition-colors">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
 
-      {/* Logo Section */}
-      <div className="mb-8 text-center">
-        <div className="w-16 h-16 bg-slate-300 rounded-full mx-auto mb-2 flex items-center justify-center font-black text-white text-xs">
-          LOGO
-        </div>
-        <h2 className="text-xl font-bold tracking-widest">SKYBUS</h2>
-      </div>
-
-      {/* Form Card */}
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-sm border border-gray-100 p-10 relative">
-        
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Buat Akun</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Bergabunglah dengan SkyBus untuk menikmati kemudahan perjalanan antar kota dengan harga terbaik.
-          </p>
+            <Link href="/" className="text-3xl font-black italic tracking-tighter inline-block mb-2">
+                SkyBus<span className="text-blue-600">.</span>
+            </Link>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Buat akun baru untuk mulai perjalanan Anda.</p>
         </div>
 
-        <form className="space-y-6">
-          {/* Email Field */}
-          <div className="relative group">
-            <label htmlFor="email" className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">
-              Email
-            </label>
-            <div className="relative">
-              <input 
-                id="email" 
-                type="email" 
-                required 
-                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
-              />
-              <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
+        <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nama Lengkap</label>
+                <div className="relative">
+                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                    <input name="name" onChange={handleChange} type="text" placeholder="John Doe" className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+                </div>
             </div>
-            
-            {/* Tooltip (Sesuai Gambar) */}
-            <div className="absolute -right-4 top-0 translate-x-full hidden lg:block w-48 p-3 bg-slate-800 text-white text-[10px] rounded-lg shadow-xl">
-               <div className="absolute left-0 top-4 -translate-x-1 w-2 h-2 bg-slate-800 rotate-45"></div>
-               Kami akan menggunakan email Anda sebagai User ID akun SkyBus Anda.
-            </div>
-          </div>
 
-          {/* Phone Field */}
-          <div>
-            <label htmlFor="phone" className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">
-              Nomor Telepon
-            </label>
-            <input 
-              id="phone" 
-              type="tel" 
-              required 
-              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
-            />
-            <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">
-              Kami sangat menyarankan untuk menambahkan nomor telepon. Ini akan membantu verifikasi akun dan menjaga keamanan akun Anda.
-            </p>
-          </div>
+            <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Email</label>
+                <div className="relative">
+                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                    <input name="email" onChange={handleChange} type="email" placeholder="name@example.com" className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+                </div>
+            </div>
 
-          {/* Password Field */}
-          <div>
-            <div className="flex justify-between items-end mb-1">
-              <label htmlFor="password" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Password
-              </label>
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1"
-              >
-                {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                {showPassword ? "Sembunyikan" : "Tampilkan"}
-              </button>
+            <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nomor Telepon</label>
+                <div className="relative flex">
+                    <div className="pl-4 pr-3 py-3 bg-slate-100 dark:bg-slate-800 rounded-l-xl font-bold text-slate-500 border-r border-slate-200 dark:border-slate-700 flex items-center">
+                        +62
+                    </div>
+                    <input name="phone" onChange={handleChange} type="tel" placeholder="812345678" className="w-full pl-4 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-r-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+                </div>
             </div>
-            <input 
-              id="password" 
-              type={showPassword ? "text" : "password"} 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required 
-              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
-            />
-          </div>
 
-          {/* Password Validation Checklist (Sesuai Gambar) */}
-          <div className="grid grid-cols-2 gap-y-2 gap-x-4 pt-1">
-            <div className="flex items-center gap-2 text-[10px] font-medium transition">
-              <div className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`}></div>
-              <span className={hasMinLength ? 'text-slate-800' : 'text-slate-400'}>Minimal 8 karakter</span>
+            <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Kata Sandi</label>
+                <div className="relative">
+                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                    <input name="password" onChange={handleChange} type={showPassword ? "text" : "password"} placeholder="••••••••" className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-800 dark:text-white" required />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition">
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                </div>
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-medium transition">
-              <div className={`w-1.5 h-1.5 rounded-full ${hasUpperLowerCase ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`}></div>
-              <span className={hasUpperLowerCase ? 'text-slate-800' : 'text-slate-400'}>Huruf besar & kecil (Aa)</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-medium transition">
-              <div className={`w-1.5 h-1.5 rounded-full ${hasNumber ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`}></div>
-              <span className={hasNumber ? 'text-slate-800' : 'text-slate-400'}>Gunakan angka (123)</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-medium transition">
-              <div className={`w-1.5 h-1.5 rounded-full ${hasSymbol ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-300'}`}></div>
-              <span className={hasSymbol ? 'text-slate-800' : 'text-slate-400'}>Gunakan simbol (!@#)</span>
-            </div>
-          </div>
 
-          {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="w-full bg-slate-900 text-white py-4 rounded-full font-bold text-sm hover:bg-black transition-all shadow-lg active:scale-95 mt-4"
-          >
-            DAFTAR SEKARANG
-          </button>
+            <div className="flex items-start gap-2 mt-4">
+                <input type="checkbox" className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" required />
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
+                    Saya menyetujui <Link href="/terms" target="_blank" className="text-blue-600 font-bold hover:underline">Syarat & Ketentuan</Link> serta <Link href="/privacy" target="_blank" className="text-blue-600 font-bold hover:underline">Kebijakan Privasi</Link> SkyBus.
+                </p>
+            </div>
 
-          {/* Legal Footer */}
-          <p className="text-[10px] text-center text-slate-400 px-4 leading-relaxed">
-            Dengan membuat akun, Anda menyetujui <Link href="/terms" className="underline hover:text-slate-600">Ketentuan Penggunaan</Link> dan <Link href="/privacy" className="underline hover:text-slate-600">Kebijakan Privasi</Link> SkyBus.
-          </p>
+            <button
+                type="submit"
+                disabled={!isFormFilled || isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-wide transition shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex justify-center items-center"
+            >
+                {isLoading ? (
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : 'Daftar Akun'}
+            </button>
         </form>
-      </div>
 
-      {/* Mobile Footer Link */}
-      <div className="mt-8 text-center md:hidden">
-        <p className="text-sm text-slate-500">
-          Sudah punya akun? <Link href="/login" className="font-bold text-slate-800 underline">Masuk</Link>
-        </p>
+        <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            Sudah punya akun? <Link href="/login" className="text-blue-600 font-bold hover:underline">Masuk Sekarang</Link>
+        </div>
       </div>
     </div>
   );
