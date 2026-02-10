@@ -2,84 +2,102 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Facebook, Apple, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // --- LOGIKA LOGIN (UPDATE) ---
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    setTimeout(() => {
+        if (email === "admin@skybus.id" && password === "admin123") {
+            localStorage.setItem("userRole", "admin"); // SIMPAN ROLE
+            router.push("/admin/dashboard");
+        } else if (email === "mitra@sinarjaya.com" && password === "mitra123") {
+            localStorage.setItem("userRole", "mitra"); // SIMPAN ROLE
+            router.push("/admin/partner");
+        } else if (email === "user@gmail.com" && password === "user123") {
+            localStorage.setItem("userRole", "user"); // SIMPAN ROLE
+            router.push("/");
+        } else {
+            setError("Email atau password salah!");
+            setLoading(false);
+        }
+    }, 1000);
+  };
+
+  // Helper untuk auto-fill
+  const autoFill = (role: 'admin' | 'mitra' | 'user') => {
+      if(role === 'admin') { setEmail("admin@skybus.id"); setPassword("admin123"); }
+      if(role === 'mitra') { setEmail("mitra@sinarjaya.com"); setPassword("mitra123"); }
+      if(role === 'user') { setEmail("user@gmail.com"); setPassword("user123"); }
+  }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors">
       
-      {/* Navbar Simple */}
       <div className="p-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary transition">
-            <ArrowLeft className="w-4 h-4" /> Kembali
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
         </Link>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 pb-20">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
         <div className="max-w-md w-full space-y-8">
             <div className="text-center">
-                <div className="inline-block p-3 bg-primary/10 rounded-full mb-4">
-                    <div className="w-8 h-8 bg-primary rounded-full"></div>
+                <div className="inline-block p-3 bg-blue-100 dark:bg-slate-800 rounded-full mb-4">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
                 </div>
-                <h2 className="text-3xl font-black text-slate-900">Selamat Datang</h2>
-                <p className="mt-2 text-slate-500">Masuk untuk mengelola tiket perjalananmu.</p>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white">Selamat Datang</h2>
+                <p className="mt-2 text-slate-500 dark:text-slate-400">Masuk untuk mengelola perjalananmu.</p>
             </div>
 
-            <div className="space-y-4">
-                 {/* Social Login */}
-                <button className="w-full flex items-center justify-center px-4 py-3 border border-slate-200 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-50 transition">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5 mr-3" alt="Google" />
-                    Lanjut dengan Google
-                </button>
+            {/* DEMO ACCOUNT HELPER */}
+            <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                <p className="font-bold mb-2 text-slate-400 uppercase tracking-widest">Demo Accounts (Klik untuk isi)</p>
+                <div className="grid grid-cols-3 gap-2">
+                    <button type="button" onClick={() => autoFill('admin')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">Admin Web</button>
+                    <button type="button" onClick={() => autoFill('mitra')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">Admin Mitra</button>
+                    <button type="button" onClick={() => autoFill('user')} className="px-2 py-1 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded hover:border-blue-500 transition text-slate-600 dark:text-slate-300">User Biasa</button>
+                </div>
             </div>
 
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                <div className="relative flex justify-center text-xs uppercase"><span className="px-2 bg-white text-slate-400 font-bold">Atau login manual</span></div>
-            </div>
+            {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl flex items-center gap-2 text-sm font-bold animate-pulse">
+                    <AlertCircle className="w-4 h-4" /> {error}
+                </div>
+            )}
 
-            <form className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                        <input type="email" required className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-white transition" placeholder="nama@email.com" />
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Email</label>
+                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="nama@email.com" />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Password</label>
                         <div className="relative">
-                            <input 
-                                type={showPassword ? "text" : "password"} 
-                                required 
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-white transition" 
-                                placeholder="••••••••" 
-                            />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                            <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                                 {showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded text-primary focus:ring-primary" />
-                        <span className="font-bold text-slate-600">Ingat Saya</span>
-                    </label>
-                    <a href="#" className="font-bold text-primary hover:underline">Lupa Password?</a>
-                </div>
-
-                <Link href="/">
-                    <button type="button" className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-sm hover:bg-black transition shadow-lg">
-                        MASUK
-                    </button>
-                </Link>
+                <button type="submit" disabled={loading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    {loading ? "MEMPROSES..." : "MASUK"}
+                </button>
             </form>
-            
-            <p className="text-center text-sm text-slate-500">
-                Belum punya akun? <Link href="/signup" className="font-bold text-primary hover:underline">Daftar Sekarang</Link>
-            </p>
         </div>
       </div>
     </div>
