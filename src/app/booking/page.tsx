@@ -1,126 +1,92 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChevronDown, ArrowLeft, User, CreditCard, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Bus, User, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function BookingPage() {
   const router = useRouter();
-  const [copyData, setCopyData] = useState(false);
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+
+  // Mock Data
+  const seats = Array.from({ length: 20 }, (_, i) => ({
+    id: `A${i + 1}`,
+    status: i % 3 === 0 ? 'booked' : 'available'
+  }));
+
+  const handleBook = () => {
+    if (!selectedSeat) {
+        alert("Pilih kursi terlebih dahulu!");
+        return;
+    }
+    // Redirect ke payment
+    router.push('/payment');
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-20">
-      
-      {/* Header */}
-      <div className="bg-white p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4">
-        <Link href="/search" className="p-2 hover:bg-slate-100 rounded-full transition">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
+      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
+        <Link href="/search" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </Link>
         <div>
-            <h1 className="font-black text-lg text-slate-800">Pengisian Data</h1>
-            <p className="text-xs text-slate-500">Jakarta → Bandung • 20 Okt 2024</p>
+            <h1 className="font-black text-lg leading-tight">Pilih Kursi</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Jakarta - Bandung • 20 Feb 2026</p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6 grid gap-6">
-        
-        {/* Step Indicator */}
-        <div className="flex items-center justify-between px-8 text-xs font-bold text-slate-400 mb-2">
-            <div className="text-primary flex flex-col items-center gap-1">
-                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center">1</div>
-                <span>Data</span>
+      <div className="max-w-xl mx-auto px-6 py-8">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 mb-6">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-2 items-center text-sm font-bold">
+                    <div className="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded"></div> Terisi
+                </div>
+                <div className="flex gap-2 items-center text-sm font-bold">
+                    <div className="w-4 h-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded"></div> Kosong
+                </div>
+                <div className="flex gap-2 items-center text-sm font-bold">
+                    <div className="w-4 h-4 bg-blue-600 rounded"></div> Pilihan
+                </div>
             </div>
-            <div className="h-[2px] flex-1 bg-slate-200 mx-2"></div>
-            <div className="flex flex-col items-center gap-1">
-                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">2</div>
-                <span>Bayar</span>
-            </div>
-            <div className="h-[2px] flex-1 bg-slate-200 mx-2"></div>
-            <div className="flex flex-col items-center gap-1">
-                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">3</div>
-                <span>Tiket</span>
+
+            <div className="grid grid-cols-4 gap-4 justify-items-center">
+                <div className="col-span-4 text-center text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 py-2 rounded w-full">Depan (Supir)</div>
+                {seats.map((seat) => (
+                    <button
+                        key={seat.id}
+                        disabled={seat.status === 'booked'}
+                        onClick={() => setSelectedSeat(seat.id)}
+                        className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs font-bold transition
+                            ${seat.status === 'booked' 
+                                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed' 
+                                : selectedSeat === seat.id 
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' 
+                                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-blue-500'
+                            }
+                        `}
+                    >
+                        {seat.id}
+                    </button>
+                ))}
             </div>
         </div>
 
-        {/* DATA PEMESAN */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" /> Data Pemesan
-            </h2>
-            <div className="space-y-4">
+        <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 p-6 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div className="max-w-xl mx-auto flex justify-between items-center">
                 <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nama Lengkap</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="Sesuai KTP" />
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">Total Harga</span>
+                    <span className="block text-xl font-black text-blue-600 dark:text-blue-400">Rp 85.000</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">No. HP / WA</label>
-                        <input type="tel" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="0812..." />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Email</label>
-                        <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" placeholder="email@..." />
-                    </div>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-lg flex gap-3 items-start">
-                    <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                        E-Ticket akan dikirim ke email dan WhatsApp di atas. Pastikan data benar.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {/* DATA PENUMPANG */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                    <User className="w-4 h-4 text-primary" /> Data Penumpang 1
-                </h2>
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                        type="checkbox" 
-                        className="rounded text-primary focus:ring-primary"
-                        checked={copyData}
-                        onChange={(e) => setCopyData(e.target.checked)}
-                    />
-                    <span className="text-xs font-bold text-slate-500">Sama dengan Pemesan</span>
-                </label>
-            </div>
-            
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nama Lengkap</label>
-                    <input 
-                        type="text" 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:outline-none focus:border-primary transition" 
-                        placeholder="Sesuai KTP"
-                        defaultValue={copyData ? "Budi Santoso" : ""}
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Nomor Kursi</label>
-                    <div className="w-full bg-slate-100 border border-slate-200 rounded-lg p-3 text-sm font-bold text-slate-500">
-                        1A (Executive)
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {/* BOTTOM ACTION */}
-        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-50">
-            <div>
-                <div className="text-xs text-slate-500">Total Pembayaran</div>
-                <div className="text-xl font-black text-primary">Rp 245.000</div>
-            </div>
-            <Link href="/payment">
-                <button className="bg-accent text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-amber-600 transition shadow-lg shadow-amber-200">
+                <button 
+                    onClick={handleBook}
+                    disabled={!selectedSeat}
+                    className="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                     Lanjut Bayar
                 </button>
-            </Link>
+            </div>
         </div>
-
       </div>
     </div>
   );
