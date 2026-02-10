@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ArrowLeft, Search, User, CreditCard, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Search, User, CreditCard, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function GuidePage() {
@@ -21,15 +21,22 @@ export default function GuidePage() {
         <h1 className="font-black text-lg">Cara Pesan Tiket</h1>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         {steps.map((step, idx) => (
-            <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex gap-6 items-start hover:border-blue-500 transition group">
-                <div className="bg-blue-600 p-4 rounded-full shadow-lg shadow-blue-200 dark:shadow-none shrink-0 group-hover:scale-110 transition">
-                    {step.icon}
+            <div key={idx} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500 transition group overflow-hidden">
+                <div className="flex gap-6 items-center mb-6">
+                    <div className="bg-blue-600 p-4 rounded-full shadow-lg shadow-blue-200 dark:shadow-none shrink-0 group-hover:scale-110 transition">
+                        {step.icon}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-xl text-slate-800 dark:text-white mb-1">{step.title}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">{step.title}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+
+                <div className="w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-slate-800/50 transition">
+                    <ImageIcon className="w-12 h-12 mb-2 opacity-50" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Tutorial Screenshot {idx + 1}</span>
                 </div>
             </div>
         ))}

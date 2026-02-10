@@ -1,49 +1,96 @@
 "use client";
 
 import React from 'react';
-import { ArrowLeft, Search, Phone, Mail, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Search, Phone, Mail, MessageCircle, HelpCircle, FileText, CreditCard, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HelpPage() {
+  const topics = [
+    { icon: <CreditCard className="w-6 h-6"/>, label: "Pembayaran & Refund" },
+    { icon: <User className="w-6 h-6"/>, label: "Akun Saya" },
+    { icon: <FileText className="w-6 h-6"/>, label: "Cara Pesan" },
+    { icon: <HelpCircle className="w-6 h-6"/>, label: "Pertanyaan Umum" },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
-      <div className="bg-blue-600 dark:bg-slate-900 text-white p-6 pb-12">
-        <div className="flex items-center gap-4 mb-6">
-            <Link href="/" className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition"><ArrowLeft className="w-5 h-5" /></Link>
-            <h1 className="font-black text-xl">Pusat Bantuan</h1>
-        </div>
-        <div className="relative">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
-            <input type="text" placeholder="Cari kendala Anda..." className="w-full pl-12 pr-4 py-3 rounded-xl text-slate-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-400" />
+
+      {/* Header with Search Hero */}
+      <div className="bg-blue-600 dark:bg-slate-900 pb-12 pt-6 px-6 shadow-md">
+        <div className="max-w-3xl mx-auto">
+            <div className="flex items-center gap-4 mb-8">
+                <Link href="/" className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition text-white">
+                    <ArrowLeft className="w-5 h-5" />
+                </Link>
+                <h1 className="font-black text-2xl text-white">Pusat Bantuan</h1>
+            </div>
+
+            <h2 className="text-white/90 text-lg mb-6 font-medium">Apa yang bisa kami bantu?</h2>
+
+            <div className="relative">
+                <Search className="absolute left-5 top-4 w-5 h-5 text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="Cari kendala Anda (contoh: refund, reschedule)..."
+                    className="w-full pl-14 pr-6 py-4 rounded-2xl text-slate-900 text-sm font-bold shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition"
+                />
+            </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 -mt-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 mb-6">
-            <h3 className="font-bold mb-4">Topik Populer</h3>
-            <div className="space-y-3">
-                {["Cara reschedule tiket", "Refund dana tiket batal", "Metode pembayaran tersedia", "Lupa password akun"].map((topic, i) => (
-                    <div key={i} className="p-3 border-b border-slate-50 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition text-sm font-medium flex justify-between items-center">
-                        {topic} <ArrowLeft className="w-4 h-4 rotate-180 text-slate-300" />
+      <div className="max-w-3xl mx-auto px-6 -mt-8 relative z-10 space-y-8">
+
+        {/* Topic Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {topics.map((topic, i) => (
+                <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-1 transition cursor-pointer group">
+                    <div className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-700 p-3 rounded-full group-hover:bg-blue-600 group-hover:text-white transition">
+                        {topic.icon}
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{topic.label}</span>
+                </div>
+            ))}
+        </div>
+
+        {/* Topik Populer */}
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+            <h3 className="font-black text-lg mb-6">Pertanyaan Populer</h3>
+            <div className="space-y-4">
+                {["Cara reschedule tiket yang sudah dibeli", "Berapa lama proses refund dana?", "Metode pembayaran apa saja yang tersedia?", "Saya lupa password akun"].map((topic, i) => (
+                    <div key={i} className="group flex justify-between items-center p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{topic}</span>
+                        <ArrowLeft className="w-4 h-4 rotate-180 text-slate-300 group-hover:text-blue-600 transition" />
                     </div>
                 ))}
             </div>
         </div>
 
-        <h3 className="font-bold mb-4 px-2">Hubungi Kami</h3>
-        <div className="grid grid-cols-3 gap-4">
-            <a href="#" className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 hover:border-blue-500 transition">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><MessageCircle className="w-5 h-5" /></div>
-                <span className="text-xs font-bold">WhatsApp</span>
-            </a>
-            <a href="#" className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 hover:border-blue-500 transition">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600"><Phone className="w-5 h-5" /></div>
-                <span className="text-xs font-bold">Call Center</span>
-            </a>
-            <a href="#" className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2 hover:border-blue-500 transition">
-                <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-600"><Mail className="w-5 h-5" /></div>
-                <span className="text-xs font-bold">Email</span>
-            </a>
+        {/* Contact Cards */}
+        <div>
+            <h3 className="font-black text-lg mb-6 px-2">Masih Butuh Bantuan?</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+                <a href="#" className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3 hover:border-green-500 hover:shadow-md transition group">
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600"><MessageCircle className="w-6 h-6" /></div>
+                    <div className="text-center">
+                        <span className="block font-bold text-sm">WhatsApp</span>
+                        <span className="text-xs text-slate-500">Respon Cepat</span>
+                    </div>
+                </a>
+                <a href="#" className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3 hover:border-blue-500 hover:shadow-md transition group">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600"><Phone className="w-6 h-6" /></div>
+                    <div className="text-center">
+                        <span className="block font-bold text-sm">Call Center</span>
+                        <span className="text-xs text-slate-500">24 Jam</span>
+                    </div>
+                </a>
+                <a href="#" className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3 hover:border-orange-500 hover:shadow-md transition group">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-600"><Mail className="w-6 h-6" /></div>
+                    <div className="text-center">
+                        <span className="block font-bold text-sm">Email</span>
+                        <span className="text-xs text-slate-500">1x24 Jam</span>
+                    </div>
+                </a>
+            </div>
         </div>
       </div>
     </div>
