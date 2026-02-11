@@ -139,7 +139,7 @@ export default function TicketPage() {
                   </div>
                   <div className="flex-1 px-4 flex flex-col items-center">
                     <span className="text-[10px] font-bold text-slate-400 mb-1">{bus.duration}</span>
-                    <div className="w-full h-[2px] bg-slate-300 dark:bg-slate-600 relative">
+                    <div className="w-full h-0.5 bg-slate-300 dark:bg-slate-600 relative">
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-400 rounded-full"></div>
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-400 rounded-full"></div>
                     </div>
