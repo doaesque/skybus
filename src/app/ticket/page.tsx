@@ -4,7 +4,8 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, ArrowRight, Star, Wifi, Zap, Armchair, ChevronDown, ChevronUp, 
   Camera, MapPin, Calendar, User, SlidersHorizontal, Info, Clock, ShieldAlert,
-  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag
+  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag,
+  Utensils, Plug, Snowflake, Bath, Moon, Monitor, ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -37,13 +38,13 @@ export default function TicketPage() {
   // STATE MODAL LOGIN
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // --- STATE FILTER LENGKAP (Updated) ---
+  // --- STATE FILTER LENGKAP ---
   const [filters, setFilters] = useState({
     pagi: false, siang: false, malam: false,
     selectedClasses: [] as string[], 
     photoOnly: false,
-    promoOnly: false, // NEW: Filter Promo
-    maxPrice: 1000000, // NEW: Filter Max Price (Default 1jt)
+    promoOnly: false,
+    maxPrice: 1000000, 
     boardingPoints: [] as string[],
     droppingPoints: [] as string[],
     operators: [] as string[],
@@ -51,6 +52,19 @@ export default function TicketPage() {
   });
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
+
+  // Helper untuk Ikon Fasilitas
+  const getFacilityIcon = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('wifi')) return <Wifi className="w-3 h-3" />;
+    if (lower.includes('ac')) return <Snowflake className="w-3 h-3" />;
+    if (lower.includes('makan') || lower.includes('snack')) return <Utensils className="w-3 h-3" />;
+    if (lower.includes('usb') || lower.includes('charg')) return <Plug className="w-3 h-3" />;
+    if (lower.includes('tv') || lower.includes('monitor')) return <Monitor className="w-3 h-3" />;
+    if (lower.includes('selimut') || lower.includes('bantal') || lower.includes('sleep')) return <Moon className="w-3 h-3" />;
+    if (lower.includes('toilet')) return <Bath className="w-3 h-3" />;
+    return <Check className="w-3 h-3" />;
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -76,10 +90,9 @@ export default function TicketPage() {
     if (!role) {
         setShowLoginModal(true);
     } else {
-        // Carry over search params to booking page
         const params = new URLSearchParams();
         params.set("busId", busId);
-        params.set("price", price.toString()); // Carry price selected
+        params.set("price", price.toString());
         params.set("date", searchParams.date);
         params.set("pax", searchParams.pax.toString());
         params.set("from", searchParams.origin);
@@ -87,7 +100,6 @@ export default function TicketPage() {
         if (searchParams.returnDate) {
             params.set("returnDate", searchParams.returnDate);
         }
-        
         router.push(`/booking?${params.toString()}`);
     }
   };
@@ -154,14 +166,11 @@ export default function TicketPage() {
        });
     }
 
-    // NEW: Filter Promo
     if (filters.promoOnly) {
-        // Asumsi data.ts punya field isPromo, kalau belum ada filter ini skip dulu atau tambahkan field dummy
         // @ts-ignore
         data = data.filter(bus => bus.isPromo === true);
     }
 
-    // NEW: Filter Max Price
     data = data.filter(bus => bus.price <= filters.maxPrice);
 
     if (selectedSort === 'Terhemat') data.sort((a, b) => a.price - b.price);
@@ -268,9 +277,25 @@ export default function TicketPage() {
             <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, promoOnly:false, maxPrice: 1000000, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
         </div>
 
-        {/* Filter Range Harga (NEW) */}
+        {/* Filter Penawaran (Dipindah ke atas) */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h4 className="font-bold text-sm mb-3 flex justify-between">
+            <h4 className="font-bold text-sm mb-4">Penawaran</h4>
+            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 hover:border-orange-300 transition">
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${filters.promoOnly ? 'bg-orange-500 border-orange-500' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}>
+                    {filters.promoOnly && <Check className="w-3 h-3 text-white" />}
+                </div>
+                <input type="checkbox" className="hidden" checked={filters.promoOnly} onChange={() => toggleBoolFilter('promoOnly')} />
+                <div className="flex-1">
+                    <span className="text-sm font-bold text-slate-700 dark:text-white block">Promo Spesial</span>
+                    <span className="text-[10px] text-slate-400">Tampilkan tiket diskon saja</span>
+                </div>
+                <Tag className="w-4 h-4 text-orange-500" />
+            </label>
+        </div>
+
+        {/* Filter Range Harga */}
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 className="font-bold text-sm mb-4 flex justify-between">
                 Harga Maksimal 
                 <span className="text-blue-600">Rp {filters.maxPrice.toLocaleString()}</span>
             </h4>
@@ -285,25 +310,9 @@ export default function TicketPage() {
             />
         </div>
 
-        {/* Filter Promo (NEW) */}
-        <div>
-            <h4 className="font-bold text-sm mb-3">Penawaran</h4>
-            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 hover:border-blue-300 transition">
-                <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${filters.promoOnly ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}>
-                    {filters.promoOnly && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <input type="checkbox" className="hidden" checked={filters.promoOnly} onChange={() => toggleBoolFilter('promoOnly')} />
-                <div className="flex-1">
-                    <span className="text-sm font-bold text-slate-700 dark:text-white block">Promo Spesial</span>
-                    <span className="text-[10px] text-slate-400">Tampilkan tiket diskon saja</span>
-                </div>
-                <Tag className="w-4 h-4 text-blue-500" />
-            </label>
-        </div>
-
         {/* Filter Kelas */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h4 className="font-bold text-sm mb-3">Kelas Armada</h4>
+            <h4 className="font-bold text-sm mb-4">Kelas Armada</h4>
             <div className="relative">
                 <select 
                     className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-600 outline-none appearance-none cursor-pointer"
@@ -327,7 +336,7 @@ export default function TicketPage() {
 
         {/* Filter Fasilitas */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h4 className="font-bold text-sm mb-3">Fasilitas</h4>
+            <h4 className="font-bold text-sm mb-4">Fasilitas</h4>
             <div className="space-y-2">
                 {commonFacilities.map((fac, idx) => (
                     <label key={idx} className="flex items-center gap-3 cursor-pointer group">
@@ -343,7 +352,7 @@ export default function TicketPage() {
 
         {/* Waktu */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h4 className="font-bold text-sm mb-3">Waktu Berangkat</h4>
+            <h4 className="font-bold text-sm mb-4">Waktu Berangkat</h4>
             <div className="space-y-2">
                 {[
                 {id: 'pagi', label: 'Pagi (00:00 - 12:00)'},
@@ -364,7 +373,7 @@ export default function TicketPage() {
         {/* Titik Naik */}
         {availableBoardingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-                <h4 className="font-bold text-sm mb-3">Titik Naik</h4>
+                <h4 className="font-bold text-sm mb-4">Titik Naik</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
                     {availableBoardingPoints.map((point: string, idx: number) => (
                         <label key={idx} className="flex items-center gap-3 cursor-pointer group">
@@ -382,7 +391,7 @@ export default function TicketPage() {
         {/* Titik Turun */}
         {availableDroppingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-                <h4 className="font-bold text-sm mb-3">Titik Turun</h4>
+                <h4 className="font-bold text-sm mb-4">Titik Turun</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
                     {availableDroppingPoints.map((point: string, idx: number) => (
                         <label key={idx} className="flex items-center gap-3 cursor-pointer group">
@@ -400,7 +409,7 @@ export default function TicketPage() {
         {/* Operator */}
         {availableOperators.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-                <h4 className="font-bold text-sm mb-3">Nama Operator</h4>
+                <h4 className="font-bold text-sm mb-4">Nama Operator</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
                     {availableOperators.map((op: string, idx: number) => (
                         <label key={idx} className="flex items-center gap-3 cursor-pointer group">
@@ -417,7 +426,7 @@ export default function TicketPage() {
 
         {/* Spesial */}
         <div>
-            <h4 className="font-bold text-sm mb-3">Fitur Spesial</h4>
+            <h4 className="font-bold text-sm mb-4">Fitur Spesial</h4>
             <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition">
                 <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${filters.photoOnly ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}>
                     {filters.photoOnly && <Check className="w-3 h-3 text-white" />}
@@ -456,7 +465,6 @@ export default function TicketPage() {
                     Untuk melanjutkan pemesanan dan mengamankan kursi Anda, silakan masuk ke akun SkyBus terlebih dahulu.
                 </p>
                 
-                {/* REVISED BUTTONS: Spaced out & Link Style */}
                 <div className="space-y-4">
                     <Link href="/login">
                         <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2">
@@ -496,7 +504,6 @@ export default function TicketPage() {
                 <span>{new Date(searchParams.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                 <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                 <span>{searchParams.pax} Penumpang</span>
-                {/* Badge Pulang Pergi */}
                 {searchParams.returnDate && (
                     <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-[10px] font-bold">Pulang Pergi: {new Date(searchParams.returnDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})}</span>
                 )}
@@ -526,7 +533,6 @@ export default function TicketPage() {
                     <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Pergi</label>
                     <input type="date" value={searchParams.date} onChange={(e)=>setSearchParams({...searchParams, date: e.target.value})} className="w-full bg-transparent font-bold text-sm outline-none" />
                  </div>
-                 {/* Tanggal Pulang */}
                  <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
                     <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Pulang (Opsional)</label>
                     <input 
@@ -624,14 +630,14 @@ export default function TicketPage() {
                     </div>
                     <div className="text-right">
                       {/* HARGA CORET & PROMO */}
-                      {/* @ts-ignore: Assume field exists based on updated data.ts */}
+                      {/* @ts-ignore */}
                       {bus.originalPrice && (
-                          <span className="block text-xs text-slate-400 line-through decoration-red-500 decoration-2 mb-0.5">
+                          <span className="block text-xs text-slate-400 line-through decoration-orange-500 decoration-2 mb-0.5">
                               Rp {bus.originalPrice.toLocaleString('id-ID')}
                           </span>
                       )}
                       
-                      <span className={`block text-xl font-black ${bus.originalPrice ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}`}>
+                      <span className={`block text-xl font-black ${bus.originalPrice ? 'text-orange-600' : 'text-blue-600 dark:text-blue-400'}`}>
                           Rp {bus.price.toLocaleString('id-ID')}
                       </span>
                       
@@ -639,7 +645,7 @@ export default function TicketPage() {
                     </div>
                   </div>
 
-                  {/* TIMELINE WITH DURATION */}
+                  {/* TIMELINE */}
                   <div className="flex items-center gap-4 mb-6">
                     <div className="text-center w-14 shrink-0">
                       <span className="block text-lg font-black text-slate-800 dark:text-white">{bus.departureTime}</span>
@@ -647,19 +653,15 @@ export default function TicketPage() {
                     </div>
                     
                     <div className="flex-1 flex flex-col items-center relative">
-                      {/* DURATION DISPLAY - Added mb-4 to avoid overlap */}
                       <span className="text-[10px] text-slate-400 font-bold mb-4">{bus.duration}</span>
                       
                       <div className="w-full h-[2px] bg-slate-200 dark:bg-slate-700 relative flex items-center justify-between px-1">
                          <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600 ring-2 ring-white dark:ring-slate-900"></div>
-                         
-                         {/* Bus Icon - Positioned Absolute Center of Line */}
                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 px-1">
                               <div className="w-6 h-6 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 text-blue-600">
                                   <Bus className="w-3 h-3" />
                               </div>
                          </div>
-
                          <div className="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white dark:ring-slate-900"></div>
                       </div>
                     </div>
@@ -667,7 +669,6 @@ export default function TicketPage() {
                     <div className="text-center w-14 shrink-0">
                       <span className="block text-lg font-black text-slate-800 dark:text-white">{bus.arrivalTime}</span>
                       <span className="text-[10px] text-slate-400 font-bold uppercase truncate">{bus.toDetail.split(" ")[0]}</span>
-                      {/* Next Day Indicator */}
                       {isNextDay(bus.departureTime, bus.arrivalTime) && (
                           <span className="text-[9px] text-red-500 font-bold block mt-0.5">+1 Hari</span>
                       )}
@@ -677,8 +678,8 @@ export default function TicketPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2 text-slate-400">
                       {bus.facilities.slice(0,3).map((fac, i) => (
-                        <div key={i} className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded text-[10px] font-bold">
-                           <Check className="w-3 h-3" /> {fac}
+                        <div key={i} className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                           {getFacilityIcon(fac)} {fac}
                         </div>
                       ))}
                     </div>
@@ -689,7 +690,6 @@ export default function TicketPage() {
                         {isExpanded ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>}
                       </button>
                       
-                      {/* SELECT BUTTON WITH AUTH CHECK */}
                       <button 
                         onClick={() => handleSelectTicket(bus.id, bus.price)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 dark:shadow-none transition"
@@ -746,13 +746,13 @@ export default function TicketPage() {
                               <div className="flex flex-wrap gap-2 mb-4">
                                   {bus.facilities.map((item, i) => (
                                       <span key={i} className="text-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                          <Zap className="w-3 h-3"/> {item}
+                                          {getFacilityIcon(item)} {item}
                                       </span>
                                   ))}
                               </div>
                               
                               {hasPhotos ? (
-                                  <div className="grid grid-cols-3 gap-2">
+                                  <div className="grid grid-cols-3 gap-2 mb-4">
                                       {partnerData?.gallery?.slice(0, 3).map((img, i) => (
                                           <div key={i} className="aspect-video rounded-lg overflow-hidden relative group bg-slate-200">
                                               <Image 
@@ -765,14 +765,17 @@ export default function TicketPage() {
                                       ))}
                                   </div>
                               ) : (
-                                  <div className="text-center py-6 bg-slate-100 dark:bg-slate-800 rounded-xl border-dashed border-2 border-slate-200 dark:border-slate-700">
+                                  <div className="text-center py-6 bg-slate-100 dark:bg-slate-800 rounded-xl border-dashed border-2 border-slate-200 dark:border-slate-700 mb-4">
                                       <Camera className="w-8 h-8 text-slate-300 mx-auto mb-2"/>
                                       <p className="text-xs text-slate-400">Belum ada foto armada.</p>
                                   </div>
                               )}
                               
-                              <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s/g, '-')}`} className="block text-center mt-4 text-xs font-bold text-blue-600 hover:underline">
-                                  Lihat Profil Mitra Lengkap
+                              {/* LINK KE HALAMAN MITRA */}
+                              <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s+/g, '-')}`} className="block">
+                                <button className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition flex items-center justify-center gap-2">
+                                    <ExternalLink className="w-3 h-3" /> Lihat Profil & Ulasan Lengkap Mitra
+                                </button>
                               </Link>
                           </div>
                       )}

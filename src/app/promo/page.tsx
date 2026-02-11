@@ -18,6 +18,7 @@ export default function PromoPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors relative">
 
+      {/* --- MODAL S&K --- */}
       {showTerms && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
@@ -42,28 +43,17 @@ export default function PromoPage() {
               </div>
             </div>
 
-            <div className="px-8 overflow-y-auto
-              scrollbar-thin
-              scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700
-              scrollbar-track-transparent
-              [&::-webkit-scrollbar]:w-2
-              [&::-webkit-scrollbar-track]:bg-transparent
-              [&::-webkit-scrollbar-thumb]:bg-slate-200
-              dark:[&::-webkit-scrollbar-thumb]:bg-slate-700
-              [&::-webkit-scrollbar-thumb]:rounded-full"
-            >
+            <div className="px-8 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
               <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed pr-2">
-                <p>
-                  Penggunaan kode promo SkyBus tunduk pada aturan berikut:
-                </p>
+                <p>Penggunaan kode promo SkyBus tunduk pada aturan berikut:</p>
                 <ol className="list-decimal pl-5 space-y-3 marker:font-bold marker:text-slate-400">
                   <li>Promo hanya berlaku untuk pemesanan tiket bus & shuttle melalui website resmi SkyBus Indonesia.</li>
                   <li>Satu kode promo hanya dapat digunakan satu kali per akun selama periode promo berlangsung, kecuali dinyatakan lain.</li>
-                  <li>Kode promo tidak dapat digabungkan dengan voucher lain, poin reward, atau promosi cashback bank.</li>
-                  <li>SkyBus berhak membatalkan transaksi atau menarik kembali diskon jika ditemukan indikasi kecurangan (fraud), manipulasi, atau pelanggaran S&K.</li>
-                  <li>Nilai diskon tidak dapat diuangkan (non-cashable) dan tidak dapat dikembalikan (non-refundable) jika tiket dibatalkan.</li>
-                  <li>Kuota promo harian terbatas. Jika kode tidak memotong harga saat checkout, maka kuota harian telah habis.</li>
-                  <li>SkyBus berhak mengubah syarat dan ketentuan sewaktu-waktu tanpa pemberitahuan sebelumnya demi kenyamanan bersama.</li>
+                  <li>Kode promo tidak dapat digabungkan dengan voucher lain atau promosi cashback bank.</li>
+                  <li>SkyBus berhak membatalkan transaksi jika ditemukan indikasi kecurangan.</li>
+                  <li>Nilai diskon tidak dapat diuangkan dan non-refundable jika tiket dibatalkan.</li>
+                  <li>Kuota promo harian terbatas.</li>
+                  <li>SkyBus berhak mengubah syarat dan ketentuan sewaktu-waktu tanpa pemberitahuan sebelumnya.</li>
                 </ol>
               </div>
             </div>
@@ -80,6 +70,7 @@ export default function PromoPage() {
         </div>
       )}
 
+      {/* --- HEADER --- */}
       <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
         <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -96,12 +87,15 @@ export default function PromoPage() {
         <div className="grid gap-6">
           {PROMO_DATA.map((promo) => (
             <div key={promo.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition duration-300 relative">
+              
+              {/* Ikon Tiket Background (Top Right) */}
               <div className="absolute top-0 right-0 p-3 opacity-10">
                 <Ticket className="w-24 h-24 rotate-12" />
               </div>
 
               <div className="p-6 relative z-10">
-                <div className="flex justify-between items-start mb-4">
+                {/* Badge Section - Sekarang Sejajar di Kiri */}
+                <div className="flex items-center gap-2 mb-4">
                   <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                     {promo.type}
                   </span>

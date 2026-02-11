@@ -14,7 +14,8 @@ export default function FooterWrapper() {
     "/payment",
     "/eticket",
     "/mitra/register",
-    "/ticket"
+    "/ticket",
+    "/settings"
   ];
 
   // Cek apakah pathname ada di list atau diawali dengan path tertentu (opsional)
