@@ -5,7 +5,8 @@ import {
   ArrowLeft, ArrowRight, Star, Wifi, Zap, Armchair, ChevronDown, ChevronUp, 
   Camera, MapPin, Calendar, User, SlidersHorizontal, Info, Clock, ShieldAlert,
   Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag,
-  Utensils, Plug, Snowflake, Bath, Moon, Monitor, ExternalLink
+  Utensils, Plug, Snowflake, Bath, Moon, Monitor, ExternalLink, Music, Droplets,
+  MessageSquare, ThumbsUp
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -53,16 +54,19 @@ export default function TicketPage() {
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
 
-  // Helper untuk Ikon Fasilitas
+  // Helper untuk Ikon Fasilitas (Lebih Lengkap)
   const getFacilityIcon = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes('wifi')) return <Wifi className="w-3 h-3" />;
-    if (lower.includes('ac')) return <Snowflake className="w-3 h-3" />;
+    if (lower.includes('ac') || lower.includes('dingin')) return <Snowflake className="w-3 h-3" />;
     if (lower.includes('makan') || lower.includes('snack')) return <Utensils className="w-3 h-3" />;
-    if (lower.includes('usb') || lower.includes('charg')) return <Plug className="w-3 h-3" />;
+    if (lower.includes('usb') || lower.includes('charg') || lower.includes('port')) return <Plug className="w-3 h-3" />;
     if (lower.includes('tv') || lower.includes('monitor')) return <Monitor className="w-3 h-3" />;
     if (lower.includes('selimut') || lower.includes('bantal') || lower.includes('sleep')) return <Moon className="w-3 h-3" />;
     if (lower.includes('toilet')) return <Bath className="w-3 h-3" />;
+    if (lower.includes('music') || lower.includes('musik')) return <Music className="w-3 h-3" />;
+    if (lower.includes('air') || lower.includes('mineral') || lower.includes('minum')) return <Droplets className="w-3 h-3" />;
+    if (lower.includes('seat') || lower.includes('kursi') || lower.includes('leg') || lower.includes('rest')) return <Armchair className="w-3 h-3" />;
     return <Check className="w-3 h-3" />;
   };
 
@@ -85,7 +89,9 @@ export default function TicketPage() {
     }));
   };
 
-  const handleSelectTicket = (busId: string, price: number) => {
+  const handleSelectTicket = (e: React.MouseEvent, busId: string, price: number) => {
+    e.stopPropagation(); // Mencegah toggle card saat tombol PILIH diklik
+    
     const role = localStorage.getItem("userRole");
     if (!role) {
         setShowLoginModal(true);
@@ -277,7 +283,7 @@ export default function TicketPage() {
             <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, promoOnly:false, maxPrice: 1000000, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
         </div>
 
-        {/* Filter Penawaran (Dipindah ke atas) */}
+        {/* Filter Penawaran */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Penawaran</h4>
             <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 hover:border-orange-300 transition">
@@ -610,7 +616,11 @@ export default function TicketPage() {
             const isExpanded = expandedBusId === bus.id;
 
             return (
-              <div key={bus.id} className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'border-blue-500 shadow-xl ring-1 ring-blue-500' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300'}`}>
+              <div 
+                key={bus.id} 
+                onClick={() => toggleDetails(bus.id)} // Card click expands
+                className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${isExpanded ? 'border-blue-500 shadow-xl ring-1 ring-blue-500' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300'}`}
+              >
                 
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-6">
@@ -685,13 +695,13 @@ export default function TicketPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <button onClick={() => toggleDetails(bus.id)} className={`text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 border ${isExpanded ? 'bg-slate-100 text-slate-600' : 'text-blue-600 border-transparent hover:bg-blue-50'}`}>
+                      <button className={`text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 border ${isExpanded ? 'bg-slate-100 text-slate-600' : 'text-blue-600 border-transparent hover:bg-blue-50'}`}>
                         {isExpanded ? 'Tutup' : 'Lihat Rincian'} 
                         {isExpanded ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>}
                       </button>
                       
                       <button 
-                        onClick={() => handleSelectTicket(bus.id, bus.price)}
+                        onClick={(e) => handleSelectTicket(e, bus.id, bus.price)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 dark:shadow-none transition"
                       >
                         PILIH
@@ -702,14 +712,19 @@ export default function TicketPage() {
 
                 {/* EXPANDED DETAILS */}
                 {isExpanded && (
-                  <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2">
+                  <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 cursor-default" onClick={(e) => e.stopPropagation()}>
                     <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide">
                       {[
                           {id: 'points', label: 'Titik Naik/Turun'},
                           {id: 'photos', label: 'Foto & Info'},
+                          {id: 'reviews', label: 'Ulasan'}, // NEW TAB
                           {id: 'policies', label: 'Kebijakan'},
                       ].map(tab => (
-                          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition ${activeTab === tab.id ? 'border-blue-600 text-blue-600 bg-white dark:bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                          <button 
+                            key={tab.id} 
+                            onClick={() => setActiveTab(tab.id)} 
+                            className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition ${activeTab === tab.id ? 'border-blue-600 text-blue-600 bg-white dark:bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'}`}
+                          >
                               {tab.label}
                           </button>
                       ))}
@@ -771,11 +786,59 @@ export default function TicketPage() {
                                   </div>
                               )}
                               
-                              {/* LINK KE HALAMAN MITRA */}
                               <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s+/g, '-')}`} className="block">
                                 <button className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition flex items-center justify-center gap-2">
                                     <ExternalLink className="w-3 h-3" /> Lihat Profil & Ulasan Lengkap Mitra
                                 </button>
+                              </Link>
+                          </div>
+                      )}
+
+                      {/* NEW REVIEWS TAB */}
+                      {activeTab === 'reviews' && (
+                          <div className="space-y-4">
+                              {partnerData?.reviews && partnerData.reviews.length > 0 ? (
+                                  partnerData.reviews.map((review) => (
+                                      <div key={review.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                                          <div className="flex justify-between items-start mb-2">
+                                              <div className="flex items-center gap-2">
+                                                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+                                                      {review.user.charAt(0)}
+                                                  </div>
+                                                  <div>
+                                                      <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{review.user}</p>
+                                                      <p className="text-[10px] text-slate-400">{review.date}</p>
+                                                  </div>
+                                              </div>
+                                              <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded text-amber-600 text-xs font-bold">
+                                                  <Star className="w-3 h-3 fill-current" /> {review.rating}
+                                              </div>
+                                          </div>
+                                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                              &quot;{review.text}&quot;
+                                          </p>
+                                          {review.tags && review.tags.length > 0 && (
+                                              <div className="flex gap-2 mt-2">
+                                                  {review.tags.map((tag, i) => (
+                                                      <span key={i} className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded flex items-center gap-1">
+                                                          <ThumbsUp className="w-2 h-2" /> {tag}
+                                                      </span>
+                                                  ))}
+                                              </div>
+                                          )}
+                                      </div>
+                                  ))
+                              ) : (
+                                  <div className="text-center py-8 text-slate-400">
+                                      <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                      <p className="text-xs">Belum ada ulasan untuk armada ini.</p>
+                                  </div>
+                              )}
+                              
+                              <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s+/g, '-')}`} className="block mt-4">
+                                  <button className="w-full text-center text-xs font-bold text-blue-600 hover:underline">
+                                      Lihat Semua Ulasan
+                                  </button>
                               </Link>
                           </div>
                       )}
