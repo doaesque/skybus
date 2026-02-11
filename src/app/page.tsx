@@ -101,9 +101,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
 
-      <nav className="flex items-center px-6 py-4 bg-white dark:bg-slate-900 text-blue-600 sticky top-0 z-50 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
+      <nav className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 text-blue-600 sticky top-0 z-40 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
         <Link href="/" className="text-2xl font-black tracking-tighter flex items-center italic hover:opacity-80 transition mr-8">
-          SkyBus<span className="text-amber-500">.</span>
+          SkyBus<span className="text-amber-500 ml-1">.</span>
         </Link>
         <div className="ml-auto flex items-center gap-8">
           <div className="hidden md:flex items-center space-x-6 text-sm font-bold text-slate-500 dark:text-slate-400">
@@ -137,15 +137,15 @@ export default function Home() {
 
                 {showUserDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50">
-                    <Link href="/my-orders" className="md:hidden px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <Link href="/my-orders" className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                       <Ticket className="w-4 h-4" /> Tiket Saya
                     </Link>
-                    <Link href="/settings" className="block px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 items-center gap-2 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                    <Link href="/settings" className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
                       <Settings className="w-4 h-4" /> Pengaturan
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800"
+                      className="w-full text-left flex items-center gap-2 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border-t border-slate-100 dark:border-slate-800"
                     >
                       <LogOut className="w-4 h-4" /> Keluar
                     </button>
@@ -382,15 +382,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Partner Resmi Kami</p>
           <div className="flex flex-wrap justify-center items-center gap-6">
-            {PARTNER_LOGOS.map((logo, i) => (
-              <div key={i} className="h-28 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-2">
-                <img
-                  src={`/img/${logo}`}
-                  alt={`Mitra ${i}`}
-                  className="max-h-full max-w-full object-contain"
-                />
-              </div>
-            ))}
+            {PARTNER_LOGOS.map((logo, i) => {
+              const slug = logo.replace('.png', '');
+              return (
+                <Link href={`/mitra/${slug}`} key={i} className="h-28 w-auto relative flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300 transform hover:scale-105 px-2 cursor-pointer">
+                  <img
+                    src={`/img/${logo}`}
+                    alt={`Mitra ${i}`}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
