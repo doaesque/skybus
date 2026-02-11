@@ -14,20 +14,20 @@ export default function Footer() {
           <div>
             <Link
               href="/"
-              className="text-2xl font-black tracking-tighter flex items-center gap-2 italic text-white mb-6 hover:opacity-80 transition"
+              className="text-2xl font-black tracking-tighter flex items-center italic text-white mb-6 hover:opacity-80 transition w-fit"
               style={{ fontFamily: 'var(--font-geist-sans)' }}
             >
-              SkyBus<span className="text-amber-500">.</span>
+              SkyBus<span className="text-amber-500 ml-1">.</span>
             </Link>
 
             <p className="text-sm leading-relaxed mb-6">
               Platform pemesanan tiket bus antarkota #1 di Indonesia. Nikmati perjalanan aman, nyaman, dan terpercaya bersama mitra otobus terbaik kami.
             </p>
             <div className="flex gap-4">
-              <a href="#" onClick={(e)=>e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-blue-600 hover:text-white transition"><Facebook className="w-4 h-4"/></a>
-              <a href="#" onClick={(e)=>e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-pink-600 hover:text-white transition"><Instagram className="w-4 h-4"/></a>
-              <a href="#" onClick={(e)=>e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-sky-500 hover:text-white transition"><Twitter className="w-4 h-4"/></a>
-              <a href="#" onClick={(e)=>e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-blue-700 hover:text-white transition"><Linkedin className="w-4 h-4"/></a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-blue-600 hover:text-white transition"><Facebook className="w-4 h-4" /></a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-pink-600 hover:text-white transition"><Instagram className="w-4 h-4" /></a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-sky-500 hover:text-white transition"><Twitter className="w-4 h-4" /></a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="p-2 bg-slate-800 rounded-full hover:bg-blue-700 hover:text-white transition"><Linkedin className="w-4 h-4" /></a>
             </div>
           </div>
 
