@@ -273,7 +273,7 @@ export default function Home() {
 
             <Link href={isFormValid ? "/ticket" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
               <button disabled={!isFormValid} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
-                {isFormValid ? 'CARI TIKET MURAH' : 'LENGKAPI DATA'}
+                CARI TIKET MURAH
               </button>
             </Link>
           </div>
