@@ -119,7 +119,14 @@ export const ALL_PARTNERS: Partner[] = [
     joined: '2024',
     description: `### Mengapa Memilih Sinar Jaya?
 
-Siapa yang tidak kenal dengan "Bus Sejuta Umat"? Sejak berdiri pada tahun 1982, Sinar Jaya Group telah menjadi tulang punggung transportasi antar kota di Pulau Jawa.`,
+Siapa yang tidak kenal dengan "Bus Sejuta Umat"? Sejak berdiri pada tahun 1982, Sinar Jaya Group telah menjadi tulang punggung transportasi antar kota di Pulau Jawa.
+
+**Keunggulan Utama Kami:**
+- **Harga Merakyat, Fasilitas Pejabat:** Kami dikenal sebagai PO dengan harga paling kompetitif namun tetap memberikan kenyamanan standar eksekutif.
+- **Jaringan Rute Terluas:** Dari Merak hingga ujung Jawa Timur, bahkan Lampung.
+- **Ketepatan Waktu:** Kami menerapkan sistem manajemen modern untuk meminimalisir keterlambatan.
+
+Perjalanan jauh tidak lagi melelahkan bersama Sinar Jaya. Pesan tiket sekarang dan nikmati perjalanan aman bersama kru berpengalaman kami.`,
     classes: [
       { name: 'Executive', price: 'Rp 150rb - 200rb', seats: '32 Seat (2-2)', facilities: ['AC', 'Reclining Seat', 'Toilet', 'USB Charger', 'Snack'] },
       { name: 'Suite Class', price: 'Rp 350rb - 450rb', seats: '21 Sleeper', facilities: ['Personal TV', 'Bantal & Selimut', 'Service Makan', 'WiFi', 'Toilet'] }
@@ -157,7 +164,12 @@ Siapa yang tidak kenal dengan "Bus Sejuta Umat"? Sejak berdiri pada tahun 1982, 
     joined: '2025',
     description: `### Legenda Lintas Jawa-Bali-Sumatera
 
-Pahala Kencana bukan pemain baru. Berdiri sejak 1976, kami telah melayani jutaan kilometer perjalanan keluarga Indonesia.`,
+Pahala Kencana bukan pemain baru. Berdiri sejak 1976, kami telah melayani jutaan kilometer perjalanan keluarga Indonesia. Keunggulan kami terletak pada rute jarak jauh yang stabil dan armada yang tangguh.
+
+**Kenapa Harus Pahala Kencana?**
+- **Pengalaman Puluhan Tahun:** Kami tahu betul kontur jalanan Indonesia, menjamin pengemudi kami handal di segala medan.
+- **Spesialis Paket Kilat:** Selain penumpang, bagasi Anda aman bersama layanan kargo kami yang terintegrasi.
+- **Makan Prasmanan:** Nikmati servis makan prasmanan yang lezat di rumah makan mitra kami.`,
     classes: [
       { name: 'VIP', price: 'Rp 180rb - 250rb', seats: '40 Seat (2-2)', facilities: ['AC', 'Toilet', 'Selimut', 'Makan Prasmanan'] },
       { name: 'Executive', price: 'Rp 280rb - 350rb', seats: '30 Seat (2-2)', facilities: ['Leg Rest', 'WiFi', 'Charging Point', 'Bantal'] }
@@ -190,7 +202,12 @@ Pahala Kencana bukan pemain baru. Berdiri sejak 1976, kami telah melayani jutaan
     joined: '2024',
     description: `### Pelopor "On-Time" Shuttle
 
-X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indonesia.`,
+X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indonesia. Kami mengerti waktu Anda sangat berharga.
+
+**Alasan Profesional Memilih X-Trans:**
+- **Jadwal Padat:** Keberangkatan setiap jam! Ketinggalan satu jadwal? Tenang, jadwal berikutnya menanti.
+- **Lokasi Strategis:** Pool kami terletak di pusat kota dan area hotel strategis.
+- **Armada Hiace Terbaru:** Nyaman, bersih, dan tidak berisik. Cocok untuk Anda yang ingin istirahat sejenak sebelum meeting.`,
     classes: [
       { name: 'Shuttle Executive', price: 'Rp 100rb - 140rb', seats: '8-10 Seat', facilities: ['AC Dingin', 'Captain Seat', 'Air Mineral', 'Music'] }
     ],
@@ -208,7 +225,7 @@ X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indone
     ],
     usps: []
   },
-  // Mitra Lainnya (Fixed: Added 'joined' to all)
+  // Mitra Lainnya
   { id: 'rosalia-indah', name: 'Rosalia Indah', type: 'PO Bus', rating: 4.9, routes: 150, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '1983', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
   { id: 'harapan-jaya', name: 'Harapan Jaya', type: 'PO Bus', rating: 4.7, routes: 90, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '1977', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
   { id: 'cititrans', name: 'Cititrans', type: 'Travel', rating: 4.9, routes: 30, image: '/img/travel-placeholder.png', address: '-', phone: '-', email: '-', founded: '2005', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
@@ -220,14 +237,17 @@ X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indone
   { id: 'juragan-99', name: 'Juragan 99', type: 'PO Bus', rating: 5.0, routes: 20, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '2018', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
 ];
 
-// --- Data Bus (Expanded) ---
+// --- Data Bus Expanded (dengan Promo & Layout) ---
 export const BUS_DATA = [
   {
     id: "1",
     name: "Sinar Jaya Executive",
     operator: "Sinar Jaya", 
     type: "Executive Class",
-    price: 245000,
+    price: 200000,
+    originalPrice: 245000, // Harga coret
+    isPromo: true,
+    seatLayout: "2-2",
     from: "Jakarta",
     fromDetail: "Terminal Pulo Gebang",
     to: "Bandung",
@@ -247,6 +267,9 @@ export const BUS_DATA = [
     operator: "Sinar Jaya", 
     type: "Sleeper Class",
     price: 350000,
+    originalPrice: null,
+    isPromo: false,
+    seatLayout: "1-1", // Sleeper layout
     from: "Jakarta",
     fromDetail: "Pool Cibitung",
     to: "Bandung",
@@ -266,6 +289,9 @@ export const BUS_DATA = [
     operator: "Primajasa",
     type: "Economy AC",
     price: 95000,
+    originalPrice: null,
+    isPromo: false,
+    seatLayout: "2-3", // Economy layout
     from: "Bandung",
     fromDetail: "Terminal Leuwi Panjang",
     to: "Jakarta",
@@ -284,7 +310,10 @@ export const BUS_DATA = [
     name: "X-Trans Shuttle",
     operator: "X-Trans",
     type: "Shuttle",
-    price: 135000,
+    price: 110000,
+    originalPrice: 135000,
+    isPromo: true,
+    seatLayout: "shuttle", // Hiace layout
     from: "Jakarta",
     fromDetail: "Hotel Kartika Chandra",
     to: "Bandung",
@@ -303,7 +332,10 @@ export const BUS_DATA = [
     name: "X-Trans Shuttle Malam",
     operator: "X-Trans",
     type: "Shuttle",
-    price: 135000,
+    price: 110000,
+    originalPrice: 135000,
+    isPromo: true,
+    seatLayout: "shuttle",
     from: "Jakarta",
     fromDetail: "Blora Menteng",
     to: "Bandung",
@@ -323,6 +355,9 @@ export const BUS_DATA = [
     operator: "Rosalia Indah",
     type: "VIP Class",
     price: 180000,
+    originalPrice: null,
+    isPromo: false,
+    seatLayout: "2-2",
     from: "Jakarta",
     fromDetail: "Terminal Kalideres",
     to: "Bandung",
@@ -342,6 +377,9 @@ export const BUS_DATA = [
     operator: "Rosalia Indah",
     type: "Sleeper Class",
     price: 450000,
+    originalPrice: 500000,
+    isPromo: true,
+    seatLayout: "1-1",
     from: "Jakarta",
     fromDetail: "Pool Pondok Pinang",
     to: "Surabaya",
@@ -351,7 +389,7 @@ export const BUS_DATA = [
     duration: "14j",
     rating: 4.9,
     totalReviews: 850,
-    facilities: ["AC", "WiFi", "Sleeper Seat", "Makan Malam", "Selimut"],
+    facilities: ["AC", "WiFi", "Sleeper Seat", "Makan Malam", "Selimut", "Toilet"],
     seatsAvailable: 4,
     image: "/img/bus-placeholder.png"
   },
