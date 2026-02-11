@@ -1,207 +1,765 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Filter, ArrowRight, Star, Clock, Wifi, Zap, Armchair, ChevronDown, ChevronUp, Camera, SlidersHorizontal, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { 
+  ArrowLeft, ArrowRight, Star, Wifi, Zap, Armchair, ChevronDown, ChevronUp, 
+  Camera, MapPin, Calendar, User, SlidersHorizontal, Info, Clock, ShieldAlert,
+  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock
+} from 'lucide-react';
 import Link from 'next/link';
-import { BUS_DATA, ALL_PARTNERS } from '@/constants/data'; // Import ALL_PARTNERS
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { BUS_DATA, ALL_PARTNERS, LOCATIONS_DETAIL, POPULAR_LOCATIONS } from '@/constants/data'; 
 
 export default function TicketPage() {
-  const [showFilter, setShowFilter] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState('Terhemat');
+  const router = useRouter();
+  const [isEditingSearch, setIsEditingSearch] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    origin: 'Jakarta',
+    originDetail: 'Semua Lokasi',
+    destination: 'Bandung',
+    destinationDetail: 'Semua Lokasi',
+    date: '2026-02-10',
+    returnDate: '', 
+    pax: 1
+  });
 
-  // Filter & Sort Logic
-  const sortedBusData = useMemo(() => {
-    let data = [...BUS_DATA];
-    if (selectedFilter === 'Terhemat') {
-      data.sort((a, b) => a.price - b.price);
-    } else if (selectedFilter === 'Tercepat') {
-      // Logic sort durasi sederhana (mock)
-      data.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
-    } else if (selectedFilter === 'Berangkat Pagi') {
-      data.sort((a, b) => parseInt(a.departureTime.replace('.', '')) - parseInt(b.departureTime.replace('.', '')));
+  const [showOriginDropdown, setShowOriginDropdown] = useState(false);
+  const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
+  const originRef = useRef<HTMLDivElement>(null);
+  const destRef = useRef<HTMLDivElement>(null);
+
+  const [selectedSort, setSelectedSort] = useState('Terhemat');
+  const [expandedBusId, setExpandedBusId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('points'); 
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  
+  // STATE MODAL LOGIN
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const [filters, setFilters] = useState({
+    pagi: false, siang: false, malam: false,
+    selectedClasses: [] as string[], 
+    photoOnly: false,
+    boardingPoints: [] as string[],
+    droppingPoints: [] as string[],
+    operators: [] as string[],
+    facilities: [] as string[]
+  });
+
+  const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (originRef.current && !originRef.current.contains(event.target as Node)) setShowOriginDropdown(false);
+      if (destRef.current && !destRef.current.contains(event.target as Node)) setShowDestinationDropdown(false);
     }
-    return data;
-  }, [selectedFilter]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  // Helper untuk mendapatkan review dari ALL_PARTNERS
-  const getPartnerReviews = (operatorName: string) => {
-    const partner = ALL_PARTNERS.find(p => p.name === operatorName);
-    return partner ? partner.reviews : [];
+  const swapLocations = () => {
+    setSearchParams(prev => ({
+      ...prev,
+      origin: prev.destination,
+      originDetail: 'Semua Lokasi',
+      destination: prev.origin,
+      destinationDetail: 'Semua Lokasi'
+    }));
   };
+
+  const handleSelectTicket = (busId: string) => {
+    const role = localStorage.getItem("userRole");
+    if (!role) {
+        setShowLoginModal(true);
+    } else {
+        // Carry over search params to booking page
+        const params = new URLSearchParams();
+        params.set("busId", busId);
+        params.set("date", searchParams.date);
+        params.set("pax", searchParams.pax.toString());
+        params.set("from", searchParams.origin);
+        params.set("to", searchParams.destination);
+        if (searchParams.returnDate) {
+            params.set("returnDate", searchParams.returnDate);
+        }
+        
+        router.push(`/booking?${params.toString()}`);
+    }
+  };
+
+  // Helper Cek Next Day (+1 Hari)
+  const isNextDay = (dep: string, arr: string) => {
+    const parseTime = (t: string) => parseInt(t.replace('.', ':').split(':')[0]);
+    return parseTime(arr) < parseTime(dep);
+  };
+
+  // --- LOGIC FILTERING ---
+  const busesOnRoute = BUS_DATA.filter(b => 
+    b.from.toLowerCase() === searchParams.origin.toLowerCase() &&
+    b.to.toLowerCase() === searchParams.destination.toLowerCase()
+  );
+  
+  const availableBoardingPoints = Array.from(new Set(busesOnRoute.map(b => b.fromDetail)));
+  const availableDroppingPoints = Array.from(new Set(busesOnRoute.map(b => b.toDetail)));
+  const availableOperators = Array.from(new Set(busesOnRoute.map(b => b.operator)));
+  const availableClasses = Array.from(new Set(BUS_DATA.map(b => b.type)));
+
+  const sortedBusData = useMemo(() => {
+    let data = [...busesOnRoute]; 
+    
+    if (searchParams.originDetail !== 'Semua Lokasi') {
+        data = data.filter(bus => bus.fromDetail === searchParams.originDetail);
+    }
+    if (searchParams.destinationDetail !== 'Semua Lokasi') {
+        data = data.filter(bus => bus.toDetail === searchParams.destinationDetail);
+    }
+
+    if (filters.pagi || filters.siang || filters.malam) {
+       data = data.filter(bus => {
+          const hour = parseInt(bus.departureTime.replace('.', ':').split(':')[0]);
+          if (filters.pagi && hour >= 0 && hour < 12) return true;
+          if (filters.siang && hour >= 12 && hour < 18) return true;
+          if (filters.malam && hour >= 18 && hour <= 24) return true;
+          return false;
+       });
+    }
+
+    if (filters.selectedClasses.length > 0) {
+       data = data.filter(bus => filters.selectedClasses.includes(bus.type));
+    }
+    if (filters.boardingPoints.length > 0) {
+        data = data.filter(bus => filters.boardingPoints.includes(bus.fromDetail));
+    }
+    if (filters.droppingPoints.length > 0) {
+        data = data.filter(bus => filters.droppingPoints.includes(bus.toDetail));
+    }
+    if (filters.operators.length > 0) {
+        data = data.filter(bus => filters.operators.includes(bus.operator));
+    }
+    if (filters.facilities.length > 0) {
+        data = data.filter(bus => {
+            return filters.facilities.every(filterFac => 
+                bus.facilities.some(busFac => busFac.toLowerCase().includes(filterFac.toLowerCase()))
+            );
+        });
+    }
+    if (filters.photoOnly) {
+       data = data.filter(bus => {
+          const partner = ALL_PARTNERS.find(p => p.name === bus.operator);
+          return partner?.reviews?.some(r => r.images && r.images.length > 0);
+       });
+    }
+
+    if (selectedSort === 'Terhemat') data.sort((a, b) => a.price - b.price);
+    if (selectedSort === 'Tercepat') data.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
+    if (selectedSort === 'Berangkat Pagi') data.sort((a, b) => parseInt(a.departureTime.replace('.', '').replace(':', '')) - parseInt(b.departureTime.replace('.', '').replace(':', '')));
+    
+    return data;
+  }, [selectedSort, filters, searchParams, busesOnRoute]);
+
+  const toggleArrayFilter = (key: 'boardingPoints' | 'droppingPoints' | 'operators' | 'selectedClasses' | 'facilities', value: string) => {
+    setFilters(prev => {
+      const arr = prev[key];
+      return arr.includes(value) ? { ...prev, [key]: arr.filter(item => item !== value) } : { ...prev, [key]: [...arr, value] };
+    });
+  };
+  
+  const toggleBoolFilter = (key: keyof typeof filters) => {
+    // @ts-ignore
+    setFilters(prev => ({...prev, [key]: !prev[key]}));
+  };
+  
+  const toggleDetails = (id: string) => {
+    setExpandedBusId(expandedBusId === id ? null : id);
+    if(expandedBusId !== id) setActiveTab('points');
+  };
+  const getPartnerData = (operatorName: string) => ALL_PARTNERS.find(p => p.name === operatorName);
+
+  const LocationDropdown = ({ type, label }: { type: 'origin' | 'destination', label: string }) => {
+    const isOrigin = type === 'origin';
+    const currentCity = isOrigin ? searchParams.origin : searchParams.destination;
+    const currentDetail = isOrigin ? searchParams.originDetail : searchParams.destinationDetail;
+    const showDropdown = isOrigin ? showOriginDropdown : showDestinationDropdown;
+    const setShowDropdown = isOrigin ? setShowOriginDropdown : setShowDestinationDropdown;
+    const ref = isOrigin ? originRef : destRef;
+
+    return (
+        <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 relative" ref={ref}>
+            <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">{label}</label>
+            <div 
+                className="w-full bg-transparent font-bold text-sm outline-none cursor-pointer flex items-center justify-between"
+                onClick={() => setShowDropdown(!showDropdown)}
+            >
+                <div className="truncate">
+                    <span className="block">{currentCity}</span>
+                    <span className="text-xs text-slate-500 font-normal truncate block">{currentDetail}</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+            </div>
+
+            {showDropdown && (
+                <div className="absolute top-full left-0 w-full md:w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 z-50 max-h-60 overflow-y-auto">
+                    <div className="p-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky top-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Pilih Kota</span>
+                    </div>
+                    {POPULAR_LOCATIONS.map((city) => (
+                        <div key={city}>
+                            <div 
+                                className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer font-bold text-sm flex justify-between items-center group"
+                                onClick={() => {
+                                    setSearchParams(prev => ({
+                                        ...prev, 
+                                        [isOrigin ? 'origin' : 'destination']: city,
+                                        [isOrigin ? 'originDetail' : 'destinationDetail']: 'Semua Lokasi'
+                                    }));
+                                }}
+                            >
+                                {city}
+                                {city === currentCity && <Check className="w-3 h-3 text-blue-600" />}
+                            </div>
+                            
+                            {city === currentCity && LOCATIONS_DETAIL[city] && (
+                                <div className="bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+                                    {LOCATIONS_DETAIL[city].map((loc) => (
+                                        <div 
+                                            key={loc}
+                                            className={`px-8 py-2 text-xs cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700 flex items-center gap-2 ${loc === currentDetail ? 'text-blue-600 font-bold' : 'text-slate-600 dark:text-slate-400'}`}
+                                            onClick={() => {
+                                                setSearchParams(prev => ({
+                                                    ...prev, 
+                                                    [isOrigin ? 'origin' : 'destination']: city, 
+                                                    [isOrigin ? 'originDetail' : 'destinationDetail']: loc
+                                                }));
+                                                setShowDropdown(false);
+                                            }}
+                                        >
+                                            {loc === 'Semua Lokasi' ? <MapPin className="w-3 h-3" /> : <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>}
+                                            {loc}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+  };
+
+  const FilterSidebar = () => (
+    <div className="space-y-6">
+        <div className="flex items-center justify-between mb-2">
+            <h3 className="font-black text-lg">Filter</h3>
+            <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
+        </div>
+
+        {/* Filter Kelas */}
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 className="font-bold text-sm mb-3">Kelas Armada</h4>
+            <div className="relative">
+                <select 
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-600 outline-none appearance-none cursor-pointer"
+                    onChange={(e) => {
+                        if(e.target.value === "") {
+                            setFilters(prev => ({...prev, selectedClasses: []}));
+                        } else {
+                            setFilters(prev => ({...prev, selectedClasses: [e.target.value]}));
+                        }
+                    }}
+                    value={filters.selectedClasses[0] || ""}
+                >
+                    <option value="">Semua Kelas</option>
+                    {availableClasses.map((cls, idx) => (
+                        <option key={idx} value={cls}>{cls}</option>
+                    ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+        </div>
+
+        {/* Filter Fasilitas */}
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 className="font-bold text-sm mb-3">Fasilitas</h4>
+            <div className="space-y-2">
+                {commonFacilities.map((fac, idx) => (
+                    <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${filters.facilities.includes(fac) ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                            {filters.facilities.includes(fac) && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <input type="checkbox" className="hidden" checked={filters.facilities.includes(fac)} onChange={() => toggleArrayFilter('facilities', fac)} />
+                        <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-600 transition">{fac}</span>
+                    </label>
+                ))}
+            </div>
+        </div>
+
+        {/* Waktu */}
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 className="font-bold text-sm mb-3">Waktu Berangkat</h4>
+            <div className="space-y-2">
+                {[
+                {id: 'pagi', label: 'Pagi (00:00 - 12:00)'},
+                {id: 'siang', label: 'Siang (12:00 - 18:00)'},
+                {id: 'malam', label: 'Malam (18:00 - 24:00)'}
+                ].map(opt => (
+                <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${filters[opt.id as keyof typeof filters] ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                        {filters[opt.id as keyof typeof filters] && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <input type="checkbox" className="hidden" checked={!!filters[opt.id as keyof typeof filters]} onChange={() => toggleBoolFilter(opt.id as keyof typeof filters)} />
+                    <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-600 transition">{opt.label}</span>
+                </label>
+                ))}
+            </div>
+        </div>
+
+        {/* Titik Naik */}
+        {availableBoardingPoints.length > 0 && (
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h4 className="font-bold text-sm mb-3">Titik Naik</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
+                    {availableBoardingPoints.map((point: string, idx: number) => (
+                        <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition ${filters.boardingPoints.includes(point) ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                {filters.boardingPoints.includes(point) && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <input type="checkbox" className="hidden" checked={filters.boardingPoints.includes(point)} onChange={() => toggleArrayFilter('boardingPoints', point)} />
+                            <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-600 transition truncate">{point}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        {/* Titik Turun */}
+        {availableDroppingPoints.length > 0 && (
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h4 className="font-bold text-sm mb-3">Titik Turun</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
+                    {availableDroppingPoints.map((point: string, idx: number) => (
+                        <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition ${filters.droppingPoints.includes(point) ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                {filters.droppingPoints.includes(point) && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <input type="checkbox" className="hidden" checked={filters.droppingPoints.includes(point)} onChange={() => toggleArrayFilter('droppingPoints', point)} />
+                            <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-600 transition truncate">{point}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        {/* Operator */}
+        {availableOperators.length > 0 && (
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h4 className="font-bold text-sm mb-3">Nama Operator</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
+                    {availableOperators.map((op: string, idx: number) => (
+                        <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition ${filters.operators.includes(op) ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                {filters.operators.includes(op) && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <input type="checkbox" className="hidden" checked={filters.operators.includes(op)} onChange={() => toggleArrayFilter('operators', op)} />
+                            <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-blue-600 transition">{op}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        {/* Spesial */}
+        <div>
+            <h4 className="font-bold text-sm mb-3">Fitur Spesial</h4>
+            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition">
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${filters.photoOnly ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}>
+                    {filters.photoOnly && <Check className="w-3 h-3 text-white" />}
+                </div>
+                <input type="checkbox" className="hidden" checked={filters.photoOnly} onChange={() => toggleBoolFilter('photoOnly')} />
+                <div className="flex-1">
+                    <span className="text-sm font-bold text-slate-700 dark:text-white block">Ada Foto Asli</span>
+                    <span className="text-[10px] text-slate-400">Hanya tampilkan bus dengan ulasan foto</span>
+                </div>
+                <Camera className="w-4 h-4 text-blue-500" />
+            </label>
+        </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
-      {/* Header Pencarian */}
-      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-4 mb-4">
-          <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
-            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 font-black text-lg">
-              Jakarta <ArrowRight className="w-4 h-4 text-slate-400" /> Bandung
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Sen, 10 Feb • 1 Penumpang
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Bar Horizontal */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          <button 
-            onClick={() => setShowFilter(!showFilter)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-          >
-            <SlidersHorizontal className="w-3 h-3" /> Filter
-          </button>
-          {['Terhemat', 'Tercepat', 'Berangkat Pagi', 'Rating Tinggi'].map((filter) => (
-            <button 
-              key={filter}
-              onClick={() => setSelectedFilter(filter)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition ${selectedFilter === filter ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'}`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Filter Modal (Mobile Style) */}
-      {showFilter && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex justify-end">
-          <div className="w-3/4 max-w-sm bg-white dark:bg-slate-900 h-full p-6 shadow-2xl animate-in slide-in-from-right duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-black text-xl">Filter</h3>
-              <button onClick={() => setShowFilter(false)}><X className="w-6 h-6 text-slate-400" /></button>
-            </div>
-            {/* Isi Filter Detail (Mockup) */}
-            <div className="space-y-6">
-              <div>
-                <h4 className="font-bold text-sm mb-3">Waktu Keberangkatan</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <button className="p-3 rounded-xl border text-xs font-bold text-center hover:bg-blue-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700">Pagi (00-12)</button>
-                  <button className="p-3 rounded-xl border text-xs font-bold text-center hover:bg-blue-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700">Siang (12-18)</button>
-                  <button className="p-3 rounded-xl border text-xs font-bold text-center hover:bg-blue-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700">Malam (18-24)</button>
+      {/* LOGIN MODAL */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative text-center">
+                <button 
+                    onClick={() => setShowLoginModal(false)}
+                    className="absolute top-4 right-4 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
+                >
+                    <X className="w-5 h-5 text-slate-400" />
+                </button>
+                
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8" />
                 </div>
-              </div>
-              <div>
-                <h4 className="font-bold text-sm mb-3">Kelas Armada</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" className="rounded text-blue-600" /> Executive</label>
-                  <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" className="rounded text-blue-600" /> Sleeper</label>
-                  <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" className="rounded text-blue-600" /> Business</label>
+                
+                <h3 className="text-xl font-black mb-2">Login Diperlukan</h3>
+                <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+                    Untuk melanjutkan pemesanan dan mengamankan kursi Anda, silakan masuk ke akun SkyBus terlebih dahulu.
+                </p>
+                
+                {/* REVISED BUTTONS: Spaced out & Link Style */}
+                <div className="space-y-4">
+                    <Link href="/login">
+                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2">
+                            <LogIn className="w-4 h-4" /> Masuk Sekarang
+                        </button>
+                    </Link>
+                    
+                    <div className="text-center">
+                        <span className="text-xs text-slate-500 font-medium">Belum punya akun? </span>
+                        <Link href="/signup" className="text-xs font-bold text-blue-600 hover:underline">
+                            Daftar Disini
+                        </Link>
+                    </div>
                 </div>
-              </div>
             </div>
-            <div className="absolute bottom-6 left-6 right-6">
-              <button onClick={() => setShowFilter(false)} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Terapkan</button>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* List Tiket */}
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
-        {sortedBusData.map((bus) => {
-          // Ambil review dari ALL_PARTNERS berdasarkan nama operator
-          const reviews = getPartnerReviews(bus.operator);
-          const hasPhotoReview = reviews.some(r => r.images && r.images.length > 0);
-
-          return (
-            <div key={bus.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition duration-300 overflow-hidden group">
-              {/* Header Tiket */}
-              <div className="p-5 pb-4 border-b border-dashed border-slate-200 dark:border-slate-800">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-black text-lg text-slate-900 dark:text-white">{bus.name}</h3>
-                    <div className="flex items-center gap-2 text-sm mt-1">
-                      <span className="font-bold text-slate-500">{bus.type}</span>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                      <div className="flex items-center text-amber-500 font-bold text-xs">
-                        <Star className="w-3 h-3 fill-current mr-1" /> {bus.rating}
-                        <span className="text-slate-400 font-normal ml-1">({bus.totalReviews})</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Per Kursi</span>
-                    <span className="text-xl font-black text-blue-600 dark:text-blue-400">Rp {bus.price.toLocaleString('id-ID')}</span>
-                  </div>
-                </div>
-
-                {/* Jadwal */}
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
-                  <div className="text-center">
-                    <span className="text-xl font-black text-slate-800 dark:text-white">{bus.departureTime}</span>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase mt-1">Berangkat</span>
-                  </div>
-                  <div className="flex-1 px-4 flex flex-col items-center">
-                    <span className="text-[10px] font-bold text-slate-400 mb-1">{bus.duration}</span>
-                    <div className="w-full h-0.5 bg-slate-300 dark:bg-slate-600 relative">
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-400 rounded-full"></div>
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-400 rounded-full"></div>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-xl font-black text-slate-800 dark:text-white">{bus.arrivalTime}</span>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase mt-1">Tiba</span>
-                  </div>
-                </div>
+      {/* --- HEADER --- */}
+      <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          {/* Bar Utama */}
+          <div className="p-4 flex items-center gap-4">
+            <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            </Link>
+            
+            <div 
+              className="flex-1 cursor-pointer group" 
+              onClick={() => setIsEditingSearch(!isEditingSearch)}
+            >
+              <div className="flex items-center gap-2 font-black text-lg group-hover:text-blue-600 transition">
+                {searchParams.origin} <ArrowRight className="w-4 h-4 text-slate-400" /> {searchParams.destination}
+                <ChevronDown className={`w-4 h-4 transition duration-300 ${isEditingSearch ? 'rotate-180 text-blue-600' : 'text-slate-300'}`} />
               </div>
-
-              {/* Fasilitas & Lokasi */}
-              <div className="p-5 pt-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      {bus.fromDetail}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      {bus.toDetail}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {bus.facilities.slice(0, 3).map((fac, idx) => (
-                    <span key={idx} className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded font-bold">
-                      {fac}
-                    </span>
-                  ))}
-                  {bus.facilities.length > 3 && (
-                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded font-bold">
-                      +{bus.facilities.length - 3} Lainnya
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  {/* FITUR UNGGULAN: REVIEW FOTO ASLI (Diperbaiki) */}
-                  {hasPhotoReview ? (
-                    <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200 dark:border-green-800 cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/50 transition">
-                      <Camera className="w-3 h-3" /> Ada Foto Asli
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      Tiket Terlaris
-                    </span>
-                  )}
-
-                  <Link href="/booking">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-bold transition shadow-lg shadow-blue-200 dark:shadow-none">
-                      Pilih
-                    </button>
-                  </Link>
-                </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+                <span>{new Date(searchParams.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <span>{searchParams.pax} Penumpang</span>
+                {/* Badge Pulang Pergi */}
+                {searchParams.returnDate && (
+                    <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-[10px] font-bold">Pulang Pergi: {new Date(searchParams.returnDate).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})}</span>
+                )}
+                {(searchParams.originDetail !== 'Semua Lokasi' || searchParams.destinationDetail !== 'Semua Lokasi') && (
+                    <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold">Filter Lokasi</span>
+                )}
               </div>
             </div>
-          );
-        })}
+          </div>
+
+          {/* Form Edit Search */}
+          {isEditingSearch && (
+            <div className="px-4 pb-4 animate-in slide-in-from-top-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div className="flex items-center justify-center mb-4">
+                  <button 
+                    onClick={swapLocations}
+                    className="flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-full hover:bg-blue-100 transition"
+                  >
+                    <ArrowUpDown className="w-3 h-3" /> Tukar Asal & Tujuan
+                  </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+                 <LocationDropdown type="origin" label="Dari" />
+                 <LocationDropdown type="destination" label="Ke" />
+                 
+                 <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Pergi</label>
+                    <input type="date" value={searchParams.date} onChange={(e)=>setSearchParams({...searchParams, date: e.target.value})} className="w-full bg-transparent font-bold text-sm outline-none" />
+                 </div>
+                 {/* Tanggal Pulang */}
+                 <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Pulang (Opsional)</label>
+                    <input 
+                        type="date" 
+                        min={searchParams.date}
+                        value={searchParams.returnDate} 
+                        onChange={(e)=>setSearchParams({...searchParams, returnDate: e.target.value})} 
+                        className="w-full bg-transparent font-bold text-sm outline-none text-slate-600 dark:text-slate-300 placeholder:text-slate-300" 
+                    />
+                 </div>
+                 <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Kursi</label>
+                    <input type="number" min="1" value={searchParams.pax} onChange={(e)=>setSearchParams({...searchParams, pax: parseInt(e.target.value)})} className="w-full bg-transparent font-bold text-sm outline-none" />
+                 </div>
+              </div>
+              <button 
+                onClick={() => setIsEditingSearch(false)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-200 dark:shadow-none"
+              >
+                Cari Tiket Baru
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* --- MAIN LAYOUT --- */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex flex-col md:flex-row gap-8 relative">
+        
+        {/* LEFT SIDEBAR */}
+        <aside className="hidden md:block w-72 shrink-0">
+          <div className="sticky top-28 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+             <FilterSidebar />
+          </div>
+        </aside>
+
+        {/* RIGHT CONTENT */}
+        <main className="flex-1 space-y-4">
+          
+          <div className="md:hidden mb-4">
+            <button onClick={() => setShowMobileFilter(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 shadow-sm">
+               <SlidersHorizontal className="w-4 h-4" /> Buka Filter & Sortir
+            </button>
+          </div>
+
+          <div className="hidden md:flex items-center justify-between mb-2">
+             <div className="text-sm font-bold text-slate-500">Menampilkan {sortedBusData.length} Bus</div>
+             <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-400">Urutkan:</span>
+                <div className="flex gap-2">
+                    {['Terhemat', 'Tercepat', 'Berangkat Pagi', 'Rating Tinggi'].map((sort) => (
+                    <button key={sort} onClick={() => setSelectedSort(sort)} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${selectedSort === sort ? 'bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-900 text-slate-600 hover:bg-slate-100'}`}>
+                        {sort}
+                    </button>
+                    ))}
+                </div>
+             </div>
+          </div>
+
+          {sortedBusData.length === 0 && (
+             <div className="bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-slate-200 dark:border-slate-800">
+                <Filter className="w-8 h-8 text-slate-400 mx-auto mb-4" />
+                <h3 className="font-bold text-lg mb-1">Bus Tidak Ditemukan</h3>
+                <p className="text-sm text-slate-500 mb-4">Coba atur ulang filter, lokasi detail, atau cari tanggal lain.</p>
+                <button onClick={() => {
+                    setFilters({pagi:false, siang:false, malam:false, selectedClasses:[], photoOnly:false, boardingPoints:[], droppingPoints:[], operators:[], facilities: []});
+                    setSearchParams(prev => ({...prev, originDetail: 'Semua Lokasi', destinationDetail: 'Semua Lokasi'}));
+                }} className="text-blue-600 font-bold text-sm hover:underline">Reset Filter & Lokasi</button>
+             </div>
+          )}
+
+          {sortedBusData.map((bus) => {
+            const partnerData = getPartnerData(bus.operator);
+            const hasPhotos = partnerData?.reviews?.some(r => r.images && r.images.length > 0);
+            const isExpanded = expandedBusId === bus.id;
+
+            return (
+              <div key={bus.id} className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'border-blue-500 shadow-xl ring-1 ring-blue-500' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300'}`}>
+                
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-lg flex items-center justify-center p-1 border border-slate-100 dark:border-slate-700">
+                         <span className="text-[10px] font-black uppercase text-slate-400">{bus.operator.substring(0,3)}</span>
+                      </div>
+                      <div>
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white leading-none mb-1.5">{bus.name}</h3>
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{bus.type}</span>
+                          <div className="flex items-center text-amber-500 font-bold">
+                            <Star className="w-3 h-3 fill-current mr-1" /> {bus.rating}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-xl font-black text-blue-600 dark:text-blue-400">Rp {bus.price.toLocaleString('id-ID')}</span>
+                      <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full">Sisa {bus.seatsAvailable} Kursi</span>
+                    </div>
+                  </div>
+
+                  {/* TIMELINE WITH DURATION */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="text-center w-14 shrink-0">
+                      <span className="block text-lg font-black text-slate-800 dark:text-white">{bus.departureTime}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase truncate">{bus.fromDetail.split(" ")[0]}</span>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col items-center relative">
+                      {/* DURATION DISPLAY - Added mb-4 to avoid overlap */}
+                      <span className="text-[10px] text-slate-400 font-bold mb-4">{bus.duration}</span>
+                      
+                      <div className="w-full h-[2px] bg-slate-200 dark:bg-slate-700 relative flex items-center justify-between px-1">
+                         <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600 ring-2 ring-white dark:ring-slate-900"></div>
+                         
+                         {/* Bus Icon - Positioned Absolute Center of Line */}
+                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 px-1">
+                              <div className="w-6 h-6 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 text-blue-600">
+                                  <Bus className="w-3 h-3" />
+                              </div>
+                         </div>
+
+                         <div className="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white dark:ring-slate-900"></div>
+                      </div>
+                    </div>
+
+                    <div className="text-center w-14 shrink-0">
+                      <span className="block text-lg font-black text-slate-800 dark:text-white">{bus.arrivalTime}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase truncate">{bus.toDetail.split(" ")[0]}</span>
+                      {/* Next Day Indicator */}
+                      {isNextDay(bus.departureTime, bus.arrivalTime) && (
+                          <span className="text-[9px] text-red-500 font-bold block mt-0.5">+1 Hari</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2 text-slate-400">
+                      {bus.facilities.slice(0,3).map((fac, i) => (
+                        <div key={i} className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded text-[10px] font-bold">
+                           <Check className="w-3 h-3" /> {fac}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button onClick={() => toggleDetails(bus.id)} className={`text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 border ${isExpanded ? 'bg-slate-100 text-slate-600' : 'text-blue-600 border-transparent hover:bg-blue-50'}`}>
+                        {isExpanded ? 'Tutup' : 'Lihat Rincian'} 
+                        {isExpanded ? <ChevronUp className="w-3 h-3"/> : <ChevronDown className="w-3 h-3"/>}
+                      </button>
+                      
+                      {/* SELECT BUTTON WITH AUTH CHECK */}
+                      <button 
+                        onClick={() => handleSelectTicket(bus.id)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 dark:shadow-none transition"
+                      >
+                        PILIH
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* EXPANDED DETAILS */}
+                {isExpanded && (
+                  <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2">
+                    <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide">
+                      {[
+                          {id: 'points', label: 'Titik Naik/Turun'},
+                          {id: 'photos', label: 'Foto & Info'},
+                          {id: 'policies', label: 'Kebijakan'},
+                      ].map(tab => (
+                          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition ${activeTab === tab.id ? 'border-blue-600 text-blue-600 bg-white dark:bg-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'}`}>
+                              {tab.label}
+                          </button>
+                      ))}
+                    </div>
+
+                    <div className="p-5 min-h-[150px]">
+                      {activeTab === 'points' && (
+                          <div className="grid grid-cols-2 gap-8">
+                              <div>
+                                  <h4 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Titik Keberangkatan</h4>
+                                  <div className="border-l-2 border-slate-200 dark:border-slate-800 ml-1 space-y-4">
+                                      <div className="relative pl-4">
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></div>
+                                          <span className="block text-sm font-bold text-slate-800 dark:text-white">{bus.departureTime}</span>
+                                          <span className="text-xs text-slate-500">{bus.fromDetail}</span>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div>
+                                  <h4 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Titik Turun</h4>
+                                  <div className="border-l-2 border-slate-200 dark:border-slate-800 ml-1">
+                                      <div className="relative pl-4">
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-blue-600"></div>
+                                          <span className="block text-sm font-bold text-slate-800 dark:text-white">{bus.arrivalTime}</span>
+                                          <span className="text-xs text-slate-500">{bus.toDetail}</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                      {activeTab === 'photos' && (
+                          <div>
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                  {bus.facilities.map((item, i) => (
+                                      <span key={i} className="text-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                                          <Zap className="w-3 h-3"/> {item}
+                                      </span>
+                                  ))}
+                              </div>
+                              
+                              {hasPhotos ? (
+                                  <div className="grid grid-cols-3 gap-2">
+                                      {partnerData?.gallery?.slice(0, 3).map((img, i) => (
+                                          <div key={i} className="aspect-video rounded-lg overflow-hidden relative group bg-slate-200">
+                                              <Image 
+                                                src={typeof img === 'string' ? img : img.src} 
+                                                alt="Bus Interior" 
+                                                fill 
+                                                className="object-cover group-hover:scale-110 transition duration-500" 
+                                              />
+                                          </div>
+                                      ))}
+                                  </div>
+                              ) : (
+                                  <div className="text-center py-6 bg-slate-100 dark:bg-slate-800 rounded-xl border-dashed border-2 border-slate-200 dark:border-slate-700">
+                                      <Camera className="w-8 h-8 text-slate-300 mx-auto mb-2"/>
+                                      <p className="text-xs text-slate-400">Belum ada foto armada.</p>
+                                  </div>
+                              )}
+                              
+                              <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s/g, '-')}`} className="block text-center mt-4 text-xs font-bold text-blue-600 hover:underline">
+                                  Lihat Profil Mitra Lengkap
+                              </Link>
+                          </div>
+                      )}
+
+                      {activeTab === 'policies' && (
+                          <div className="space-y-4">
+                              <div className="flex gap-3">
+                                  <ShieldAlert className="w-5 h-5 text-red-500 shrink-0" />
+                                  <div>
+                                      <h5 className="font-bold text-xs mb-1">Pembatalan Tiket</h5>
+                                      <p className="text-[10px] text-slate-500 leading-relaxed">
+                                          Pembatalan maksimal H-24 jam. Biaya admin 25%.
+                                      </p>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </main>
+      </div>
+
+      {showMobileFilter && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex justify-end">
+            <div className="w-3/4 max-w-sm bg-white dark:bg-slate-900 h-full p-6 shadow-2xl animate-in slide-in-from-right duration-300 overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-black text-xl">Filter & Sortir</h3>
+                    <button onClick={() => setShowMobileFilter(false)}><X className="w-6 h-6" /></button>
+                </div>
+                <FilterSidebar />
+                <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button onClick={() => setShowMobileFilter(false)} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">
+                        Terapkan Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
     </div>
   );
 }
