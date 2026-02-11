@@ -43,7 +43,17 @@ export default function PromoPage() {
               </div>
             </div>
 
-            <div className="px-8 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            {/* SCROLLABLE CONTENT DENGAN CUSTOM SCROLLBAR */}
+            <div className="px-8 overflow-y-auto 
+              scrollbar-thin 
+              scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 
+              scrollbar-track-transparent
+              [&::-webkit-scrollbar]:w-2
+              [&::-webkit-scrollbar-track]:bg-transparent
+              [&::-webkit-scrollbar-thumb]:bg-slate-200
+              dark:[&::-webkit-scrollbar-thumb]:bg-slate-700
+              [&::-webkit-scrollbar-thumb]:rounded-full"
+            >
               <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed pr-2">
                 <p>Penggunaan kode promo SkyBus tunduk pada aturan berikut:</p>
                 <ol className="list-decimal pl-5 space-y-3 marker:font-bold marker:text-slate-400">
@@ -94,7 +104,7 @@ export default function PromoPage() {
               </div>
 
               <div className="p-6 relative z-10">
-                {/* Badge Section - Sekarang Sejajar di Kiri */}
+                {/* Badge Section - Sejajar di Kiri */}
                 <div className="flex items-center gap-2 mb-4">
                   <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                     {promo.type}
