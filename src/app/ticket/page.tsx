@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, ArrowRight, Star, Wifi, Zap, Armchair, ChevronDown, ChevronUp, 
   Camera, MapPin, Calendar, User, SlidersHorizontal, Info, Clock, ShieldAlert,
-  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock
+  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -37,10 +37,13 @@ export default function TicketPage() {
   // STATE MODAL LOGIN
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // --- STATE FILTER LENGKAP (Updated) ---
   const [filters, setFilters] = useState({
     pagi: false, siang: false, malam: false,
     selectedClasses: [] as string[], 
     photoOnly: false,
+    promoOnly: false, // NEW: Filter Promo
+    maxPrice: 1000000, // NEW: Filter Max Price (Default 1jt)
     boardingPoints: [] as string[],
     droppingPoints: [] as string[],
     operators: [] as string[],
@@ -68,7 +71,7 @@ export default function TicketPage() {
     }));
   };
 
-  const handleSelectTicket = (busId: string) => {
+  const handleSelectTicket = (busId: string, price: number) => {
     const role = localStorage.getItem("userRole");
     if (!role) {
         setShowLoginModal(true);
@@ -76,6 +79,7 @@ export default function TicketPage() {
         // Carry over search params to booking page
         const params = new URLSearchParams();
         params.set("busId", busId);
+        params.set("price", price.toString()); // Carry price selected
         params.set("date", searchParams.date);
         params.set("pax", searchParams.pax.toString());
         params.set("from", searchParams.origin);
@@ -88,7 +92,6 @@ export default function TicketPage() {
     }
   };
 
-  // Helper Cek Next Day (+1 Hari)
   const isNextDay = (dep: string, arr: string) => {
     const parseTime = (t: string) => parseInt(t.replace('.', ':').split(':')[0]);
     return parseTime(arr) < parseTime(dep);
@@ -150,6 +153,16 @@ export default function TicketPage() {
           return partner?.reviews?.some(r => r.images && r.images.length > 0);
        });
     }
+
+    // NEW: Filter Promo
+    if (filters.promoOnly) {
+        // Asumsi data.ts punya field isPromo, kalau belum ada filter ini skip dulu atau tambahkan field dummy
+        // @ts-ignore
+        data = data.filter(bus => bus.isPromo === true);
+    }
+
+    // NEW: Filter Max Price
+    data = data.filter(bus => bus.price <= filters.maxPrice);
 
     if (selectedSort === 'Terhemat') data.sort((a, b) => a.price - b.price);
     if (selectedSort === 'Tercepat') data.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
@@ -252,7 +265,40 @@ export default function TicketPage() {
     <div className="space-y-6">
         <div className="flex items-center justify-between mb-2">
             <h3 className="font-black text-lg">Filter</h3>
-            <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
+            <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, promoOnly:false, maxPrice: 1000000, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
+        </div>
+
+        {/* Filter Range Harga (NEW) */}
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+            <h4 className="font-bold text-sm mb-3 flex justify-between">
+                Harga Maksimal 
+                <span className="text-blue-600">Rp {filters.maxPrice.toLocaleString()}</span>
+            </h4>
+            <input 
+                type="range" 
+                min="50000" 
+                max="1000000" 
+                step="10000" 
+                value={filters.maxPrice} 
+                onChange={(e) => setFilters(prev => ({...prev, maxPrice: parseInt(e.target.value)}))}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            />
+        </div>
+
+        {/* Filter Promo (NEW) */}
+        <div>
+            <h4 className="font-bold text-sm mb-3">Penawaran</h4>
+            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 hover:border-blue-300 transition">
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${filters.promoOnly ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}>
+                    {filters.promoOnly && <Check className="w-3 h-3 text-white" />}
+                </div>
+                <input type="checkbox" className="hidden" checked={filters.promoOnly} onChange={() => toggleBoolFilter('promoOnly')} />
+                <div className="flex-1">
+                    <span className="text-sm font-bold text-slate-700 dark:text-white block">Promo Spesial</span>
+                    <span className="text-[10px] text-slate-400">Tampilkan tiket diskon saja</span>
+                </div>
+                <Tag className="w-4 h-4 text-blue-500" />
+            </label>
         </div>
 
         {/* Filter Kelas */}
@@ -546,7 +592,7 @@ export default function TicketPage() {
                 <h3 className="font-bold text-lg mb-1">Bus Tidak Ditemukan</h3>
                 <p className="text-sm text-slate-500 mb-4">Coba atur ulang filter, lokasi detail, atau cari tanggal lain.</p>
                 <button onClick={() => {
-                    setFilters({pagi:false, siang:false, malam:false, selectedClasses:[], photoOnly:false, boardingPoints:[], droppingPoints:[], operators:[], facilities: []});
+                    setFilters({pagi:false, siang:false, malam:false, selectedClasses:[], photoOnly:false, promoOnly:false, maxPrice: 1000000, boardingPoints:[], droppingPoints:[], operators:[], facilities: []});
                     setSearchParams(prev => ({...prev, originDetail: 'Semua Lokasi', destinationDetail: 'Semua Lokasi'}));
                 }} className="text-blue-600 font-bold text-sm hover:underline">Reset Filter & Lokasi</button>
              </div>
@@ -577,7 +623,18 @@ export default function TicketPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="block text-xl font-black text-blue-600 dark:text-blue-400">Rp {bus.price.toLocaleString('id-ID')}</span>
+                      {/* HARGA CORET & PROMO */}
+                      {/* @ts-ignore: Assume field exists based on updated data.ts */}
+                      {bus.originalPrice && (
+                          <span className="block text-xs text-slate-400 line-through decoration-red-500 decoration-2 mb-0.5">
+                              Rp {bus.originalPrice.toLocaleString('id-ID')}
+                          </span>
+                      )}
+                      
+                      <span className={`block text-xl font-black ${bus.originalPrice ? 'text-red-600' : 'text-blue-600 dark:text-blue-400'}`}>
+                          Rp {bus.price.toLocaleString('id-ID')}
+                      </span>
+                      
                       <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full">Sisa {bus.seatsAvailable} Kursi</span>
                     </div>
                   </div>
@@ -634,7 +691,7 @@ export default function TicketPage() {
                       
                       {/* SELECT BUTTON WITH AUTH CHECK */}
                       <button 
-                        onClick={() => handleSelectTicket(bus.id)}
+                        onClick={() => handleSelectTicket(bus.id, bus.price)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 dark:shadow-none transition"
                       >
                         PILIH
