@@ -21,7 +21,6 @@ export default function Home() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
 
-  // State untuk Dropdown User
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
@@ -37,7 +36,6 @@ export default function Home() {
   const isFormValid = origin.length > 0 && destination.length > 0 && departDate.length > 0 && passengers > 0;
 
   useEffect(() => {
-    // Cek Login Status
     const role = localStorage.getItem("userRole");
     if (role) setIsLoggedIn(true);
 
@@ -105,7 +103,7 @@ export default function Home() {
 
       <nav className="flex items-center px-6 py-4 bg-white dark:bg-slate-900 text-blue-600 sticky top-0 z-50 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
         <Link href="/" className="text-2xl font-black tracking-tighter flex items-center italic hover:opacity-80 transition mr-8">
-           SkyBus<span className="text-amber-500">.</span>
+          SkyBus<span className="text-amber-500">.</span>
         </Link>
         <div className="ml-auto flex items-center gap-8">
           <div className="hidden md:flex items-center space-x-6 text-sm font-bold text-slate-500 dark:text-slate-400">
@@ -113,14 +111,12 @@ export default function Home() {
             <Link href="/mitra" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Mitra Operator</Link>
             <Link href="/help" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Bantuan</Link>
 
-            {/* Jika Login, Tampilkan Tiket Saya (Desktop) */}
             {isLoggedIn && (
               <Link href="/my-orders" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Tiket Saya</Link>
             )}
           </div>
 
           <div className="flex space-x-3 items-center">
-            {/* LOGIKA LOGIN / LOGOUT */}
             {!isLoggedIn ? (
               <>
                 <Link href="/login">
@@ -131,7 +127,6 @@ export default function Home() {
                 </Link>
               </>
             ) : (
-              // DROPDOWN AKUN
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -142,11 +137,10 @@ export default function Home() {
 
                 {showUserDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50">
-                    {/* TIKET SAYA (Hanya Mobile) */}
-                    <Link href="/my-orders" className="md:hidden block px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2">
+                    <Link href="/my-orders" className="md:hidden px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2">
                       <Ticket className="w-4 h-4" /> Tiket Saya
                     </Link>
-                    <Link href="/settings" className="block px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                    <Link href="/settings" className="block px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 items-center gap-2 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
                       <Settings className="w-4 h-4" /> Pengaturan
                     </Link>
                     <button
@@ -163,7 +157,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="relative px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start overflow-hidden min-h-[600px]">
+      <section className="relative px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start overflow-hidden min-h-150">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src="/img/hero-bus.jpg"
@@ -172,7 +166,7 @@ export default function Home() {
             priority
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/60 dark:from-slate-950/90 dark:to-slate-900/60"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-blue-900/90 to-blue-800/60 dark:from-slate-950/90 dark:to-slate-900/60"></div>
         </div>
 
         <div className="text-white space-y-6 relative z-10 pt-10 md:pt-16">
@@ -180,20 +174,20 @@ export default function Home() {
             #1 Partner Perjalanan Anda
           </div>
           <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight">
-            JELAJAHI <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500">INDONESIA</span>
+            JELAJAHI <br /> <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-300 to-amber-500">INDONESIA</span>
           </h1>
           <p className="opacity-90 max-w-md leading-relaxed text-lg font-medium text-blue-50">
             Pesan tiket bus online dengan jaminan harga transparan, jadwal real-time, dan ulasan foto asli.
           </p>
           <div className="flex gap-4 pt-4">
-             <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-green-400" />
-                <span className="text-sm font-bold">Jaminan Tiket Resmi</span>
-             </div>
-             <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-yellow-400" />
-                <span className="text-sm font-bold">2 Juta+ Pengguna</span>
-             </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-green-400" />
+              <span className="text-sm font-bold">Jaminan Tiket Resmi</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-yellow-400" />
+              <span className="text-sm font-bold">2 Juta+ Pengguna</span>
+            </div>
           </div>
         </div>
 
@@ -208,8 +202,8 @@ export default function Home() {
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                 <div className="w-full">
-                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Dari Mana?</label>
-                   <input type="text" placeholder="Ketik kota asal..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={origin} onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); }} onFocus={() => setShowOriginDropdown(true)} />
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Dari Mana?</label>
+                  <input type="text" placeholder="Ketik kota asal..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={origin} onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); }} onFocus={() => setShowOriginDropdown(true)} />
                 </div>
               </div>
               {showOriginDropdown && (
@@ -235,8 +229,8 @@ export default function Home() {
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 relative group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                 <div className="w-full">
-                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Mau Ke Mana?</label>
-                   <input type="text" placeholder="Ketik kota tujuan..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={destination} onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); }} onFocus={() => setShowDestDropdown(true)} />
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Mau Ke Mana?</label>
+                  <input type="text" placeholder="Ketik kota tujuan..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={destination} onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); }} onFocus={() => setShowDestDropdown(true)} />
                 </div>
               </div>
               {showDestDropdown && (
@@ -257,7 +251,7 @@ export default function Home() {
                     min={today}
                     value={departDate}
                     onChange={(e) => setDepartDate(e.target.value)}
-                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [scheme-light] dark:[scheme-dark]"
                   />
                 </div>
                 {tripType === 'round-trip' && (
@@ -266,7 +260,7 @@ export default function Home() {
                     <input
                       type="date"
                       min={departDate || today}
-                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [scheme-light] dark:[scheme-dark]"
                     />
                   </div>
                 )}
@@ -279,7 +273,7 @@ export default function Home() {
 
             <Link href={isFormValid ? "/ticket" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
               <button disabled={!isFormValid} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
-                 {isFormValid ? 'CARI TIKET MURAH' : 'LENGKAPI DATA'}
+                {isFormValid ? 'CARI TIKET MURAH' : 'LENGKAPI DATA'}
               </button>
             </Link>
           </div>
@@ -290,10 +284,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
             {[
-              {icon: <Clock className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "Jadwal Real-Time", desc: "Informasi jadwal bus terupdate & akurat"},
-              {icon: <Armchair className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "Pilih Kursi", desc: "Bebas pilih kursi idaman tanpa biaya"},
-              {icon: <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "Pembayaran Aman", desc: "Jaminan transaksi 100% aman"},
-              {icon: <Ticket className="w-8 h-8 text-blue-600 dark:text-blue-400"/>, title: "E-Ticket Instan", desc: "Tiket terbit instan & bebas cetak"}
+              { icon: <Clock className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Jadwal Real-Time", desc: "Informasi jadwal bus terupdate & akurat" },
+              { icon: <Armchair className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Pilih Kursi", desc: "Bebas pilih kursi idaman tanpa biaya" },
+              { icon: <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Pembayaran Aman", desc: "Jaminan transaksi 100% aman" },
+              { icon: <Ticket className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "E-Ticket Instan", desc: "Tiket terbit instan & bebas cetak" }
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-center gap-3 group">
                 <div className="bg-blue-50 dark:bg-slate-800 p-5 rounded-full group-hover:scale-110 transition duration-300 shadow-sm">
@@ -301,7 +295,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px] mx-auto">{item.desc}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-50 mx-auto">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -318,25 +312,25 @@ export default function Home() {
               Dapatkan potongan harga spesial untuk perjalanan pertama Anda. Tanpa syarat ribet, langsung potong harga!
             </p>
             <Link href="/promo" className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:gap-4 transition-all">
-              Lihat Semua Promo <ArrowRight className="w-4 h-4"/>
+              Lihat Semua Promo <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="flex-none w-full md:w-[550px]">
+          <div className="flex-none w-full md:w-137.5">
             <div className="flex bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden relative border border-slate-200 dark:border-slate-800 group hover:-translate-y-2 transition duration-300">
               <div className="flex-1 p-6 relative">
                 <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Valid s.d. 31 Des 2026</div>
                 <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Diskon Pengguna Baru</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">Potongan 20% untuk transaksi pertama.</p>
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-slate-700">
-                  <Ticket className="w-3 h-3"/> Tanpa Min. Transaksi
+                  <Ticket className="w-3 h-3" /> Tanpa Min. Transaksi
                 </div>
                 <div className="absolute -top-3 right-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full translate-x-3"></div>
                 <div className="absolute -bottom-3 right-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full translate-x-3"></div>
               </div>
-              <div className="w-[1px] border-l-2 border-dashed border-slate-300 dark:border-slate-700 relative my-3"></div>
-              <div className="bg-blue-600 dark:bg-blue-600 text-white p-6 flex flex-col items-center justify-center min-w-[140px] text-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
+              <div className="w-px border-l-2 border-dashed border-slate-300 dark:border-slate-700 relative my-3"></div>
+              <div className="bg-blue-600 dark:bg-blue-600 text-white p-6 flex flex-col items-center justify-center min-w-35 text-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-white to-transparent"></div>
                 <div className="relative z-10">
                   <div className="text-3xl font-black mb-1">20%</div>
                   <div className="text-[10px] font-bold uppercase opacity-80 mb-3 tracking-widest">OFF</div>
@@ -346,7 +340,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="mx-4 h-2 bg-slate-200 dark:bg-slate-800 rounded-b-xl mt-[-2px] mx-auto w-[90%]"></div>
+            <div className="mx-auto h-2 bg-slate-200 dark:bg-slate-800 rounded-b-xl -mt-0.5 w-[90%]"></div>
           </div>
         </div>
       </section>
@@ -363,19 +357,19 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
             {POPULAR_ROUTES.map((route, idx) => (
               <Link href={`/ticket?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
-                <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
+                <div className="aspect-4/3 bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
                   <Image
                     src={`/img/rute-populer-0${idx + 1}.jpg`}
                     alt={`${route.from} ke ${route.to}`}
                     fill
                     className="object-cover transition duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-60 transition"></div>
+                  <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-60 transition"></div>
                 </div>
                 <div className="absolute bottom-0 left-0 p-4 w-full">
                   <div className="text-[10px] font-bold text-amber-400 mb-1 tracking-wide uppercase bg-slate-900/50 backdrop-blur-sm inline-block px-2 py-0.5 rounded">{route.price}</div>
                   <h3 className="font-bold text-white text-sm leading-tight mt-1 drop-shadow-md">
-                    {route.from} <ArrowRight className="w-3 h-3 inline mx-0.5 text-slate-300"/> {route.to}
+                    {route.from} <ArrowRight className="w-3 h-3 inline mx-0.5 text-slate-300" /> {route.to}
                   </h3>
                 </div>
               </Link>
@@ -385,7 +379,7 @@ export default function Home() {
       </section>
 
       <section className="py-8 px-6 bg-slate-50 dark:bg-slate-950">
-         <div className="max-w-7xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Partner Resmi Kami</p>
           <div className="flex flex-wrap justify-center items-center gap-6">
             {PARTNER_LOGOS.map((logo, i) => (
@@ -398,7 +392,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-         </div>
+        </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-6">
