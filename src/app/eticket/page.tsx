@@ -1,74 +1,141 @@
 "use client";
 
-import React from 'react';
-import { CheckCircle, QrCode, MessageCircle, Mail } from 'lucide-react';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { BUS_DATA, LOCATIONS_DETAIL } from '@/constants/data';
+import { CheckCircle, Download, Home, Share2, MapPin, Calendar, Clock, Bus } from 'lucide-react';
 import Link from 'next/link';
+import QRCode from 'react-qr-code'; // Opsional: kalau blm install, ganti kotak biasa
 
-export default function EticketPage() {
+function ETicketContent() {
+  const searchParams = useSearchParams();
+  const busId = searchParams.get('busId');
+  const seats = searchParams.get('seats');
+  const date = searchParams.get('date');
+  const isNewSuccess = searchParams.get('status') === 'success'; // Cek apakah baru sukses bayar
+
+  const bus = BUS_DATA.find(b => b.id === busId) || BUS_DATA[0]; // Fallback data if missing
+
   return (
-    <div className="min-h-screen bg-blue-600 flex items-center justify-center p-6 font-sans">
-      <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans py-10 px-4">
+      <div className="max-w-md mx-auto">
         
-        {/* Success Header */}
-        <div className="bg-green-500 p-8 text-center text-white relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-white opacity-10" 
-                 style={{backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2.5px)', backgroundSize: '20px 20px'}}></div>
-            <div className="relative z-10">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                    <CheckCircle className="w-8 h-8 text-white" />
+        {/* Notifikasi Sukses (Hanya muncul kalau baru bayar) */}
+        {isNewSuccess && (
+            <div className="text-center mb-8 animate-in slide-in-from-top-4 fade-in duration-700">
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-10 h-10" />
                 </div>
-                <h2 className="text-2xl font-black uppercase tracking-tight">Pembayaran Sukses!</h2>
-                <p className="text-sm opacity-90 mt-1">Kode: <span className="font-mono font-bold bg-white/20 px-2 py-0.5 rounded">TRX-88921</span></p>
+                <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Pembayaran Berhasil!</h1>
+                <p className="text-slate-500 text-sm">E-Tiket Anda telah terbit. Silakan simpan atau screenshot halaman ini.</p>
+            </div>
+        )}
+
+        {/* E-Ticket Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative">
+            {/* Top Section */}
+            <div className="bg-blue-600 p-6 text-white text-center relative overflow-hidden">
+                <div className="relative z-10">
+                    <h2 className="text-sm font-bold opacity-80 uppercase tracking-widest mb-1">Boarding Pass</h2>
+                    <h1 className="text-3xl font-black">SKYBUS</h1>
+                </div>
+                {/* Decorative Circles */}
+                <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+            </div>
+
+            {/* Ticket Details */}
+            <div className="p-6 relative">
+                {/* Punch Holes Effect */}
+                <div className="absolute -left-3 top-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full"></div>
+                <div className="absolute -right-3 top-0 w-6 h-6 bg-slate-50 dark:bg-slate-950 rounded-full"></div>
+
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase">Booking ID</p>
+                        <p className="text-lg font-mono font-black text-slate-800 dark:text-white">SKY-{Math.floor(Math.random() * 10000)}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-xs text-slate-400 font-bold uppercase">Tanggal</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{date ? new Date(date).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}) : '12 Feb 2026'}</p>
+                    </div>
+                </div>
+
+                {/* Route */}
+                <div className="flex items-center gap-4 mb-6 bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
+                    <div className="flex-1">
+                        <p className="text-xs text-slate-400">Dari</p>
+                        <p className="font-bold text-lg leading-tight">{bus.from}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{bus.departureTime}</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <Bus className="w-5 h-5 text-blue-600 mb-1" />
+                        <div className="w-12 h-[1px] bg-slate-300 dark:bg-slate-600"></div>
+                        <p className="text-[10px] text-slate-400 mt-1">{bus.duration}</p>
+                    </div>
+                    <div className="flex-1 text-right">
+                        <p className="text-xs text-slate-400">Ke</p>
+                        <p className="font-bold text-lg leading-tight">{bus.to}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{bus.arrivalTime}</p>
+                    </div>
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-1">Operator</p>
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-slate-100 rounded-full"></div> {/* Logo Placeholder */}
+                            <span className="text-sm font-bold">{bus.name}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase mb-1">Kursi</p>
+                        <span className="text-sm font-black bg-blue-100 text-blue-700 px-2 py-1 rounded">{seats || '12A'}</span>
+                    </div>
+                </div>
+
+                {/* QR Code Area */}
+                <div className="flex flex-col items-center justify-center border-t border-dashed border-slate-200 dark:border-slate-800 pt-6">
+                    <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                        {/* Jika tidak ada library QRCode, bisa pakai gambar dummy */}
+                        <div className="w-32 h-32 bg-slate-900 flex items-center justify-center text-white text-xs text-center">
+                             [QR CODE] <br/> SCAN ME
+                        </div>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-3 text-center">Tunjukkan QR Code ini kepada petugas<br/>saat check-in di {bus.fromDetail}.</p>
+                </div>
             </div>
         </div>
 
-        {/* Ticket Details */}
-        <div className="p-6 space-y-6">
-            <div className="text-center">
-                <div className="text-xs text-slate-400 uppercase font-bold tracking-widest mb-3">Tunjukkan Ke Petugas</div>
-                <div className="bg-slate-100 p-6 inline-block rounded-2xl border-2 border-dashed border-slate-300">
-                    <QrCode className="w-32 h-32 text-slate-800" />
-                </div>
-            </div>
-
-            <div className="space-y-3 border-t border-slate-100 pt-4">
-                <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Penumpang</span>
-                    <span className="font-bold text-slate-800">Budi Santoso</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Bus</span>
-                    <span className="font-bold text-slate-800">SkyBus Executive</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Kursi</span>
-                    <span className="font-bold text-slate-800">1A</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Jadwal</span>
-                    <span className="font-bold text-slate-800">20 Okt 2026, 22.00</span>
-                </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-                <button className="flex flex-col items-center justify-center gap-1 p-3 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition border border-green-200">
-                    <MessageCircle className="w-5 h-5" />
-                    <span className="text-[10px] font-bold uppercase">Kirim ke WA</span>
-                </button>
-                <button className="flex flex-col items-center justify-center gap-1 p-3 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition border border-blue-200">
-                    <Mail className="w-5 h-5" />
-                    <span className="text-[10px] font-bold uppercase">Kirim ke Email</span>
-                </button>
-            </div>
-            
-            <Link href="/" className="block">
-                <button className="w-full text-slate-400 text-sm font-bold py-2 hover:text-slate-600 transition">
-                    Kembali ke Beranda
+        {/* Action Buttons */}
+        <div className="mt-8 space-y-3">
+            <Link href="/">
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2">
+                    <Home className="w-4 h-4" /> Kembali ke Beranda
                 </button>
             </Link>
+            <div className="grid grid-cols-2 gap-3">
+                <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2">
+                    <Download className="w-4 h-4" /> Simpan PDF
+                </button>
+                <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2">
+                    <Share2 className="w-4 h-4" /> Bagikan
+                </button>
+            </div>
         </div>
+
       </div>
     </div>
   );
+}
+
+export default function ETicketPage() {
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+            <Suspense fallback={<div className="p-10 text-center">Memuat Tiket...</div>}>
+                <ETicketContent />
+            </Suspense>
+        </div>
+    );
 }
