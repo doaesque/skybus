@@ -112,7 +112,7 @@ export default function Home() {
             <Link href="/help" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Bantuan</Link>
 
             {isLoggedIn && (
-              <Link href="/my-orders" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Tiket Saya</Link>
+              <Link href="/my-tickets" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Tiket Saya</Link>
             )}
           </div>
 
@@ -137,7 +137,7 @@ export default function Home() {
 
                 {showUserDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50">
-                    <Link href="/my-orders" className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <Link href="/my-tickets" className="md:hidden flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                       <Ticket className="w-4 h-4" /> Tiket Saya
                     </Link>
                     <Link href="/settings" className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
