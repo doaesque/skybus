@@ -68,7 +68,7 @@ export default function SettingsPage() {
       <div className="max-w-2xl mx-auto px-6 py-10">
         <div className="flex flex-col items-center mb-10">
             <div className="relative group">
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-200 dark:shadow-none">
+                <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-200 dark:shadow-none">
                     {formData.name.charAt(0)}
                 </div>
                 <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-md text-blue-600 hover:scale-110 transition">
