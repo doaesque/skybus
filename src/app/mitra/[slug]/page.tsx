@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { 
-  ArrowLeft, Star, Bus, MapPin, ShieldCheck, Clock, 
-  Info, FileText, Image as ImageIcon, CheckCircle, 
-  XCircle, PlayCircle, Phone, Mail, Building2, Map as MapIcon, X, ChevronRight, ChevronLeft
+import {
+  ArrowLeft, Star, Bus, MapPin, ShieldCheck, Clock,
+  Info, FileText, Image as ImageIcon, CheckCircle,
+  XCircle, PlayCircle, Phone, Mail, Building2, Map as MapIcon, X, Filter, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,11 +15,7 @@ export default function MitraDetailPage() {
   const router = useRouter();
   const [partner, setPartner] = useState<typeof ALL_PARTNERS[0] | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'policies'>('info');
-  
-  // Gallery Lightbox State
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  // Review Filter State
   const [reviewFilter, setReviewFilter] = useState<'All' | 'With Photo' | '5 Star' | '4 Star' | '3 Star'>('All');
 
   useEffect(() => {
@@ -32,9 +28,6 @@ export default function MitraDetailPage() {
   if (!partner && params.slug) return <div className="p-10 text-center font-bold text-slate-400">Memuat Data Mitra...</div>;
   if (!partner) return null;
 
-  // --- HELPER FUNCTIONS ---
-
-  // 1. Censor Name Logic: Keep First & Last, Asterisk Middle
   const censorName = (name: string) => {
       const parts = name.split(' ');
       return parts.map(part => {
@@ -46,7 +39,6 @@ export default function MitraDetailPage() {
       }).join(' ');
   };
 
-  // 2. Render Markdown-like Description
   const renderDescription = (text: string) => {
       return text.split('\n').map((str, index) => {
           if (str.startsWith('### ')) {
@@ -56,23 +48,22 @@ export default function MitraDetailPage() {
               return (
                   <div key={index} className="flex gap-3 mb-2 pl-4">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0"></div>
-                      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ 
-                          __html: str.replace('- ', '').replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>') 
+                      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{
+                          __html: str.replace('- ', '').replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>')
                       }} />
                   </div>
               );
           }
           if (str.trim() === '') return <br key={index} />;
-          
+
           return (
-              <p key={index} className="mb-3 text-slate-600 dark:text-slate-300 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={{ 
-                  __html: str.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>') 
+              <p key={index} className="mb-3 text-slate-600 dark:text-slate-300 leading-relaxed text-sm md:text-base" dangerouslySetInnerHTML={{
+                  __html: str.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>')
               }} />
           );
       });
   };
 
-  // 3. Filter Reviews
   const filteredReviews = partner.reviews ? partner.reviews.filter(r => {
       if (reviewFilter === 'All') return true;
       if (reviewFilter === 'With Photo') return r.images && r.images.length > 0;
@@ -82,7 +73,6 @@ export default function MitraDetailPage() {
       return true;
   }) : [];
 
-  // 4. Lightbox Navigation
   const handleNextImage = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (lightboxIndex !== null && partner.gallery) {
@@ -99,15 +89,13 @@ export default function MitraDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-32">
-      
-      {/* --- LIGHTBOX MODAL --- */}
+
       {lightboxIndex !== null && partner.gallery && (
-          <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
+          <div className="fixed inset-0 z-60 bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
               <button className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-20">
                   <X className="w-8 h-8" />
               </button>
-              
-              {/* Nav Buttons */}
+
               <button onClick={handlePrevImage} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition z-20">
                   <ChevronLeft className="w-8 h-8" />
               </button>
@@ -122,10 +110,10 @@ export default function MitraDetailPage() {
                           <p className="absolute bottom-4 text-white/50 text-sm">Video Playback Placeholder</p>
                       </div>
                   ) : (
-                      <img 
-                        src={partner.gallery[lightboxIndex].src} 
-                        alt="Gallery Preview" 
-                        className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain" 
+                      <img
+                        src={partner.gallery[lightboxIndex].src}
+                        alt="Gallery Preview"
+                        className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
                       />
                   )}
                   <p className="text-white mt-4 font-medium text-lg">{partner.gallery[lightboxIndex].title}</p>
@@ -134,7 +122,6 @@ export default function MitraDetailPage() {
           </div>
       )}
 
-      {/* HEADER (MATCHING /ABOUT STYLE) */}
       <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
         <button onClick={() => router.push('/mitra')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition text-slate-600 dark:text-slate-400">
             <ArrowLeft className="w-5 h-5" />
@@ -142,13 +129,11 @@ export default function MitraDetailPage() {
         <h1 className="font-black text-lg text-slate-800 dark:text-white">Profil Mitra</h1>
       </div>
 
-      {/* HEADER BANNER */}
       <div className="relative h-64 bg-slate-900 overflow-hidden group">
           <div className="absolute inset-0 opacity-60 bg-[url('/img/hero-bus.jpg')] bg-cover bg-center transition duration-1000 group-hover:scale-105"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
-          
+          <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+
           <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 max-w-5xl mx-auto flex items-end gap-6 translate-y-8">
-              {/* LOGO */}
               <div className="w-28 h-28 bg-white dark:bg-slate-800 rounded-2xl p-2 shadow-2xl border-4 border-slate-50 dark:border-slate-900 flex items-center justify-center shrink-0 overflow-hidden relative z-10">
                   {partner.image.includes('placeholder') ? (
                       <span className="text-4xl font-black text-slate-300 dark:text-slate-600 select-none">
@@ -170,8 +155,6 @@ export default function MitraDetailPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 mt-12 relative z-10">
-          
-          {/* MOBILE TITLE */}
           <div className="md:hidden mb-6">
              <h1 className="text-3xl font-black mb-1">{partner.name}</h1>
              <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
@@ -180,7 +163,6 @@ export default function MitraDetailPage() {
              </div>
           </div>
 
-          {/* TABS NAVIGATION */}
           <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 mb-8 overflow-x-auto scrollbar-hide">
               {[
                   { id: 'info', label: 'Info & Armada' },
@@ -198,34 +180,27 @@ export default function MitraDetailPage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-              {/* MAIN CONTENT */}
-              <div className="lg:col-span-2 space-y-12 min-h-[400px]">
-                  
-                  {/* TAB: INFO */}
+              <div className="lg:col-span-2 space-y-12 min-h-100">
                   {activeTab === 'info' && (
                       <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                          
-                          {/* Description (Markdown Render) */}
                           <section>
                               {renderDescription(partner.description || '')}
                           </section>
 
-                          {/* Gallery (Next/Prev + Video) */}
                           {partner.gallery && partner.gallery.length > 0 && (
                               <section>
                                   <h3 className="font-black text-lg mb-4 flex items-center gap-2">
                                       <ImageIcon className="w-5 h-5 text-slate-400" /> Galeri Armada
                                   </h3>
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-auto md:h-[350px]">
-                                      {/* Featured Video / Main Image */}
-                                      <div 
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-auto md:h-87.5">
+                                      <div
                                         className="md:col-span-2 md:h-full aspect-video md:aspect-auto rounded-2xl overflow-hidden relative group cursor-pointer border border-slate-200 dark:border-slate-700 bg-black"
                                         onClick={() => setLightboxIndex(0)}
                                       >
-                                          <img 
-                                            src={partner.gallery?.[0].src} 
-                                            alt="Featured" 
-                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition duration-500" 
+                                          <img
+                                            src={partner.gallery?.[0].src}
+                                            alt="Featured"
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition duration-500"
                                           />
                                           <div className="absolute inset-0 flex items-center justify-center">
                                               {partner.gallery?.[0].type === 'video' ? (
@@ -239,11 +214,10 @@ export default function MitraDetailPage() {
                                           </div>
                                       </div>
 
-                                      {/* Side Images */}
                                       <div className="grid grid-cols-2 md:grid-cols-1 gap-3 h-full">
                                           {partner.gallery?.slice(1, 3).map((media, i) => (
-                                              <div 
-                                                key={i} 
+                                              <div
+                                                key={i}
                                                 onClick={() => setLightboxIndex(i + 1)}
                                                 className="relative rounded-2xl overflow-hidden cursor-pointer group h-32 md:h-auto border border-slate-200 dark:border-slate-700"
                                               >
@@ -260,7 +234,6 @@ export default function MitraDetailPage() {
                               </section>
                           )}
 
-                          {/* Bus Classes */}
                           <section>
                               <h3 className="font-black text-lg mb-4">Armada & Kelas</h3>
                               <div className="space-y-4">
@@ -298,13 +271,11 @@ export default function MitraDetailPage() {
                       </div>
                   )}
 
-                  {/* TAB: REVIEWS */}
                   {activeTab === 'reviews' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                          {/* Filter Bar (Symbols Only) */}
                           <div className="flex flex-wrap gap-2 pb-2">
                               {['All', 'With Photo', '5 Star', '4 Star', '3 Star'].map((f) => (
-                                  <button 
+                                  <button
                                     key={f}
                                     onClick={() => setReviewFilter(f as any)}
                                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition ${reviewFilter === f ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'}`}
@@ -323,7 +294,6 @@ export default function MitraDetailPage() {
                                                   {review.user.charAt(0)}
                                               </div>
                                               <div>
-                                                  {/* NAME CENSOR LOGIC */}
                                                   <span className="font-bold text-sm block text-slate-900 dark:text-white">
                                                       {review.anonymous ? censorName(review.user) : review.user}
                                                   </span>
@@ -338,10 +308,9 @@ export default function MitraDetailPage() {
                                               </div>
                                           </div>
                                       </div>
-                                      
+
                                       <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{review.text}</p>
-                                      
-                                      {/* Review Images */}
+
                                       {review.images && review.images.length > 0 && (
                                           <div className="flex gap-2 mb-4">
                                               {review.images.map((img, idx) => (
@@ -372,7 +341,6 @@ export default function MitraDetailPage() {
                       </div>
                   )}
 
-                  {/* TAB: POLICIES */}
                   {activeTab === 'policies' && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
@@ -385,7 +353,7 @@ export default function MitraDetailPage() {
                                   <li>Tidak hadir (No Show): Tiket hangus (Non-refundable).</li>
                               </ul>
                           </div>
-                          
+
                           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
                               <h3 className="font-black text-lg mb-4 flex items-center gap-2">
                                   <Clock className="w-5 h-5 text-amber-500" /> Reschedule (Ubah Jadwal)
@@ -404,11 +372,9 @@ export default function MitraDetailPage() {
 
               </div>
 
-              {/* SIDEBAR (STICKY INFO) */}
               <div className="relative">
                   <div className="sticky top-24 space-y-6">
-                      
-                      {/* Booking CTA */}
+
                       <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 text-center">
                           <h3 className="font-black text-lg mb-2">Pesan Tiket Sekarang</h3>
                           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
@@ -421,7 +387,6 @@ export default function MitraDetailPage() {
                           </Link>
                       </div>
 
-                      {/* Company Info */}
                       <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
                           <h3 className="font-black text-sm uppercase tracking-widest text-slate-400 mb-4">Info Perusahaan</h3>
                           <div className="space-y-4">
@@ -449,16 +414,15 @@ export default function MitraDetailPage() {
                           </div>
                       </div>
 
-                      {/* Departure Points */}
                       {partner.departurePoints && partner.departurePoints.length > 0 && (
                           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
                               <h3 className="font-black text-sm uppercase tracking-widest text-slate-400 mb-4">Titik Keberangkatan</h3>
                               <div className="space-y-3">
                                   {partner.departurePoints.map((point: any, idx: number) => (
-                                      <a 
-                                        key={idx} 
-                                        href={point.link} 
-                                        target="_blank" 
+                                      <a
+                                        key={idx}
+                                        href={point.link}
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 group transition"
                                       >
