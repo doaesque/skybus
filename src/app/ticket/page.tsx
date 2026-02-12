@@ -41,6 +41,7 @@ function TicketContent() {
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxImages, setLightboxImages] = useState<{src: string, type: string, title?: string}[]>([]);
+  
   const [filters, setFilters] = useState({
     pagi: false, siang: false, malam: false,
     selectedClasses: [] as string[], 
@@ -52,6 +53,12 @@ function TicketContent() {
     operators: [] as string[],
     facilities: [] as string[]
   });
+
+  const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
+
+  useEffect(() => {
+    setLocalMaxPrice(filters.maxPrice);
+  }, [filters.maxPrice]);
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
 
@@ -319,16 +326,17 @@ function TicketContent() {
       <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
         <h4 className="font-bold text-sm mb-4 flex justify-between">
           Harga Maksimal 
-          <span className="text-blue-600">Rp {filters.maxPrice.toLocaleString()}</span>
+          <span className="text-blue-600">Rp {localMaxPrice.toLocaleString()}</span>
         </h4>
         <input 
           type="range" 
           min="50000" 
           max="1000000" 
           step="10000" 
-          value={filters.maxPrice} 
-          onChange={(e) => setFilters(prev => ({...prev, maxPrice: parseInt(e.target.value)}))}
-          onPointerDown={(e) => e.stopPropagation()}
+          value={localMaxPrice} 
+          onChange={(e) => setLocalMaxPrice(parseInt(e.target.value))}
+          onMouseUp={() => setFilters(prev => ({...prev, maxPrice: localMaxPrice}))}
+          onTouchEnd={() => setFilters(prev => ({...prev, maxPrice: localMaxPrice}))}
           className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
         />
       </div>
