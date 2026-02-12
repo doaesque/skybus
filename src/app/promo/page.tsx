@@ -44,9 +44,9 @@ export default function PromoPage() {
             </div>
 
             {/* SCROLLABLE CONTENT DENGAN CUSTOM SCROLLBAR */}
-            <div className="px-8 overflow-y-auto 
-              scrollbar-thin 
-              scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 
+            <div className="px-8 overflow-y-auto
+              scrollbar-thin
+              scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700
               scrollbar-track-transparent
               [&::-webkit-scrollbar]:w-2
               [&::-webkit-scrollbar-track]:bg-transparent
@@ -97,7 +97,7 @@ export default function PromoPage() {
         <div className="grid gap-6">
           {PROMO_DATA.map((promo) => (
             <div key={promo.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden group hover:shadow-lg transition duration-300 relative">
-              
+
               {/* Ikon Tiket Background (Top Right) */}
               <div className="absolute top-0 right-0 p-3 opacity-10">
                 <Ticket className="w-24 h-24 rotate-12" />
