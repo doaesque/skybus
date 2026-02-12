@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
 import { 
   ArrowLeft, ArrowRight, Star, Wifi, Armchair, ChevronDown, ChevronUp, 
   Camera, MapPin, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag,
@@ -12,11 +12,10 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation'; 
 import { BUS_DATA, ALL_PARTNERS, LOCATIONS_DETAIL, POPULAR_LOCATIONS } from '@/constants/data'; 
 
-export default function TicketPage() {
+function TicketContent() {
   const router = useRouter();
   const searchParamsUrl = useSearchParams();
 
-  // --- STATE ---
   const [searchParams, setSearchParams] = useState({
     origin: searchParamsUrl.get('origin') || 'Jakarta',
     originDetail: searchParamsUrl.get('originDetail') || 'Semua Lokasi',
@@ -39,7 +38,6 @@ export default function TicketPage() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // --- LIGHTBOX & FILTER STATES ---
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxImages, setLightboxImages] = useState<{src: string, type: string, title?: string}[]>([]);
   const [filters, setFilters] = useState({
@@ -56,7 +54,6 @@ export default function TicketPage() {
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
 
-  // Helper function untuk generate URL Redirect saat Login
   const getLoginRedirectUrl = () => {
     const params = new URLSearchParams();
     params.set("origin", searchParams.origin);
@@ -140,7 +137,6 @@ export default function TicketPage() {
     return parseTime(arr) < parseTime(dep);
   };
 
-  // --- LOGIC FILTERING ---
   const busesOnRoute = BUS_DATA.filter(b => 
     b.from.toLowerCase() === searchParams.origin.toLowerCase() &&
     b.to.toLowerCase() === searchParams.destination.toLowerCase()
@@ -289,7 +285,6 @@ export default function TicketPage() {
             <button onClick={() => setFilters({pagi:false, siang:false, malam:false, selectedClasses: [], facilities: [], photoOnly:false, promoOnly:false, maxPrice: 1000000, boardingPoints:[], droppingPoints:[], operators:[]})} className="text-xs font-bold text-blue-600 hover:underline">Reset</button>
         </div>
 
-        {/* Filter Penawaran */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Penawaran</h4>
             <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 hover:border-orange-300 transition">
@@ -305,7 +300,6 @@ export default function TicketPage() {
             </label>
         </div>
 
-        {/* Filter Range Harga */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4 flex justify-between">
                 Harga Maksimal 
@@ -322,7 +316,6 @@ export default function TicketPage() {
             />
         </div>
 
-        {/* Filter Kelas */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Kelas Armada</h4>
             <div className="relative">
@@ -346,7 +339,6 @@ export default function TicketPage() {
             </div>
         </div>
 
-        {/* Filter Fasilitas */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Fasilitas</h4>
             <div className="space-y-2">
@@ -362,7 +354,6 @@ export default function TicketPage() {
             </div>
         </div>
 
-        {/* Waktu */}
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Waktu Berangkat</h4>
             <div className="space-y-2">
@@ -378,7 +369,6 @@ export default function TicketPage() {
             </div>
         </div>
 
-        {/* Titik Naik - HANYA MUNCUL JIKA 'Semua Lokasi' */}
         {searchParams.originDetail === 'Semua Lokasi' && availableBoardingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Titik Naik</h4>
@@ -396,7 +386,6 @@ export default function TicketPage() {
             </div>
         )}
 
-        {/* Titik Turun - HANYA MUNCUL JIKA 'Semua Lokasi' */}
         {searchParams.destinationDetail === 'Semua Lokasi' && availableDroppingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Titik Turun</h4>
@@ -414,7 +403,6 @@ export default function TicketPage() {
             </div>
         )}
 
-        {/* Operator & Spesial */}
         {availableOperators.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Nama Operator</h4>
@@ -451,8 +439,6 @@ export default function TicketPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
-      {/* ... (LIGHTBOX MODAL & LOGIN MODAL CODE UNCHANGED) ... */}
-      {/* --- LIGHTBOX MODAL --- */}
       {lightboxIndex !== null && lightboxImages.length > 0 && (
           <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
               <button className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-20">
@@ -487,7 +473,6 @@ export default function TicketPage() {
           </div>
       )}
 
-      {/* LOGIN MODAL */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
             <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative text-center">
@@ -525,10 +510,8 @@ export default function TicketPage() {
         </div>
       )}
 
-      {/* --- HEADER --- */}
       <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
-          {/* Bar Utama */}
           <div className="p-4 flex items-center gap-4">
             <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
               <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -556,7 +539,6 @@ export default function TicketPage() {
             </div>
           </div>
 
-          {/* Form Edit Search */}
           {isEditingSearch && (
             <div className="px-4 pb-4 animate-in slide-in-from-top-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
               <div className="flex items-center justify-center mb-4">
@@ -601,19 +583,14 @@ export default function TicketPage() {
         </div>
       </div>
 
-      {/* --- MAIN LAYOUT --- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex flex-col md:flex-row gap-16 relative"> {/* Updated gap-16 */}
-        
-        {/* LEFT SIDEBAR */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex flex-col md:flex-row gap-16 relative">
         <aside className="hidden md:block w-72 shrink-0">
           <div className="sticky top-28 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
              <FilterSidebar />
           </div>
         </aside>
 
-        {/* RIGHT CONTENT */}
         <main className="flex-1 space-y-4">
-          
           <div className="md:hidden mb-4">
             <button onClick={() => setShowMobileFilter(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 shadow-sm">
                <SlidersHorizontal className="w-4 h-4" /> Buka Filter & Sortir
@@ -650,7 +627,6 @@ export default function TicketPage() {
             const partnerData = getPartnerData(bus.operator);
             const isExpanded = expandedBusId === bus.id;
             
-            // Gabungkan foto gallery & review
             const galleryImages = partnerData?.gallery?.map(g => ({ src: g.src, type: g.type, title: g.title })) || [];
             const reviewImages = partnerData?.reviews?.flatMap(r => r.images || []).map(img => ({ src: img, type: 'image', title: 'Foto Ulasan' })) || [];
             const allImages = [...galleryImages, ...reviewImages];
@@ -659,7 +635,7 @@ export default function TicketPage() {
             return (
               <div 
                 key={bus.id} 
-                onClick={() => toggleDetails(bus.id)} // Card click expands
+                onClick={() => toggleDetails(bus.id)}
                 className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${isExpanded ? 'border-blue-500 shadow-xl ring-1 ring-blue-500' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300'}`}
               >
                 
@@ -680,7 +656,6 @@ export default function TicketPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      {/* HARGA CORET & PROMO */}
                       {/* @ts-ignore */}
                       {bus.originalPrice && (
                           <span className="block text-xs text-slate-400 line-through decoration-orange-500 decoration-2 mb-0.5">
@@ -696,7 +671,6 @@ export default function TicketPage() {
                     </div>
                   </div>
 
-                  {/* TIMELINE */}
                   <div className="flex items-center gap-4 mb-6">
                     <div className="text-center w-14 shrink-0">
                       <span className="block text-lg font-black text-slate-800 dark:text-white">{bus.departureTime}</span>
@@ -751,14 +725,13 @@ export default function TicketPage() {
                   </div>
                 </div>
 
-                {/* EXPANDED DETAILS */}
                 {isExpanded && (
                   <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 cursor-default" onClick={(e) => e.stopPropagation()}>
                     <div className="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide">
                       {[
                           {id: 'points', label: 'Titik Naik/Turun'},
                           {id: 'photos', label: 'Foto & Info'},
-                          {id: 'reviews', label: 'Ulasan'}, // NEW TAB
+                          {id: 'reviews', label: 'Ulasan'}, 
                           {id: 'policies', label: 'Kebijakan'},
                       ].map(tab => (
                           <button 
@@ -821,13 +794,11 @@ export default function TicketPage() {
                                                 fill 
                                                 className="object-cover group-hover:scale-110 transition duration-500" 
                                               />
-                                              {/* Overlay jika ada lebih banyak foto */}
                                               {i === 2 && allImages.length > 3 && (
                                                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                                       <span className="text-white font-bold text-sm">+{ allImages.length - 3 } Foto</span>
                                                   </div>
                                               )}
-                                              {/* Icon Play jika video */}
                                               {img.type === 'video' && (
                                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                                    <div className="bg-white/20 backdrop-blur-md p-2 rounded-full">
@@ -853,7 +824,6 @@ export default function TicketPage() {
                           </div>
                       )}
 
-                      {/* NEW REVIEWS TAB */}
                       {activeTab === 'reviews' && (
                           <div className="space-y-4">
                               {partnerData?.reviews && partnerData.reviews.length > 0 ? (
@@ -943,5 +913,17 @@ export default function TicketPage() {
       )}
 
     </div>
+  );
+}
+
+export default function TicketPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center font-bold text-slate-500 dark:bg-slate-950">
+        Memuat Data Tiket...
+      </div>
+    }>
+      <TicketContent />
+    </Suspense>
   );
 }
