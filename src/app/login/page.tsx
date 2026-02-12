@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function LoginContent() {
@@ -13,13 +13,36 @@ function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
 
+  // State untuk menyimpan pesan error spesifik per kolom
+  const [errors, setErrors] = useState({
+    email: "",
+    password: ""
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({ email: "", password: "" });
+
+    let newErrors = { email: "", password: "" };
+    let hasError = false;
+
+    if (!email.trim()) {
+      newErrors.email = "Email wajib diisi";
+      hasError = true;
+    }
+    if (!password.trim()) {
+      newErrors.password = "Kata sandi wajib diisi";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     setTimeout(() => {
@@ -33,7 +56,7 @@ function LoginContent() {
             foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
           }
         } catch (err) {
-          console.error("Error parsing users", err);
+          console.error(err);
         }
       }
 
@@ -67,16 +90,38 @@ function LoginContent() {
           router.push("/");
         }
       } else {
-        setError("Email atau password salah!");
+        setErrors({ 
+          email: "Email atau password salah", 
+          password: "Email atau password salah" 
+        });
         setLoading(false);
       }
     }, 1000);
   };
 
   const autoFill = (role: 'admin' | 'mitra' | 'user') => {
+    setErrors({ email: "", password: "" });
     if (role === 'admin') { setEmail("admin@skybus.id"); setPassword("admin123"); }
     if (role === 'mitra') { setEmail("mitra@sinarjaya.com"); setPassword("mitra123"); }
     if (role === 'user') { setEmail("user@gmail.com"); setPassword("user123"); }
+  };
+
+  // Komponen Bubble Error
+  const ErrorBubble = ({ message }: { message: string }) => (
+    <div className="absolute top-full left-0 mt-2 w-full z-10 animate-in fade-in slide-in-from-top-1">
+      <div className="bg-red-500 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-lg relative">
+        <div className="absolute -top-1.5 left-4 w-3 h-3 bg-red-500 rotate-45"></div>
+        {message}
+      </div>
+    </div>
+  );
+
+  const getInputClass = (isError: boolean) => {
+    return `w-full px-4 py-3 rounded-xl text-sm font-semibold focus:outline-none transition dark:text-white ${
+      isError
+        ? "bg-red-50 dark:bg-red-900/10 border border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-500"
+        : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-blue-600 dark:focus:border-blue-500"
+    }`;
   };
 
   return (
@@ -114,27 +159,43 @@ function LoginContent() {
             </div>
           )}
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl flex items-center gap-2 text-sm font-bold animate-pulse">
-              <AlertCircle className="w-4 h-4" /> {error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="nama@email.com" />
+          <form onSubmit={handleLogin} className="space-y-6" noValidate>
+            <div className="space-y-6">
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase mb-1 ${errors.email ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Email</label>
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if(errors.email) setErrors({...errors, email: ""});
+                  }} 
+                  className={getInputClass(!!errors.email)}
+                  placeholder="nama@email.com" 
+                />
+                {errors.email && <ErrorBubble message={errors.email} />}
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Password</label>
+              
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase mb-1 ${errors.password ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Password</label>
                 <div className="relative">
-                  <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 transition dark:text-white" placeholder="••••••••" />
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password} 
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if(errors.password) setErrors({...errors, password: ""});
+                    }} 
+                    className={getInputClass(!!errors.password)}
+                    placeholder="••••••••" 
+                  />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {errors.password && <ErrorBubble message={errors.password} />}
               </div>
+
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600" />
@@ -145,6 +206,7 @@ function LoginContent() {
                 </Link>
               </div>
             </div>
+
             <button type="submit" disabled={loading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? "MEMPROSES..." : "MASUK"}
             </button>
