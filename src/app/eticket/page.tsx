@@ -2,36 +2,36 @@
 
 import React, { useRef, useState, Suspense } from 'react';
 import { 
-  ArrowLeft, Download, Share2, MapPin, User, Bus, QrCode, ShieldCheck, Check, Loader2 
+  ArrowLeft, Download, Share2, MapPin, User, Bus, ShieldCheck, Check, Loader2 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { BUS_DATA } from '../../constants/data'; // Mengambil data dari modul yang sudah ada
+import QRCode from 'react-qr-code';
+import { BUS_DATA } from '../../constants/data';
 
 function ETicketContent() {
   const searchParams = useSearchParams();
   const ticketRef = useRef<HTMLDivElement>(null);
   
-  // State untuk feedback button tanpa popup
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
-  // Ambil ID dari URL
   const ticketId = searchParams.get('id');
-  
-  // Cari data bus yang sesuai dari constants/data.ts, fallback ke data pertama jika tidak ketemu
-  const busInfo = BUS_DATA.find(b => b.id === ticketId) || BUS_DATA[1]; // Fallback ke Sinar Jaya Suite Class (index 1) agar terlihat bagus
+  const busInfo = BUS_DATA.find(b => b.id === ticketId) || BUS_DATA[1];
 
-  // Gabungkan data statis (mockup) dengan data real dari constants
+  // Logic: Cek apakah ID sudah punya prefix "SKY-" atau belum
+  const rawId = ticketId ? ticketId.toUpperCase() : "8829301";
+  const displayCode = rawId.startsWith("SKY-") ? rawId : `SKY-${rawId}`;
+
   const ticketData = {
-    bookingCode: "SKY-" + (ticketId ? ticketId.toUpperCase() : "8829301"),
+    bookingCode: displayCode,
     busName: busInfo.name,
     operator: busInfo.operator,
     class: busInfo.type,
-    plateNumber: "B 7789 TGA", // Data mockup
-    seat: "1A", // Data mockup
-    passenger: "Budi Santoso", // Data mockup (ideally from localStorage/User Context)
+    plateNumber: "B 7789 TGA",
+    seat: "1A",
+    passenger: "Budi Santoso",
     date: "10 Feb 2026",
     time: busInfo.departureTime,
     arrivalTime: busInfo.arrivalTime,
@@ -42,28 +42,21 @@ function ETicketContent() {
 
   const handleDownload = () => {
     if (downloadStatus !== 'idle') return;
-    
     setDownloadStatus('loading');
-    // Simulasi proses download
     setTimeout(() => {
       setDownloadStatus('success');
-      // Reset status setelah 2 detik
       setTimeout(() => setDownloadStatus('idle'), 2000);
     }, 1500);
   };
 
   const handleShare = () => {
-    // Copy URL ke clipboard
     navigator.clipboard.writeText(window.location.href);
     setShareStatus('copied');
-    // Reset status setelah 2 detik
     setTimeout(() => setShareStatus('idle'), 2000);
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
-      
-      {/* Header disamakan dengan /about (Rata Kiri) */}
       <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
         <Link href="/my-tickets" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -77,7 +70,7 @@ function ETicketContent() {
           <p className="text-sm text-slate-500">Tunjukkan QR Code ini kepada petugas.</p>
         </div>
 
-        <div ref={ticketRef} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden relative border border-slate-200 dark:border-slate-800 transition-colors">
+        <div ref={ticketRef} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden relative border border-slate-200 dark:border-slate-800 transition-colors z-10">
           <div className="bg-blue-600 p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
             <div className="relative z-10 flex justify-between items-start">
@@ -104,10 +97,10 @@ function ETicketContent() {
             </div>
 
             <div className="relative pl-6 space-y-8 mb-8">
-              <div className="absolute left-[7px] top-2 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+              <div className="absolute left-1.75 top-2 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
               
               <div className="relative z-10">
-                <div className="absolute -left-[24px] top-1 w-4 h-4 bg-white dark:bg-slate-900 border-4 border-blue-500 rounded-full"></div>
+                <div className="absolute -left-6 top-1 w-4 h-4 bg-white dark:bg-slate-900 border-4 border-blue-500 rounded-full"></div>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs text-slate-400 font-bold uppercase">Berangkat</p>
@@ -121,7 +114,7 @@ function ETicketContent() {
               </div>
 
               <div className="relative z-10">
-                <div className="absolute -left-[24px] top-1 w-4 h-4 bg-blue-500 border-4 border-white dark:border-slate-900 rounded-full shadow-md"></div>
+                <div className="absolute -left-6top-1 w-4 h-4 bg-blue-500 border-4 border-white dark:border-slate-900 rounded-full shadow-md"></div>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs text-slate-400 font-bold uppercase">Tiba</p>
@@ -150,8 +143,13 @@ function ETicketContent() {
             </div>
 
             <div className="flex flex-col items-center justify-center pt-2">
-              <div className="bg-white p-3 rounded-xl border-2 border-slate-100 mb-3">
-                 <QrCode className="w-32 h-32 text-slate-900" />
+              <div className="bg-white p-3 rounded-xl border-2 border-slate-100 mb-3 w-40 h-40 flex items-center justify-center">
+                <QRCode 
+                  value={ticketData.bookingCode} 
+                  size={256}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  viewBox={`0 0 256 256`}
+                />
               </div>
               <p className="text-xs font-bold text-slate-400 text-center">Scan QR ini di loket untuk check-in</p>
             </div>
@@ -162,7 +160,7 @@ function ETicketContent() {
           <div className="absolute left-4 right-4 top-1/2 h-px border-t-2 border-dashed border-slate-200 dark:border-slate-700"></div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-2 gap-4 mt-10">
           <button 
             onClick={handleDownload}
             disabled={downloadStatus !== 'idle'}
