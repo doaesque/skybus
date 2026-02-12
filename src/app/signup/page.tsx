@@ -38,11 +38,9 @@ function SignupContent() {
 
     setLoading(true);
     setTimeout(() => {
-      // Ambil data users yang sudah ada (jika ada)
       const existingUsersJSON = localStorage.getItem("skybus_users");
       const existingUsers = existingUsersJSON ? JSON.parse(existingUsersJSON) : [];
 
-      // Cek apakah email sudah terdaftar
       const emailExists = existingUsers.some((u: any) => u.email === formData.email);
       
       if (emailExists) {
@@ -51,20 +49,17 @@ function SignupContent() {
         return;
       }
 
-      // Buat data user baru
       const newUser = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password, // Disimpan untuk simulasi login
+        password: formData.password, 
         role: "user"
       };
 
-      // Simpan ke array users
       const updatedUsers = [...existingUsers, newUser];
       localStorage.setItem("skybus_users", JSON.stringify(updatedUsers));
 
-      // Auto-login session (opsional, tapi bagus untuk UX)
       localStorage.setItem("userRole", "user");
       localStorage.setItem("skybus_session", "skb_user_new_" + Date.now());
 
