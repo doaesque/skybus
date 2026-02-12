@@ -4,18 +4,38 @@ import React, { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { BUS_DATA, ALL_PARTNERS, PROMO_DATA } from '@/constants/data';
 import { 
-  CreditCard, CheckCircle, ArrowLeft, Loader2, Lock, ShieldCheck, 
+  CheckCircle, Loader2, Lock, ShieldCheck, 
   Ticket, Clock, ChevronDown, ChevronUp, Tag, Copy, Smartphone, 
-  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw
+  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw, X
 } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
 
-// --- Components ---
+// --- Components Helper ---
+
+const AlertModal = ({ isOpen, message, onClose }: { isOpen: boolean; message: string; onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="w-5 h-5" />
+        </button>
+        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-in zoom-in">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h3 className="text-lg font-black mb-2 text-slate-800 dark:text-white">Perhatian</h3>
+        <p className="text-sm text-slate-500 mb-6 leading-relaxed">{message}</p>
+        <button onClick={onClose} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold transition hover:opacity-90">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const PaymentMethodItem = ({ 
-  id, label, icon: Icon, description, isSelected, onSelect, children 
+  label, icon: Icon, description, isSelected, onSelect, children 
 }: { 
   id: string; label: string; icon: any; description: string; isSelected: boolean; onSelect: () => void; children?: React.ReactNode 
 }) => (
@@ -77,7 +97,6 @@ const SuccessModal = ({ isOpen }: { isOpen: boolean }) => {
     );
 };
 
-// Data instruksi yang dinamis dan spesifik
 const getInstructions = (method: string, subMethod: string) => {
     if (method === 'qris') {
         return [
@@ -111,12 +130,11 @@ const getInstructions = (method: string, subMethod: string) => {
         } else if (subMethod === 'Bank Lain') {
             return [
                 { title: "ATM Bersama / Prima / Alto", desc: "Masuk ke menu Transfer Antar Bank pada ATM atau Mobile Banking." },
-                { title: "Pilih Bank Permata (013)", desc: "SkyBus menggunakan Virtual Account Bank Permata untuk transfer antar bank." },
-                { title: "Masukkan Nomor VA", desc: "Input nomor VA yang tertera di atas." },
+                { title: "Pilih Bank Tujuan", desc: "Pilih Bank Permata (Kode: 013). SkyBus menggunakan VA Bank Permata untuk transfer antar bank." },
+                { title: "Masukkan Nomor VA", desc: "Input nomor VA yang tertera di atas sebagai rekening tujuan." },
                 { title: "Konfirmasi", desc: "Pastikan detail pembayaran benar lalu bayar." }
             ];
         }
-        // Default VA
         return [
             { title: "ATM / Mobile Banking", desc: `Masuk ke menu pembayaran Virtual Account bank ${subMethod}.` },
             { title: "Input Nomor VA", desc: "Masukkan nomor yang tertera di layar." },
@@ -158,7 +176,9 @@ const PaymentInstruction = ({ method, subMethod }: { method: string, subMethod: 
             </div>
         </div>
     );
-}
+};
+
+// --- Main Content Component ---
 
 function PaymentContent() {
   const searchParams = useSearchParams();
@@ -169,7 +189,9 @@ function PaymentContent() {
   const seats = seatString.split(',');
   const pax = parseInt(searchParams.get('pax') || '1');
   const date = searchParams.get('date');
+  const returnDate = searchParams.get('returnDate');
   const hasInfant = searchParams.get('hasInfant') === 'true';
+  const isRoundTrip = !!returnDate;
   
   const bus = BUS_DATA.find(b => b.id === busId);
   const partner = ALL_PARTNERS.find(p => p.name === bus?.operator);
@@ -184,6 +206,9 @@ function PaymentContent() {
   const [voucherError, setVoucherError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // New State for Alert Modal
+  const [alertInfo, setAlertInfo] = useState({ isOpen: false, message: '' });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -207,7 +232,7 @@ function PaymentContent() {
 
   if (!bus) return null;
 
-  const ticketPrice = bus.price * seats.length;
+  const ticketPrice = bus.price * seats.length * (isRoundTrip ? 2 : 1);
   const serviceFee = 2500; 
   const discountAmount = appliedVoucher ? appliedVoucher.amount : 0;
   const totalPrice = ticketPrice + serviceFee - discountAmount;
@@ -233,7 +258,8 @@ function PaymentContent() {
   const handleCreatePayment = () => {
       if (!selectedMethod) return;
       if (selectedMethod === 'va' && !subMethod) {
-          alert("Pilih bank terlebih dahulu");
+          // REPLACED ALERT WITH MODAL
+          setAlertInfo({ isOpen: true, message: 'Silakan pilih Bank terlebih dahulu untuk melanjutkan pembayaran VA.' });
           return;
       }
       setIsProcessing(true);
@@ -265,15 +291,13 @@ function PaymentContent() {
     <div className="max-w-4xl mx-auto px-4 py-8 font-sans min-h-screen pb-32">
        <TimeoutModal isOpen={showTimeout} />
        <SuccessModal isOpen={showSuccess} />
+       <AlertModal 
+            isOpen={alertInfo.isOpen} 
+            message={alertInfo.message} 
+            onClose={() => setAlertInfo({ ...alertInfo, isOpen: false })} 
+       />
 
-       {/* Top Bar Timer */}
-       <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl p-3 flex justify-between items-center mb-6 sticky top-24 z-30 shadow-sm backdrop-blur-md">
-           <span className="text-sm font-bold text-red-600 flex items-center gap-2">
-               <Clock className="w-4 h-4" /> Selesaikan pembayaran dalam
-           </span>
-           <span className="font-mono text-xl font-black text-red-600">{formatTime(timeLeft)}</span>
-       </div>
-
+       {/* Removed items-start to allow columns to stretch, enabling sticky behavior inside */}
        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            
            <div className="md:col-span-2 space-y-6">
@@ -291,6 +315,9 @@ function PaymentContent() {
                                    <h4 className="font-bold text-lg leading-tight">{bus.name}</h4>
                                    <p className="text-sm text-slate-500">{bus.type}</p>
                                    <p className="text-xs text-slate-400 mt-1">{date ? new Date(date).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'}) : ''} • {bus.departureTime}</p>
+                                   {isRoundTrip && (
+                                       <span className="inline-block mt-1 bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded">Pulang Pergi</span>
+                                   )}
                                </div>
                            </div>
                        </div>
@@ -344,42 +371,53 @@ function PaymentContent() {
                {/* STEP 2: INSTRUCTION VIEW */}
                {paymentStep === 'instruction' && (
                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm text-center animate-in slide-in-from-right">
-                       <div className="mb-6 relative">
-                           <h3 className="font-bold text-xl mb-2">Selesaikan Pembayaran</h3>
-                           <p className="text-slate-500 text-sm">Lakukan pembayaran sebelum waktu habis.</p>
-                       </div>
+                       
+                       <div className="mb-8">
+                           <h3 className="font-bold text-xl mb-1">Selesaikan Pembayaran</h3>
+                           <p className="text-slate-500 text-sm mb-6">Lakukan pembayaran sebelum waktu habis.</p>
 
-                       <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 mb-8 inline-block w-full max-w-sm">
                            {selectedMethod === 'qris' && (
-                               <div>
-                                   <p className="font-bold text-sm mb-4 uppercase tracking-widest text-slate-400">Scan QRIS</p>
-                                   <div className="bg-white p-4 rounded-xl shadow-sm mb-4 inline-block">
+                               <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm inline-block relative overflow-hidden">
+                                   <div className="w-full bg-blue-600 h-2 absolute top-0 left-0"></div>
+                                   <div className="mb-4">
+                                      <div className="font-black text-lg tracking-widest text-slate-800 dark:text-white">SKYBUS PAY</div>
+                                   </div>
+                                   <div className="bg-white p-2 rounded-xl border-2 border-slate-900 inline-block mb-4">
                                       <QRCode 
                                         value={`SKYBUS-PAY-${busId}-${totalPrice}`} 
                                         size={180}
                                         style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                                       />
                                    </div>
-                                   <p className="text-xs text-slate-500">Total: Rp {totalPrice.toLocaleString('id-ID')}</p>
+                                   <p className="font-bold text-lg text-slate-900 dark:text-white">Rp {totalPrice.toLocaleString('id-ID')}</p>
+                                   <p className="text-xs text-slate-400">Scan dengan E-Wallet Anda</p>
                                </div>
                            )}
+
                            {selectedMethod === 'va' && (
-                               <div>
-                                   <div className="flex items-center justify-between mb-2"><span className="font-bold text-lg">{subMethod} Virtual Account</span><Image src={`/img/bank-placeholder.png`} width={40} height={20} alt={subMethod} className="bg-white rounded" /></div>
-                                   <p className="text-xs text-slate-400 mb-4 text-left">Nomor VA:</p>
-                                   <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mb-4"><span className="font-mono text-xl font-black tracking-wider text-blue-600">8801234567890</span><button className="text-slate-400 hover:text-blue-600"><Copy className="w-5 h-5"/></button></div>
+                               <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 max-w-sm mx-auto">
+                                   <div className="flex items-center justify-between mb-2">
+                                       <span className="font-bold text-lg">{subMethod} Virtual Account</span>
+                                   </div>
+                                   <p className="text-xs text-slate-400 mb-2 text-left uppercase font-bold tracking-wider">Nomor Virtual Account</p>
+                                   <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-2 shadow-sm">
+                                       <span className="font-mono text-2xl font-black tracking-wider text-blue-600">8801234567890</span>
+                                       <button className="text-slate-400 hover:text-blue-600 transition"><Copy className="w-5 h-5"/></button>
+                                   </div>
+                                   <p className="text-xs text-slate-400 text-left">Total: <span className="text-slate-900 dark:text-white font-bold">Rp {totalPrice.toLocaleString('id-ID')}</span></p>
                                </div>
                            )}
+
                            {selectedMethod === 'retail' && (
-                               <div>
-                                   <p className="font-bold text-sm mb-4 uppercase tracking-widest text-slate-400">Kode Pembayaran</p>
-                                   <div className="text-3xl font-mono font-black text-orange-600 bg-orange-50 p-4 rounded-xl mb-4 border border-orange-200">SKY-99281</div>
+                               <div className="bg-orange-50 dark:bg-orange-900/10 p-6 rounded-2xl border border-orange-200 dark:border-orange-800 max-w-sm mx-auto">
+                                   <p className="font-bold text-sm mb-4 uppercase tracking-widest text-orange-600 dark:text-orange-400">Kode Pembayaran</p>
+                                   <div className="text-4xl font-mono font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 p-4 rounded-xl mb-4 border-2 border-orange-500 border-dashed">SKY-99281</div>
                                    <p className="text-xs text-slate-500">Tunjukkan kode ini ke kasir Indomaret/Alfamart terdekat.</p>
                                </div>
                            )}
                        </div>
 
-                       <div className="space-y-3 max-w-sm mx-auto">
+                       <div className="space-y-3 max-w-sm mx-auto mb-8">
                            <button onClick={handleConfirmPayment} disabled={isProcessing} className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 dark:shadow-none transition flex items-center justify-center gap-2">{isProcessing ? <Loader2 className="w-5 h-5 animate-spin"/> : <CheckCircle className="w-5 h-5"/>} Saya Sudah Bayar</button>
                            <button onClick={() => setPaymentStep('select')} className="w-full py-3 text-slate-500 font-bold hover:text-blue-600 transition flex items-center justify-center gap-2 text-sm"><RotateCcw className="w-4 h-4" /> Ganti Metode Pembayaran</button>
                        </div>
@@ -390,27 +428,41 @@ function PaymentContent() {
                )}
            </div>
 
-           {/* RIGHT COLUMN */}
+           {/* RIGHT COLUMN (Sticky Sidebar) */}
            <div className="md:col-span-1">
-               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg sticky top-28">
-                   <h3 className="font-bold text-lg mb-4">Rincian Harga</h3>
-                   <div className="space-y-3 text-sm mb-6">
-                       <div className="flex justify-between"><span className="text-slate-500">Tiket ({pax}x)</span><span>Rp {ticketPrice.toLocaleString('id-ID')}</span></div>
-                       <div className="flex justify-between"><span className="text-slate-500">Biaya Layanan</span><span>Rp {serviceFee.toLocaleString('id-ID')}</span></div>
-                       {hasInfant && (<div className="flex justify-between"><span className="text-slate-500">Bayi (Infant)</span><span className="text-green-600 font-bold">Gratis</span></div>)}
-                       {appliedVoucher && (<div className="flex justify-between text-green-600"><span className="flex items-center gap-1"><Tag className="w-3 h-3"/> Diskon</span><span>- Rp {appliedVoucher.amount.toLocaleString('id-ID')}</span></div>)}
-                       <div className="border-t border-dashed pt-3 mt-2 flex justify-between font-black text-xl"><span>Total</span><span className="text-blue-600">Rp {totalPrice.toLocaleString('id-ID')}</span></div>
+               <div className="sticky top-24 space-y-4"> 
+                   
+                   {/* TIMER */}
+                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                       <span className="text-sm font-bold text-red-600 flex items-center gap-2">
+                           <Clock className="w-5 h-5" /> Sisa Waktu
+                       </span>
+                       <span className="font-mono text-xl font-black text-red-600">{formatTime(timeLeft)}</span>
                    </div>
-                   {paymentStep === 'select' && (
-                       <button onClick={handleCreatePayment} disabled={isProcessing || !selectedMethod} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95">{isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}</button>
-                   )}
-                   <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-center"><ShieldCheck className="w-3 h-3" /> Transaksi Anda dilindungi enkripsi SSL 256-bit.</div>
+
+                   {/* RINCIAN HARGA CARD */}
+                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg">
+                       <h3 className="font-bold text-lg mb-4">Rincian Harga</h3>
+                       <div className="space-y-3 text-sm mb-6">
+                           <div className="flex justify-between"><span className="text-slate-500">Tiket ({pax}x)</span><span>Rp {ticketPrice.toLocaleString('id-ID')}</span></div>
+                           <div className="flex justify-between"><span className="text-slate-500">Biaya Layanan</span><span>Rp {serviceFee.toLocaleString('id-ID')}</span></div>
+                           {hasInfant && (<div className="flex justify-between"><span className="text-slate-500">Bayi (Infant)</span><span className="text-green-600 font-bold">Gratis</span></div>)}
+                           {appliedVoucher && (<div className="flex justify-between text-green-600"><span className="flex items-center gap-1"><Tag className="w-3 h-3"/> Diskon</span><span>- Rp {appliedVoucher.amount.toLocaleString('id-ID')}</span></div>)}
+                           <div className="border-t border-dashed pt-3 mt-2 flex justify-between font-black text-xl"><span>Total</span><span className="text-blue-600">Rp {totalPrice.toLocaleString('id-ID')}</span></div>
+                       </div>
+                       {paymentStep === 'select' && (
+                           <button onClick={handleCreatePayment} disabled={isProcessing || !selectedMethod} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95">{isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}</button>
+                       )}
+                       <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-center"><ShieldCheck className="w-3 h-3" /> Transaksi Anda dilindungi enkripsi SSL 256-bit.</div>
+                   </div>
                </div>
            </div>
        </div>
     </div>
   );
 }
+
+// --- Default Export ---
 
 export default function PaymentPage() {
     return (
