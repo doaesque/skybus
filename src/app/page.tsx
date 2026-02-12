@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
-  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, X, Calendar
+  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, Calendar
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -408,22 +408,26 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 py-10 border-b border-slate-100 dark:border-slate-800">
+      <section className="bg-white dark:bg-slate-900 py-16 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+          <div className="text-center mb-12">
+            <span className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">Keunggulan Kami</span>
+            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight mt-4">Pesan Tiket Tanpa Ribet</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
             {[
               { icon: <Clock className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Jadwal Real-Time", desc: "Informasi jadwal bus terupdate & akurat" },
               { icon: <Armchair className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Pilih Kursi", desc: "Bebas pilih kursi idaman tanpa biaya" },
               { icon: <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "Pembayaran Aman", desc: "Jaminan transaksi 100% aman" },
               { icon: <Ticket className="w-8 h-8 text-blue-600 dark:text-blue-400" />, title: "E-Ticket Instan", desc: "Tiket terbit instan & bebas cetak" }
             ].map((item, i) => (
-              <div key={i} className="flex flex-col items-center gap-3 group">
-                <div className="bg-blue-50 dark:bg-slate-800 p-5 rounded-full group-hover:scale-110 transition duration-300 shadow-sm">
+              <div key={i} className="flex flex-col items-center gap-2 cursor-default">
+                <div className="bg-blue-50 dark:bg-slate-800 p-5 rounded-full mb-2 border border-blue-100 dark:border-slate-700">
                   {item.icon}
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-50 mx-auto">{item.desc}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px] mx-auto">{item.desc}</p>
                 </div>
               </div>
             ))}
