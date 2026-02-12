@@ -206,6 +206,7 @@ function TicketContent() {
     if (selectedSort === 'Terhemat') data.sort((a, b) => a.price - b.price);
     if (selectedSort === 'Tercepat') data.sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
     if (selectedSort === 'Berangkat Pagi') data.sort((a, b) => parseInt(a.departureTime.replace('.', '').replace(':', '')) - parseInt(b.departureTime.replace('.', '').replace(':', '')));
+    if (selectedSort === 'Rating Tinggi') data.sort((a, b) => b.rating - a.rating);
     
     return data;
   }, [selectedSort, filters, searchParams, busesOnRoute]);
@@ -494,18 +495,11 @@ function TicketContent() {
             <ChevronRight className="w-8 h-8" />
           </button>
           <div className="relative max-w-5xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            {lightboxImages[lightboxIndex].type === 'video' ? (
-              <div className="w-full aspect-video bg-black rounded-lg flex items-center justify-center border border-white/10">
-                <PlayCircle className="w-20 h-20 text-white/50" />
-                <p className="absolute bottom-4 text-white/50 text-sm">Video Playback Placeholder</p>
-              </div>
-            ) : (
-              <img
-                src={lightboxImages[lightboxIndex].src}
-                alt="Gallery Preview"
-                className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
-              />
-            )}
+            <img
+              src={lightboxImages[lightboxIndex].src}
+              alt="Gallery Preview"
+              className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
+            />
             {lightboxImages[lightboxIndex].title && (
               <p className="text-white mt-4 font-medium text-lg text-center">{lightboxImages[lightboxIndex].title}</p>
             )}
