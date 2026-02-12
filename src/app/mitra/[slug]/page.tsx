@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft, Star, Bus, MapPin, ShieldCheck, Clock,
-  Info, FileText, Image as ImageIcon, CheckCircle,
+  Info, FileText, ImageIcon, CheckCircle,
   XCircle, PlayCircle, Phone, Mail, Building2, Map as MapIcon, X, Filter, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ export default function MitraDetailPage() {
   const [partner, setPartner] = useState<typeof ALL_PARTNERS[0] | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'policies'>('info');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [reviewFilter, setReviewFilter] = useState<'All' | 'With Photo' | '5 Star' | '4 Star' | '3 Star'>('All');
+  const [reviewFilter, setReviewFilter] = useState<'All' | 'With Photo' | '5 Star' | '4 Star' | '3 Star' | '2 Star' | '1 Star'>('All');
 
   useEffect(() => {
     if (params.slug) {
@@ -69,7 +69,9 @@ export default function MitraDetailPage() {
     if (reviewFilter === 'With Photo') return r.images && r.images.length > 0;
     if (reviewFilter === '5 Star') return r.rating === 5;
     if (reviewFilter === '4 Star') return r.rating === 4;
-    if (reviewFilter === '3 Star') return r.rating <= 3;
+    if (reviewFilter === '3 Star') return r.rating === 3;
+    if (reviewFilter === '2 Star') return r.rating === 2;
+    if (reviewFilter === '1 Star') return r.rating === 1;
     return true;
   }) : [];
 
@@ -189,7 +191,7 @@ export default function MitraDetailPage() {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-auto md:h-87.5">
                       <div
-                        className="md:col-span-2 md:h-full aspect-video md:aspect-auto rounded-2xl overflow-hidden relative group cursor-pointer border border-slate-200 dark:border-slate-700 bg-black"
+                        className={`md:h-full aspect-video md:aspect-auto rounded-2xl overflow-hidden relative group cursor-pointer border border-slate-200 dark:border-slate-700 bg-black ${partner.gallery.length === 1 ? 'md:col-span-3' : 'md:col-span-2'}`}
                         onClick={() => setLightboxIndex(0)}
                       >
                         <img
@@ -208,22 +210,25 @@ export default function MitraDetailPage() {
                           {partner.gallery?.[0].title}
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-1 gap-3 h-full">
-                        {partner.gallery?.slice(1, 3).map((media, i) => (
-                          <div
-                            key={i}
-                            onClick={() => setLightboxIndex(i + 1)}
-                            className="relative rounded-2xl overflow-hidden cursor-pointer group h-32 md:h-auto border border-slate-200 dark:border-slate-700"
-                          >
-                            <img src={media.src} alt={media.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
-                            {i === 1 && (partner.gallery?.length || 0) > 3 && (
-                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">+{ (partner.gallery?.length || 0) - 3 } Foto</span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      
+                      {partner.gallery.length > 1 && (
+                        <div className={`grid gap-3 h-full ${partner.gallery.length === 2 ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-1'}`}>
+                          {partner.gallery?.slice(1, 3).map((media, i) => (
+                            <div
+                              key={i}
+                              onClick={() => setLightboxIndex(i + 1)}
+                              className="relative rounded-2xl overflow-hidden cursor-pointer group h-32 md:h-auto border border-slate-200 dark:border-slate-700"
+                            >
+                              <img src={media.src} alt={media.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+                              {i === 1 && (partner.gallery?.length || 0) > 3 && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                  <span className="text-white font-bold text-sm">+{ (partner.gallery?.length || 0) - 3 } Foto</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </section>
                 )}
@@ -266,13 +271,15 @@ export default function MitraDetailPage() {
             {activeTab === 'reviews' && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex flex-wrap gap-2 pb-2">
-                  {['All', 'With Photo', '5 Star', '4 Star', '3 Star'].map((f) => (
+                  {['All', 'With Photo', '5 Star', '4 Star', '3 Star', '2 Star', '1 Star'].map((f) => (
                     <button
                       key={f}
                       onClick={() => setReviewFilter(f as any)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition ${reviewFilter === f ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'}`}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${reviewFilter === f ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'}`}
                     >
-                      {f === 'With Photo' ? '📷 Media' : f === '5 Star' ? '5 ★' : f === '4 Star' ? '4 ★' : f === '3 Star' ? '< 4 ★' : 'Semua'}
+                      {f === 'All' && 'Semua'}
+                      {f === 'With Photo' && <><ImageIcon className="w-3 h-3" /> Media</>}
+                      {f.includes('Star') && <>{f.split(' ')[0]} <Star className="w-3 h-3" fill="currentColor" /></>}
                     </button>
                   ))}
                 </div>
@@ -364,7 +371,7 @@ export default function MitraDetailPage() {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                   Pastikan kursi Anda aman bersama {partner.name}.
                 </p>
-                <Link href={`/ticket?operator=${partner.name}`}>
+                <Link href={`/ticket?operator=${encodeURIComponent(partner.name)}`}>
                   <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide transition shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2">
                     Cari Jadwal
                   </button>
@@ -401,19 +408,16 @@ export default function MitraDetailPage() {
                   <h3 className="font-black text-sm uppercase tracking-widest text-slate-400 mb-4">Titik Keberangkatan</h3>
                   <div className="space-y-3">
                     {partner.departurePoints.map((point: any, idx: number) => (
-                      <a
+                      <div
                         key={idx}
-                        href={point.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 group transition"
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 group transition cursor-default"
                       >
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-slate-400 group-hover:text-blue-500" />
                           <span className="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-600">{point.name}</span>
                         </div>
                         <MapIcon className="w-3 h-3 text-slate-300 group-hover:text-blue-500" />
-                      </a>
+                      </div>
                     ))}
                   </div>
                 </div>
