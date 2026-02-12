@@ -1,14 +1,16 @@
 "use client";
 
-import React, { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { BUS_DATA } from '@/constants/data';
-import { CheckCircle, Download, Home, Share2, Bus, Ticket } from 'lucide-react';
+import { CheckCircle, Download, Share2, Bus, Star, X, Home, Send, MessageSquare, Ticket } from 'lucide-react';
 import Link from 'next/link';
 import QRCode from 'react-qr-code'; 
 
 function ETicketContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  
   const busId = searchParams.get('busId');
   const seats = searchParams.get('seats');
   const date = searchParams.get('date');
@@ -18,31 +20,55 @@ function ETicketContent() {
   const bus = BUS_DATA.find(b => b.id === busId) || BUS_DATA[0]; 
   const isNewSuccess = status === 'success';
 
-  // Logika tombol kembali
+  // State untuk Review
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [isReviewSubmitted, setIsReviewSubmitted] = useState(false);
+
+  // Logika navigasi kembali
   const backLink = source === 'payment' ? '/' : '/my-tickets';
-  const backText = source === 'payment' ? 'Kembali ke Beranda' : 'Kembali ke Tiket Saya';
+
+  const handleSubmitReview = () => {
+    if (rating === 0) return;
+    setIsReviewSubmitted(true);
+    // Di sini logika API call untuk simpan review
+    setTimeout(() => {
+        // Simulasi delay atau efek
+    }, 1000);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans py-10 px-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 transition-colors">
+      
+      {/* HEADER BARU (Sticky Top) */}
+      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+        <h1 className="font-black text-lg text-slate-800 dark:text-white flex items-center gap-2">
+            <Ticket className="w-5 h-5 text-blue-600" /> E-Tiket
+        </h1>
+        <Link href={backLink} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition text-slate-600 dark:text-slate-400">
+            {source === 'payment' ? <Home className="w-6 h-6" /> : <X className="w-6 h-6" />}
+        </Link>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 py-8">
         
-        {/* Notifikasi Sukses */}
+        {/* Notifikasi Sukses (Hanya muncul jika baru bayar) */}
         {isNewSuccess && (
             <div className="text-center mb-8 animate-in slide-in-from-top-4 fade-in duration-700">
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <CheckCircle className="w-10 h-10" />
+                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm animate-in zoom-in">
+                    <CheckCircle className="w-8 h-8" />
                 </div>
-                <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Transaksi Berhasil!</h1>
-                <p className="text-slate-500 text-sm">Tiket elektronik Anda sudah siap digunakan.</p>
+                <h2 className="text-xl font-black text-slate-800 dark:text-white mb-1">Transaksi Berhasil!</h2>
+                <p className="text-slate-500 text-sm">Tiket Anda aman tersimpan.</p>
             </div>
         )}
 
         {/* E-Ticket Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative transform transition hover:scale-[1.01] duration-300">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative transform transition hover:scale-[1.01] duration-300 mb-8">
             {/* Top Section */}
             <div className="bg-blue-600 p-6 text-white text-center relative overflow-hidden">
                 <div className="relative z-10">
-                    <h2 className="text-xs font-bold opacity-80 uppercase tracking-[0.2em] mb-1">Boarding Pass</h2>
+                    <h2 className="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em] mb-1">Boarding Pass</h2>
                     <h1 className="text-3xl font-black italic">SKYBUS<span className="text-amber-400">.</span></h1>
                 </div>
                 {/* Decorative Circles */}
@@ -113,23 +139,65 @@ function ETicketContent() {
             </div>
         </div>
 
-        {/* Action Buttons (Lebih Renggang) */}
-        <div className="mt-8 space-y-4">
-            <Link href={backLink} className="block">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 transform active:scale-95">
-                    {source === 'payment' ? <Home className="w-5 h-5" /> : <Ticket className="w-5 h-5" />} 
-                    {backText}
-                </button>
-            </Link>
-            
-            <div className="grid grid-cols-2 gap-4">
-                <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 transition">
-                    <Download className="w-4 h-4" /> Simpan PDF
-                </button>
-                <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 transition">
-                    <Share2 className="w-4 h-4" /> Bagikan
-                </button>
-            </div>
+        {/* --- REVIEW SECTION --- */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+            {!isReviewSubmitted ? (
+                <>
+                    <div className="text-center mb-6">
+                        <h3 className="font-bold text-lg mb-2">Bagaimana Pengalaman Anda?</h3>
+                        <p className="text-xs text-slate-500">Beri rating untuk operator {bus.operator}</p>
+                    </div>
+                    
+                    <div className="flex justify-center gap-3 mb-6">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button 
+                                key={star}
+                                onClick={() => setRating(star)}
+                                className="transition transform hover:scale-110 active:scale-95 focus:outline-none"
+                            >
+                                <Star 
+                                    className={`w-8 h-8 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`} 
+                                />
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="relative mb-4">
+                        <textarea 
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            placeholder="Ceritakan pengalaman perjalanan Anda..."
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-600 min-h-[100px] resize-none"
+                        ></textarea>
+                    </div>
+
+                    <button 
+                        onClick={handleSubmitReview}
+                        disabled={rating === 0}
+                        className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                    >
+                        <Send className="w-4 h-4" /> Kirim Ulasan
+                    </button>
+                </>
+            ) : (
+                <div className="text-center py-6 animate-in zoom-in duration-300">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <MessageSquare className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">Terima Kasih!</h3>
+                    <p className="text-xs text-slate-500">Ulasan Anda membantu kami menjadi lebih baik.</p>
+                </div>
+            )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-4">
+            <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 transition">
+                <Download className="w-4 h-4" /> Simpan PDF
+            </button>
+            <button className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 transition">
+                <Share2 className="w-4 h-4" /> Bagikan
+            </button>
         </div>
 
       </div>
