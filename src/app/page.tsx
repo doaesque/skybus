@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
-  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings
+  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, X
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { POPULAR_LOCATIONS, POPULAR_ROUTES } from "@/constants/data";
+import { POPULAR_LOCATIONS, POPULAR_ROUTES, LOCATIONS_DETAIL } from "@/constants/data";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -15,9 +15,15 @@ export default function Home() {
   const router = useRouter();
   const [tripType, setTripType] = useState<'one-way' | 'round-trip'>('one-way');
   const [passengers, setPassengers] = useState(1);
+  
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
+  
+  const [isOriginTyped, setIsOriginTyped] = useState(false);
+  const [isDestTyped, setIsDestTyped] = useState(false);
+
   const [departDate, setDepartDate] = useState("");
+  const [returnDate, setReturnDate] = useState(""); 
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
 
@@ -27,21 +33,61 @@ export default function Home() {
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestDropdown, setShowDestDropdown] = useState(false);
 
-  const originRef = useRef<HTMLDivElement>(null);
-  const destRef = useRef<HTMLDivElement>(null);
+  const originWrapperRef = useRef<HTMLDivElement>(null);
+  const destWrapperRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const originInputRef = useRef<HTMLInputElement>(null);
+  const destInputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const returnDateInputRef = useRef<HTMLInputElement>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
-  const isFormValid = origin.length > 0 && destination.length > 0 && departDate.length > 0 && passengers > 0;
+  // --- 1. GENERATE SEARCH OPTIONS (CITY + TERMINALS) ---
+  const searchOptions = useMemo(() => {
+    return POPULAR_LOCATIONS.flatMap(city => {
+      const terminals = LOCATIONS_DETAIL[city] || [];
+      const specificTerminals = terminals
+        .filter(t => t !== "Semua Lokasi")
+        .map(t => ({
+          label: `${t}, ${city}`,
+          city: city,
+          detail: t,
+          type: 'terminal' as const
+        }));
+      
+      return [
+        { label: city, city: city, detail: "Semua Lokasi", type: 'city' as const },
+        ...specificTerminals
+      ];
+    });
+  }, []);
+
+  const getCityFromLabel = (label: string) => {
+    const found = searchOptions.find(opt => opt.label === label);
+    return found ? found.city : label; 
+  };
+
+  const selectedOriginCity = getCityFromLabel(origin);
+  const selectedDestCity = getCityFromLabel(destination);
+
+  const isFormValid = 
+    origin.length > 0 && 
+    destination.length > 0 && 
+    selectedOriginCity !== selectedDestCity && 
+    departDate.length > 0 && 
+    (tripType === 'one-way' || returnDate.length > 0) &&
+    passengers > 0;
 
   useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    if (role) setIsLoggedIn(true);
+    const role = localStorage.getItem("userRole"); 
+    const session = localStorage.getItem("skybus_session"); 
+    if (role || session) setIsLoggedIn(true);
 
     function handleClickOutside(event: MouseEvent) {
-      if (originRef.current && !originRef.current.contains(event.target as Node)) setShowOriginDropdown(false);
-      if (destRef.current && !destRef.current.contains(event.target as Node)) setShowDestDropdown(false);
+      if (originWrapperRef.current && !originWrapperRef.current.contains(event.target as Node)) setShowOriginDropdown(false);
+      if (destWrapperRef.current && !destWrapperRef.current.contains(event.target as Node)) setShowDestDropdown(false);
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setShowUserDropdown(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -50,13 +96,21 @@ export default function Home() {
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
+    localStorage.removeItem("skybus_session");
+    localStorage.removeItem("user_name");
     setIsLoggedIn(false);
     setShowUserDropdown(false);
     router.refresh();
   };
 
-  const filteredOrigins = POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(origin.toLowerCase()));
-  const filteredDests = POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(destination.toLowerCase()));
+  // --- 2. FILTER LOGIC DENGAN RESET SUGGESTION ---
+  const filteredOrigins = isOriginTyped
+    ? searchOptions.filter(opt => opt.label.toLowerCase().includes(origin.toLowerCase()) && opt.city !== selectedDestCity)
+    : searchOptions.filter(opt => opt.city !== selectedDestCity);
+
+  const filteredDests = isDestTyped
+    ? searchOptions.filter(opt => opt.label.toLowerCase().includes(destination.toLowerCase()) && opt.city !== selectedOriginCity)
+    : searchOptions.filter(opt => opt.city !== selectedOriginCity);
 
   const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value);
@@ -82,6 +136,37 @@ export default function Home() {
     const temp = origin;
     setOrigin(destination);
     setDestination(temp);
+    setIsOriginTyped(false);
+    setIsDestTyped(false);
+  };
+
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (!origin) { setShowOriginDropdown(true); originInputRef.current?.focus(); return; }
+    if (!destination) { setShowDestDropdown(true); destInputRef.current?.focus(); return; }
+    // @ts-ignore
+    if (!departDate) { dateInputRef.current?.showPicker ? dateInputRef.current?.showPicker() : dateInputRef.current?.focus(); return; }
+    // @ts-ignore
+    if (tripType === 'round-trip' && !returnDate) { returnDateInputRef.current?.showPicker ? returnDateInputRef.current?.showPicker() : returnDateInputRef.current?.focus(); return; }
+
+    const originObj = searchOptions.find(o => o.label === origin);
+    const destObj = searchOptions.find(o => o.label === destination);
+
+    const params = new URLSearchParams();
+    params.set("origin", originObj ? originObj.city : origin);
+    params.set("originDetail", originObj ? originObj.detail : "Semua Lokasi");
+    
+    params.set("destination", destObj ? destObj.city : destination);
+    params.set("destinationDetail", destObj ? destObj.detail : "Semua Lokasi");
+    
+    params.set("date", departDate);
+    params.set("pax", passengers.toString());
+    if (tripType === 'round-trip' && returnDate) {
+        params.set("returnDate", returnDate);
+    }
+    
+    router.push(`/ticket?${params.toString()}`);
   };
 
   const faqs = [
@@ -198,23 +283,44 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col gap-0">
-            <div className="relative mb-2" ref={originRef}>
+            {/* INPUT ORIGIN */}
+            <div className="relative mb-2" ref={originWrapperRef}>
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                 <div className="w-full">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Dari Mana?</label>
-                  <input type="text" placeholder="Ketik kota asal..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={origin} onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); }} onFocus={() => setShowOriginDropdown(true)} />
+                  <input 
+                    ref={originInputRef} 
+                    type="text" 
+                    placeholder="Ketik kota atau terminal..." 
+                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" 
+                    value={origin} 
+                    onFocus={(e) => { 
+                      setShowOriginDropdown(true); 
+                      setIsOriginTyped(false); 
+                      e.target.select(); // Select all text on click to allow easy clearing/replacement
+                    }}
+                    onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); setIsOriginTyped(true); }} 
+                  />
                 </div>
               </div>
               {showOriginDropdown && (
                 <div className="absolute top-full left-0 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 z-20 max-h-60 overflow-y-auto">
-                  {filteredOrigins.length > 0 ? filteredOrigins.map((loc, idx) => (
-                    <div key={idx} className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 border-b border-slate-50 dark:border-slate-700 last:border-0" onClick={() => { setOrigin(loc); setShowOriginDropdown(false); }}>{loc}</div>
+                  {filteredOrigins.length > 0 ? filteredOrigins.map((opt, idx) => (
+                    <div 
+                      key={idx} 
+                      className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 border-b border-slate-50 dark:border-slate-700 last:border-0 flex items-center gap-2" 
+                      onClick={() => { setOrigin(opt.label); setShowOriginDropdown(false); setIsOriginTyped(false); }}
+                    >
+                      {opt.type === 'terminal' ? <Bus className="w-4 h-4 text-slate-400"/> : <MapPin className="w-4 h-4 text-blue-500"/>}
+                      <span className={opt.type === 'city' ? 'font-bold' : ''}>{opt.label}</span>
+                    </div>
                   )) : (<div className="px-4 py-3 text-xs text-slate-400">Lokasi tidak ditemukan</div>)}
                 </div>
               )}
             </div>
 
+            {/* SWAP BUTTON */}
             <div className="relative h-0 z-20 flex justify-center items-center">
               <button
                 onClick={swapLocations}
@@ -225,18 +331,38 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="relative mt-2 mb-4" ref={destRef}>
+            {/* INPUT DESTINATION */}
+            <div className="relative mt-2 mb-4" ref={destWrapperRef}>
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 relative group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
                 <div className="w-full">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Mau Ke Mana?</label>
-                  <input type="text" placeholder="Ketik kota tujuan..." className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" value={destination} onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); }} onFocus={() => setShowDestDropdown(true)} />
+                  <input 
+                    ref={destInputRef} 
+                    type="text" 
+                    placeholder="Ketik kota atau terminal..." 
+                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white placeholder:font-normal" 
+                    value={destination} 
+                    onFocus={(e) => { 
+                      setShowDestDropdown(true); 
+                      setIsDestTyped(false); 
+                      e.target.select(); 
+                    }}
+                    onChange={(e) => { setDestination(e.target.value); setShowDestDropdown(true); setIsDestTyped(true); }} 
+                  />
                 </div>
               </div>
               {showDestDropdown && (
                 <div className="absolute top-full left-0 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 z-20 max-h-60 overflow-y-auto">
-                  {filteredDests.length > 0 ? filteredDests.map((loc, idx) => (
-                    <div key={idx} className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 border-b border-slate-50 dark:border-slate-700 last:border-0" onClick={() => { setDestination(loc); setShowDestDropdown(false); }}>{loc}</div>
+                  {filteredDests.length > 0 ? filteredDests.map((opt, idx) => (
+                    <div 
+                      key={idx} 
+                      className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 border-b border-slate-50 dark:border-slate-700 last:border-0 flex items-center gap-2" 
+                      onClick={() => { setDestination(opt.label); setShowDestDropdown(false); setIsDestTyped(false); }}
+                    >
+                      {opt.type === 'terminal' ? <Bus className="w-4 h-4 text-slate-400"/> : <MapPin className="w-4 h-4 text-red-500"/>}
+                      <span className={opt.type === 'city' ? 'font-bold' : ''}>{opt.label}</span>
+                    </div>
                   )) : (<div className="px-4 py-3 text-xs text-slate-400">Lokasi tidak ditemukan</div>)}
                 </div>
               )}
@@ -247,6 +373,7 @@ export default function Home() {
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full">
                   <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pergi</label>
                   <input
+                    ref={dateInputRef}
                     type="date"
                     min={today}
                     value={departDate}
@@ -258,8 +385,11 @@ export default function Home() {
                   <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full animate-in fade-in slide-in-from-left-4">
                     <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pulang</label>
                     <input
+                      ref={returnDateInputRef}
                       type="date"
                       min={departDate || today}
+                      value={returnDate}
+                      onChange={(e) => setReturnDate(e.target.value)}
                       className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [scheme-light] dark:[scheme-dark]"
                     />
                   </div>
@@ -272,7 +402,7 @@ export default function Home() {
             </div>
 
             <Link href={isFormValid ? "/ticket" : "#"} className={`block w-full pt-2 ${!isFormValid ? 'cursor-not-allowed opacity-50' : ''}`} onClick={!isFormValid ? (e) => e.preventDefault() : undefined}>
-              <button disabled={!isFormValid} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
+              <button disabled={!isFormValid} onClick={handleSearchClick} className="w-full bg-amber-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-wide hover:bg-amber-600 transition shadow-lg shadow-amber-500/30 flex justify-center items-center gap-2 disabled:bg-slate-300 disabled:shadow-none disabled:text-slate-500">
                 CARI TIKET MURAH
               </button>
             </Link>
@@ -356,7 +486,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
             {POPULAR_ROUTES.map((route, idx) => (
-              <Link href={`/ticket?from=${route.from}&to=${route.to}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
+              <Link href={`/ticket?origin=${route.from}&destination=${route.to}&date=${today}&pax=1`} key={idx} className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-sm hover:shadow-xl transition border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                 <div className="aspect-4/3 bg-slate-200 dark:bg-slate-700 flex items-center justify-center relative overflow-hidden group-hover:bg-blue-100 dark:group-hover:bg-slate-600 transition duration-500">
                   <Image
                     src={`/img/rute-populer-0${idx + 1}.jpg`}
