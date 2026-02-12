@@ -3,12 +3,10 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 function SignupContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect');
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -72,7 +70,6 @@ function SignupContent() {
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate all fields on submit
     const allTouched = {
       name: true,
       email: true,
@@ -117,16 +114,8 @@ function SignupContent() {
       const updatedUsers = [...existingUsers, newUser];
       localStorage.setItem("skybus_users", JSON.stringify(updatedUsers));
 
-      localStorage.setItem("userRole", "user");
-      localStorage.setItem("skybus_session", "skb_user_new_" + Date.now());
-
       setLoading(false);
-
-      if (redirectUrl) {
-        router.push(redirectUrl);
-      } else {
-        router.push('/login');
-      }
+      router.push('/login');
     }, 1500);
   };
 
@@ -261,7 +250,7 @@ function SignupContent() {
           </form>
 
           <div className="text-center text-sm font-bold text-slate-500 dark:text-slate-400">
-            Sudah punya akun? <Link href={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login"} className="text-blue-600 dark:text-blue-400 hover:underline">Masuk Saja</Link>
+            Sudah punya akun? <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Masuk Saja</Link>
           </div>
         </div>
       </div>

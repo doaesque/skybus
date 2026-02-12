@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,11 +16,22 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
 
-  // State untuk menyimpan pesan error spesifik per kolom
   const [errors, setErrors] = useState({
     email: "",
     password: ""
   });
+
+  useEffect(() => {
+    const existingUsers = localStorage.getItem("skybus_users");
+    if (!existingUsers) {
+      const demoAccounts = [
+        { name: "Admin Skybus", email: "admin@skybus.id", password: "admin123", role: "admin", phone: "081234567890" },
+        { name: "Mitra Sinar Jaya", email: "mitra@sinarjaya.com", password: "mitra123", role: "mitra", phone: "081234567891" },
+        { name: "User Demo", email: "user@gmail.com", password: "user123", role: "user", phone: "081234567892" }
+      ];
+      localStorage.setItem("skybus_users", JSON.stringify(demoAccounts));
+    }
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,37 +73,23 @@ function LoginContent() {
 
       if (foundUser) {
         localStorage.setItem("userRole", foundUser.role || "user");
-        localStorage.setItem("skybus_session", "skb_user_" + Date.now());
-        
-        if (redirectUrl) {
-          router.push(redirectUrl);
-        } else {
-          router.push("/");
-        }
-        return;
-      }
+        localStorage.setItem("skybus_session", "skb_" + foundUser.role + "_" + Date.now());
 
-      if (email === "admin@skybus.id" && password === "admin123") {
-        localStorage.setItem("userRole", "admin");
-        localStorage.setItem("skybus_session", "skb_admin_secure_8823_hash");
-        router.push("/admin/dashboard");
-      } else if (email === "mitra@sinarjaya.com" && password === "mitra123") {
-        localStorage.setItem("userRole", "mitra");
-        localStorage.setItem("skybus_session", "skb_mitra_v2_9988_token");
-        router.push("/admin/partner");
-      } else if (email === "user@gmail.com" && password === "user123") {
-        localStorage.setItem("userRole", "user");
-        localStorage.setItem("skybus_session", "skb_user_v1_xy77_access");
-        
-        if (redirectUrl) {
-          router.push(redirectUrl);
+        if (foundUser.role === "admin") {
+          router.push("/admin/dashboard");
+        } else if (foundUser.role === "mitra") {
+          router.push("/admin/partner");
         } else {
-          router.push("/");
+          if (redirectUrl) {
+            router.push(redirectUrl);
+          } else {
+            router.push("/");
+          }
         }
       } else {
-        setErrors({ 
-          email: "Email atau password salah", 
-          password: "Email atau password salah" 
+        setErrors({
+          email: "Email atau password tidak ditemukan",
+          password: "Email atau password tidak ditemukan"
         });
         setLoading(false);
       }
@@ -106,7 +103,6 @@ function LoginContent() {
     if (role === 'user') { setEmail("user@gmail.com"); setPassword("user123"); }
   };
 
-  // Komponen Bubble Error
   const ErrorBubble = ({ message }: { message: string }) => (
     <div className="absolute top-full left-0 mt-2 w-full z-10 animate-in fade-in slide-in-from-top-1">
       <div className="bg-red-500 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-lg relative">
@@ -163,31 +159,31 @@ function LoginContent() {
             <div className="space-y-6">
               <div className="relative">
                 <label className={`block text-xs font-bold uppercase mb-1 ${errors.email ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Email</label>
-                <input 
-                  type="email" 
-                  value={email} 
+                <input
+                  type="email"
+                  value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if(errors.email) setErrors({...errors, email: ""});
-                  }} 
+                  }}
                   className={getInputClass(!!errors.email)}
-                  placeholder="nama@email.com" 
+                  placeholder="nama@email.com"
                 />
                 {errors.email && <ErrorBubble message={errors.email} />}
               </div>
-              
+
               <div className="relative">
                 <label className={`block text-xs font-bold uppercase mb-1 ${errors.password ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Password</label>
                 <div className="relative">
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    value={password} 
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       if(errors.password) setErrors({...errors, password: ""});
-                    }} 
+                    }}
                     className={getInputClass(!!errors.password)}
-                    placeholder="••••••••" 
+                    placeholder="••••••••"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
