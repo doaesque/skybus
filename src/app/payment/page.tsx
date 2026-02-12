@@ -6,12 +6,10 @@ import { BUS_DATA, ALL_PARTNERS, PROMO_DATA } from '@/constants/data';
 import { 
   CheckCircle, Loader2, Lock, ShieldCheck, 
   Ticket, Clock, ChevronDown, ChevronUp, Tag, Copy, Smartphone, 
-  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw, X, Check
+  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw, X, Check, Info, ArrowLeft
 } from 'lucide-react';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
-
-// --- Components Helper ---
 
 const AlertModal = ({ isOpen, message, onClose }: { isOpen: boolean; message: string; onClose: () => void }) => {
   if (!isOpen) return null;
@@ -29,6 +27,56 @@ const AlertModal = ({ isOpen, message, onClose }: { isOpen: boolean; message: st
         <button onClick={onClose} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold transition hover:opacity-90">
           Mengerti
         </button>
+      </div>
+    </div>
+  );
+};
+
+const PromoModal = ({ isOpen, onClose, onSelect }: { isOpen: boolean; onClose: () => void; onSelect: (code: string, discount: string) => void }) => {
+  const [tncOpen, setTncOpen] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <h3 className="font-bold text-lg">Promo Tersedia</h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-slate-400" /></button>
+        </div>
+        <div className="p-4 overflow-y-auto space-y-3 bg-slate-50 dark:bg-slate-950/50 flex-1">
+          {PROMO_DATA.map((promo) => (
+            <div key={promo.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative group">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h4 className="font-bold text-slate-800 dark:text-white">{promo.title}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded font-mono font-bold">{promo.code}</span>
+                    <button onClick={() => setTncOpen(tncOpen === promo.code ? null : promo.code)} className="text-[10px] text-blue-600 font-bold underline">S&K</button>
+                  </div>
+                </div>
+                <div className={`px-2 py-1 rounded text-[10px] font-bold text-white uppercase ${promo.color === 'blue' ? 'bg-blue-600' : promo.color === 'orange' ? 'bg-orange-500' : 'bg-green-600'}`}>
+                  {promo.discount}
+                </div>
+              </div>
+              
+              {tncOpen === promo.code && (
+                <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-900 rounded text-xs text-slate-500 mb-2 border border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-1">
+                  <p className="font-bold mb-1">Syarat & Ketentuan:</p>
+                  <p>{promo.desc}</p>
+                  <p className="mt-1 text-[10px]">Min. Transaksi: {promo.minTrans}</p>
+                  <p className="text-[10px]">Berlaku s.d: {promo.validUntil}</p>
+                </div>
+              )}
+
+              <button 
+                onClick={() => { onSelect(promo.code, promo.discount); onClose(); }}
+                className="w-full mt-2 bg-slate-900 dark:bg-slate-700 text-white py-2 rounded-lg text-xs font-bold hover:opacity-90 transition"
+              >
+                Pakai Promo
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -178,8 +226,6 @@ const PaymentInstruction = ({ method, subMethod }: { method: string, subMethod: 
     );
 };
 
-// --- Main Content Component ---
-
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -201,14 +247,15 @@ function PaymentContent() {
   const [paymentStep, setPaymentStep] = useState<'select' | 'instruction'>('select');
   const [selectedMethod, setSelectedMethod] = useState('');
   const [subMethod, setSubMethod] = useState(''); 
+  
   const [voucherCode, setVoucherCode] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<{code: string, amount: number} | null>(null);
   const [voucherError, setVoucherError] = useState('');
+  const [showPromoModal, setShowPromoModal] = useState(false);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  // New State for Modals
   const [alertInfo, setAlertInfo] = useState({ isOpen: false, message: '' });
 
   useEffect(() => {
@@ -244,18 +291,19 @@ function PaymentContent() {
   const discountAmount = appliedVoucher ? appliedVoucher.amount : 0;
   const totalPrice = ticketPrice + serviceFee - discountAmount;
 
-  const handleApplyVoucher = () => {
+  const handleApplyVoucher = (code: string = voucherCode) => {
       setVoucherError('');
-      const promo = PROMO_DATA.find(p => p.code === voucherCode.toUpperCase());
+      const promo = PROMO_DATA.find(p => p.code === code.toUpperCase());
       if (promo) {
           let amount = 0;
           if (promo.discount.includes('%')) {
-              const pct = parseInt(promo.discount);
+              const pct = parseInt(promo.discount.replace(/\D/g, ''));
               amount = (ticketPrice * pct) / 100;
           } else {
-              amount = 20000; 
+              amount = 20000; // Fallback or fixed amount
           }
           setAppliedVoucher({ code: promo.code, amount: amount });
+          setVoucherCode(promo.code);
       } else {
           setVoucherError('Kode voucher tidak valid.');
           setAppliedVoucher(null);
@@ -276,11 +324,8 @@ function PaymentContent() {
       }, 1500);
   };
 
-  // --- LOGIC PEMBAYARAN OTOMATIS (Simulasi) ---
   const handleConfirmPayment = () => {
-      setIsProcessing(true); // Ganti tombol jadi loading
-      
-      // Simulasi delay pengecekan ke gateway
+      setIsProcessing(true); 
       setTimeout(() => {
           setIsProcessing(false);
           setShowSuccess(true);
@@ -297,21 +342,38 @@ function PaymentContent() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 font-sans min-h-screen pb-32">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-32 text-slate-800 dark:text-slate-100 transition-colors">
+       
        <TimeoutModal isOpen={showTimeout} />
        <SuccessModal isOpen={showSuccess} />
-       <AlertModal 
-            isOpen={alertInfo.isOpen} 
-            message={alertInfo.message} 
-            onClose={() => setAlertInfo({ ...alertInfo, isOpen: false })} 
-       />
-       
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+       <AlertModal isOpen={alertInfo.isOpen} message={alertInfo.message} onClose={() => setAlertInfo({ ...alertInfo, isOpen: false })} />
+       <PromoModal isOpen={showPromoModal} onClose={() => setShowPromoModal(false)} onSelect={(code) => handleApplyVoucher(code)} />
+
+       <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
+         <div className="max-w-4xl mx-auto px-4 py-4">
+           <div className="flex items-center gap-4 mb-2">
+             <button onClick={() => paymentStep === 'instruction' ? setPaymentStep('select') : router.back()} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+               <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+             </button>
+             <div>
+               <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight">Pembayaran</h1>
+               <p className="text-xs text-slate-500">Selesaikan pesanan Anda</p>
+             </div>
+           </div>
            
-           {/* KOLOM KIRI: Konten */}
+           {/* Steps Indicator */}
+           <div className="flex items-center gap-2 mt-2">
+             <div className="flex-1 h-1 bg-blue-600 rounded-full"></div>
+             <div className="flex-1 h-1 bg-blue-600 rounded-full"></div>
+             <div className={`flex-1 h-1 rounded-full ${paymentStep === 'instruction' ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
+           </div>
+         </div>
+       </div>
+       
+       <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+           
            <div className="md:col-span-2 space-y-6">
                
-               {/* STEP 1: PAYMENT SELECTION */}
                {paymentStep === 'select' && (
                    <>
                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
@@ -324,7 +386,6 @@ function PaymentContent() {
                                    <h4 className="font-bold text-lg leading-tight">{bus.name}</h4>
                                    <p className="text-sm text-slate-500">{bus.type}</p>
                                    <p className="text-xs text-slate-400 mt-1">
-                                       {/* UPDATE: Tanggal lebih spesifik dengan Tahun */}
                                        {date ? new Date(date).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}) : ''} • {bus.departureTime}
                                    </p>
                                    {isRoundTrip && (
@@ -334,13 +395,24 @@ function PaymentContent() {
                            </div>
                        </div>
 
-                       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                           <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Tag className="w-5 h-5 text-amber-500"/> Kode Voucher</h3>
+                       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm relative">
+                           <div className="flex justify-between items-center mb-4">
+                             <h3 className="font-bold text-lg flex items-center gap-2"><Tag className="w-5 h-5 text-amber-500"/> Kode Voucher</h3>
+                             {!appliedVoucher && (
+                               <button 
+                                 onClick={() => setShowPromoModal(true)}
+                                 className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
+                               >
+                                 Lihat Promo <ChevronDown className="w-3 h-3"/>
+                               </button>
+                             )}
+                           </div>
+                           
                            <div className="flex gap-2">
                                <div className="relative flex-1">
-                                   <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} placeholder="Punya kode promo?" disabled={!!appliedVoucher} className="w-full pl-4 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-600 outline-none uppercase font-bold"/>
+                                   <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} placeholder="Punya kode promo?" disabled={!!appliedVoucher} className="w-full pl-4 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-600 outline-none uppercase font-bold text-sm"/>
                                </div>
-                               {appliedVoucher ? (<button onClick={() => {setAppliedVoucher(null); setVoucherCode('');}} className="px-6 py-2 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition">Hapus</button>) : (<button onClick={handleApplyVoucher} className="px-6 py-2 bg-slate-900 text-white font-bold rounded-xl hover:opacity-90 transition">Pakai</button>)}
+                               {appliedVoucher ? (<button onClick={() => {setAppliedVoucher(null); setVoucherCode('');}} className="px-6 py-2 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition text-sm">Hapus</button>) : (<button onClick={() => handleApplyVoucher()} className="px-6 py-2 bg-slate-900 text-white font-bold rounded-xl hover:opacity-90 transition text-sm">Pakai</button>)}
                            </div>
                            {voucherError && <p className="text-red-500 text-xs mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {voucherError}</p>}
                            {appliedVoucher && <p className="text-green-600 text-xs mt-2 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Kode <strong>{appliedVoucher.code}</strong> berhasil digunakan!</p>}
@@ -357,14 +429,14 @@ function PaymentContent() {
                                    <div className="grid grid-cols-2 gap-3">
                                        {['BCA', 'Mandiri', 'BNI', 'BRI', 'Bank Lain'].map(bank => (
                                            <label 
-                                                key={bank} 
-                                                className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition
-                                                    ${subMethod === bank 
-                                                        ? 'bg-blue-50 border-blue-500 dark:bg-blue-900/30 dark:border-blue-500' 
-                                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 dark:border-slate-700'
-                                                    }
-                                                `}
-                                            >
+                                               key={bank} 
+                                               className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition
+                                                   ${subMethod === bank 
+                                                       ? 'bg-blue-50 border-blue-500 dark:bg-blue-900/30 dark:border-blue-500' 
+                                                       : 'hover:bg-slate-50 dark:hover:bg-slate-800 dark:border-slate-700'
+                                                   }
+                                               `}
+                                           >
                                                <input type="radio" name="bank" className="accent-blue-600" checked={subMethod === bank} onChange={() => setSubMethod(bank)} />
                                                <span className="font-bold text-sm text-slate-700 dark:text-slate-200">{bank}</span>
                                            </label>
@@ -380,7 +452,6 @@ function PaymentContent() {
                    </>
                )}
 
-               {/* STEP 2: INSTRUCTION VIEW */}
                {paymentStep === 'instruction' && (
                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm text-center animate-in slide-in-from-right">
                        
@@ -438,7 +509,6 @@ function PaymentContent() {
                        </div>
 
                        <div className="space-y-3 max-w-sm mx-auto mb-8">
-                           {/* UPDATE: Hapus Confirm Modal, Ganti jadi Action Button Langsung */}
                            <button onClick={handleConfirmPayment} disabled={isProcessing} className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                                 {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin"/> Mengecek Pembayaran...</> : <><CheckCircle className="w-5 h-5"/> Saya Sudah Bayar</>}
                            </button>
@@ -446,17 +516,13 @@ function PaymentContent() {
                            <button onClick={() => setPaymentStep('select')} className="w-full py-3 text-slate-500 font-bold hover:text-blue-600 transition flex items-center justify-center gap-2 text-sm"><RotateCcw className="w-4 h-4" /> Ganti Metode Pembayaran</button>
                        </div>
 
-                       {/* Tutorial Section */}
                        <PaymentInstruction method={selectedMethod} subMethod={subMethod} />
                    </div>
                )}
            </div>
 
-           {/* KOLOM KANAN: STICKY SIDEBAR */}
            <div className="md:col-span-1">
                <div className="sticky top-24 space-y-4"> 
-                   
-                   {/* TIMER */}
                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-2xl p-4 flex justify-between items-center shadow-sm">
                        <span className="text-sm font-bold text-red-600 flex items-center gap-2">
                            <Clock className="w-5 h-5" /> Sisa Waktu
@@ -464,8 +530,18 @@ function PaymentContent() {
                        <span className="font-mono text-xl font-black text-red-600">{formatTime(timeLeft)}</span>
                    </div>
 
-                   {/* RINCIAN HARGA CARD */}
                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg">
+                       {/* Placeholder Image Logic */}
+                       <div className="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center">
+                          {bus.image && bus.image !== '/img/bus-placeholder.png' ? (
+                             <Image src={bus.image} alt={bus.name} fill className="object-cover" />
+                          ) : (
+                             <div className="text-center">
+                                <p className="font-black text-slate-300 dark:text-slate-600 text-2xl uppercase">{bus.operator}</p>
+                             </div>
+                          )}
+                       </div>
+
                        <h3 className="font-bold text-lg mb-4">Rincian Harga</h3>
                        <div className="space-y-3 text-sm mb-6">
                            <div className="flex justify-between"><span className="text-slate-500">Tiket ({pax}x)</span><span>Rp {ticketPrice.toLocaleString('id-ID')}</span></div>
@@ -475,14 +551,13 @@ function PaymentContent() {
                            <div className="border-t border-dashed pt-3 mt-2 flex justify-between font-black text-xl"><span>Total</span><span className="text-blue-600">Rp {totalPrice.toLocaleString('id-ID')}</span></div>
                        </div>
                        
-                       {/* TOMBOL BAYAR (Hanya muncul di Step 1) */}
                        {paymentStep === 'select' && (
                            <button 
-                                onClick={handleRequestPayment} 
-                                disabled={isProcessing || !selectedMethod} 
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95"
+                               onClick={handleRequestPayment} 
+                               disabled={isProcessing || !selectedMethod} 
+                               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95"
                            >
-                                {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}
+                               {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}
                            </button>
                        )}
                        
@@ -494,8 +569,6 @@ function PaymentContent() {
     </div>
   );
 }
-
-// --- Default Export ---
 
 export default function PaymentPage() {
     return (
