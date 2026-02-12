@@ -14,31 +14,60 @@ export default function MitraRegisterPage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [errorFields, setErrorFields] = useState<string[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (error) setError("");
-    if (errorFields.includes(e.target.name)) {
-      setErrorFields(errorFields.filter(field => field !== e.target.name));
-    }
   };
 
-  const isEmailValid = (email: string) => /\S+@\S+\.\S+/.test(email);
-  const isPhoneValid = (phone: string) => phone.length >= 9;
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setTouched({ ...touched, [e.target.name]: true });
+  };
+
+  const validate = (field: string, value: string) => {
+    if (field === 'poName') {
+      if (!value.trim()) return "Nama Perusahaan (PO) wajib diisi";
+      if (value.trim().length < 3) return "Nama PO minimal 3 karakter";
+      return "";
+    }
+    if (field === 'picName') {
+      if (!value.trim()) return "Nama Penanggung Jawab wajib diisi";
+      if (value.trim().length < 3) return "Nama minimal 3 karakter";
+      return "";
+    }
+    if (field === 'email') {
+      if (!value.trim()) return "Email bisnis wajib diisi";
+      if (!/\S+@\S+\.\S+/.test(value)) return "Format email tidak valid";
+      return "";
+    }
+    if (field === 'phone') {
+      if (!value.trim()) return "Nomor telepon wajib diisi";
+      if (value.length < 9) return "Nomor telepon minimal 9 digit";
+      return "";
+    }
+    return "";
+  };
+
+  const getFieldError = (field: string) => {
+    // @ts-ignore
+    return validate(field, formData[field]);
+  };
+
+  const isFieldInvalid = (field: string) => {
+    return touched[field] && getFieldError(field) !== "";
+  };
 
   const handleSubmit = () => {
-    const newErrorFields: string[] = [];
-    if (!formData.poName) newErrorFields.push('poName');
-    if (!formData.picName) newErrorFields.push('picName');
-    if (!formData.email || !isEmailValid(formData.email)) newErrorFields.push('email');
-    if (!formData.phone || !isPhoneValid(formData.phone)) newErrorFields.push('phone');
+    const allTouched = { poName: true, picName: true, email: true, phone: true };
+    setTouched(allTouched);
 
-    if (newErrorFields.length > 0) {
-      setErrorFields(newErrorFields);
-      setError("Mohon lengkapi formulir dengan data yang valid.");
+    const poError = validate('poName', formData.poName);
+    const picError = validate('picName', formData.picName);
+    const emailError = validate('email', formData.email);
+    const phoneError = validate('phone', formData.phone);
+
+    if (poError || picError || emailError || phoneError) {
       return;
     }
 
@@ -52,14 +81,23 @@ export default function MitraRegisterPage() {
   const handleCloseModal = () => {
     setShowSuccessModal(false);
     setFormData({ poName: '', picName: '', email: '', phone: '', fleetSize: '1 - 10 Bus' });
-    setErrorFields([]);
+    setTouched({});
   };
 
-  const getBorderColor = (fieldName: string) => {
-    return errorFields.includes(fieldName)
+  const getBorderColor = (field: string) => {
+    return isFieldInvalid(field)
       ? "border-red-500 focus:ring-red-500"
       : "border-transparent focus:ring-blue-500";
   };
+
+  const ErrorBubble = ({ message }: { message: string }) => (
+    <div className="absolute top-full left-0 mt-2 w-full z-10 animate-in fade-in slide-in-from-top-1">
+      <div className="bg-red-500 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-lg relative">
+        <div className="absolute -top-1.5 left-4 w-3 h-3 bg-red-500 rotate-45"></div>
+        {message}
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors relative">
@@ -138,73 +176,75 @@ export default function MitraRegisterPage() {
         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 h-fit">
           <h3 className="text-xl font-black mb-6">Formulir Pendaftaran</h3>
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl flex items-center gap-3 text-sm font-bold animate-pulse mb-6 shadow-sm border border-red-100 dark:border-red-900/30">
-              <AlertCircle className="w-5 h-5 shrink-0" /> {error}
-            </div>
-          )}
-
-          <form className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nama Perusahaan (PO)</label>
+          <form className="space-y-6">
+            <div className="relative">
+              <label className={`block text-xs font-bold uppercase mb-2 ${isFieldInvalid('poName') ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Nama Perusahaan (PO)</label>
               <div className="relative">
-                <Building className={`absolute left-4 top-3 w-5 h-5 ${errorFields.includes('poName') ? 'text-red-500' : 'text-slate-400'}`} />
+                <Building className={`absolute left-4 top-3 w-5 h-5 ${isFieldInvalid('poName') ? 'text-red-500' : 'text-slate-400'}`} />
                 <input
                   name="poName"
                   value={formData.poName}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   type="text"
                   placeholder="Contoh: PT. Sinar Jaya Group"
                   className={`w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 transition text-slate-800 dark:text-white border ${getBorderColor('poName')}`}
                 />
               </div>
+              {isFieldInvalid('poName') && <ErrorBubble message={getFieldError('poName')} />}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Nama Penanggung Jawab</label>
+            <div className="relative">
+              <label className={`block text-xs font-bold uppercase mb-2 ${isFieldInvalid('picName') ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Nama Penanggung Jawab</label>
               <div className="relative">
-                <User className={`absolute left-4 top-3 w-5 h-5 ${errorFields.includes('picName') ? 'text-red-500' : 'text-slate-400'}`} />
+                <User className={`absolute left-4 top-3 w-5 h-5 ${isFieldInvalid('picName') ? 'text-red-500' : 'text-slate-400'}`} />
                 <input
                   name="picName"
                   value={formData.picName}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   type="text"
                   placeholder="Nama Lengkap"
                   className={`w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 transition text-slate-800 dark:text-white border ${getBorderColor('picName')}`}
                 />
               </div>
+              {isFieldInvalid('picName') && <ErrorBubble message={getFieldError('picName')} />}
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Email Bisnis</label>
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase mb-2 ${isFieldInvalid('email') ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>Email Bisnis</label>
                 <div className="relative">
-                  <Mail className={`absolute left-4 top-3 w-5 h-5 ${errorFields.includes('email') ? 'text-red-500' : 'text-slate-400'}`} />
+                  <Mail className={`absolute left-4 top-3 w-5 h-5 ${isFieldInvalid('email') ? 'text-red-500' : 'text-slate-400'}`} />
                   <input
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     type="email"
                     placeholder="email@pt.com"
                     className={`w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-bold focus:outline-none focus:ring-2 transition text-slate-800 dark:text-white border ${getBorderColor('email')}`}
                   />
                 </div>
+                {isFieldInvalid('email') && <ErrorBubble message={getFieldError('email')} />}
               </div>
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">No. Telepon / WA</label>
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase mb-2 ${isFieldInvalid('phone') ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>No. Telepon / WA</label>
                 <div className="relative flex">
-                  <div className="pl-4 pr-3 py-3 bg-slate-100 dark:bg-slate-800 rounded-l-xl font-bold text-slate-500 border-r border-slate-200 dark:border-slate-700 flex items-center">
+                  <div className={`pl-4 pr-3 py-3 bg-slate-100 dark:bg-slate-800 rounded-l-xl font-bold border-r flex items-center ${isFieldInvalid('phone') ? 'text-red-500 border-red-500' : 'text-slate-500 border-slate-200 dark:border-slate-700'}`}>
                     +62
                   </div>
                   <input
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     type="tel"
                     placeholder="812345678"
                     className={`w-full pl-4 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-r-xl font-bold focus:outline-none focus:ring-2 transition text-slate-800 dark:text-white border ${getBorderColor('phone')}`}
                   />
                 </div>
+                {isFieldInvalid('phone') && <ErrorBubble message={getFieldError('phone')} />}
               </div>
             </div>
 
