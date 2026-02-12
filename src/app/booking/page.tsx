@@ -55,32 +55,32 @@ const ReservationTimerHeader = ({ duration, onExpire }: { duration: number; onEx
 
 const PassengerForm = ({ index, data, onChange, isError }: { index: number, data: any, onChange: (idx: number, field: string, val: string) => void, isError: boolean }) => (
   <div className={`mb-4 border rounded-xl p-4 bg-slate-50/50 dark:bg-slate-800/50 transition ${isError ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 dark:border-slate-800'}`}>
-    <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
+    <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-slate-800 dark:text-white">
       <User className="w-4 h-4 text-blue-600"/>
       {`Penumpang ${index + 1} (Dewasa)`}
     </h4>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div>
         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nama Lengkap (Sesuai KTP)</label>
-        <input
-          type="text"
+        <input 
+          type="text" 
           value={data.name}
           onChange={(e) => onChange(index, 'name', e.target.value)}
-          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-600 outline-none"
+          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-400"
           placeholder="Contoh: Budi Santoso"
         />
       </div>
       <div>
         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nomor Identitas (NIK/Paspor)</label>
-        <input
-          type="text"
+        <input 
+          type="text" 
           value={data.idNumber}
           maxLength={16}
           onChange={(e) => {
             const val = e.target.value.replace(/\D/g, '');
             onChange(index, 'idNumber', val);
           }}
-          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-600 outline-none"
+          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-400"
           placeholder="Angka Saja (Min 16 digit)"
         />
       </div>
@@ -96,18 +96,18 @@ const InfantForm = ({ index, data, onChange, isError }: { index: number, data: a
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div>
         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nama Lengkap Bayi</label>
-        <input
-          type="text"
+        <input 
+          type="text" 
           value={data.name}
           onChange={(e) => onChange(index, 'name', e.target.value)}
-          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none"
+          className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none placeholder:text-slate-400"
           placeholder="Sesuai KK/KIA"
         />
       </div>
       <div>
         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tanggal Lahir</label>
-        <input
-          type="date"
+        <input 
+          type="date" 
           value={data.dob}
           onChange={(e) => onChange(index, 'dob', e.target.value)}
           className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-pink-500 outline-none"
@@ -120,24 +120,24 @@ const InfantForm = ({ index, data, onChange, isError }: { index: number, data: a
 function BookingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-
+  
   const busId = searchParams.get('busId');
   const paxCount = parseInt(searchParams.get('pax') || '1');
   const pricePerSeat = parseInt(searchParams.get('price') || '0');
   const date = searchParams.get('date');
   const returnDate = searchParams.get('returnDate');
   const isRoundTrip = !!returnDate;
-
+  
   const bus = BUS_DATA.find(b => b.id === busId);
-
+  
   const [step, setStep] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-
+  
   const [passengers, setPassengers] = useState<Array<{name: string, idNumber: string}>>([]);
   const [infants, setInfants] = useState<Array<{name: string, dob: string}>>([]);
   const [infantCount, setInfantCount] = useState(0);
 
-  const [formErrors, setFormErrors] = useState<number[]>([]);
+  const [formErrors, setFormErrors] = useState<number[]>([]); 
   const [infantErrors, setInfantErrors] = useState<number[]>([]);
   const [alertState, setAlertState] = useState({ isOpen: false, message: '', type: 'error' as 'error'|'info' });
 
@@ -153,14 +153,14 @@ function BookingContent() {
       const x = Math.sin(seed++) * 10000;
       return x - Math.floor(x);
     };
-    const generatedOccupied: string[] = [];
-    const totalSeats = 40;
-    const seatsToFill = Math.floor(random() * 8) + 8;
-    for(let i=0; i < seatsToFill; i++) {
+    const generatedOccupied: string[] = []; 
+    const totalSeats = 40; 
+    const seatsToFill = Math.floor(random() * 8) + 8; 
+    for(let i=0; i < seatsToFill; i++) { 
       const seatNum = Math.floor(random() * totalSeats) + 1;
       const suffix = random() > 0.5 ? 'A' : 'B';
       const seatCode = `${seatNum}${suffix}`;
-      if (!generatedOccupied.includes(seatCode)) generatedOccupied.push(seatCode);
+      if (!generatedOccupied.includes(seatCode)) generatedOccupied.push(seatCode); 
     }
     return generatedOccupied;
   }, [bus, date]);
@@ -233,7 +233,7 @@ function BookingContent() {
     passengers.forEach((p, idx) => {
       if (!p.name.trim() || !p.idNumber.trim()) pErrors.push(idx);
     });
-
+    
     const iErrors: number[] = [];
     infants.forEach((i, idx) => {
       if (!i.name.trim() || !i.dob.trim()) iErrors.push(idx);
@@ -245,12 +245,12 @@ function BookingContent() {
       setAlertState({ isOpen: true, message: 'Mohon lengkapi semua data penumpang.', type: 'error' });
       return;
     }
-
+    
     const params = new URLSearchParams(searchParams.toString());
     params.set("seats", selectedSeats.join(","));
     params.set("hasInfant", infantCount > 0 ? 'true' : 'false');
     if (returnDate) params.set("returnDate", returnDate);
-
+    
     router.push(`/payment?${params.toString()}`);
   };
 
@@ -262,8 +262,8 @@ function BookingContent() {
 
   const renderSeatMap = () => {
     const layout = bus.seatLayout || "2-2";
-    const rows = layout === "shuttle" ? 3 : 10;
-    let mapWidth = "max-w-[300px]";
+    const rows = layout === "shuttle" ? 3 : 10; 
+    let mapWidth = "max-w-[300px]"; 
     if (layout === "2-3") mapWidth = "max-w-[350px]";
     if (layout === "1-1" || layout === "sleeper" || layout === "shuttle") mapWidth = "max-w-[240px]";
 
@@ -276,8 +276,8 @@ function BookingContent() {
           disabled={isOccupied}
           onClick={() => handleSeatClick(seatNum)}
           className={`w-10 h-10 rounded-lg m-1 flex items-center justify-center text-xs font-bold transition transform active:scale-90 border
-            ${isOccupied ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-slate-200 dark:bg-slate-700 dark:border-slate-700' :
-              isSelected ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105' :
+            ${isOccupied ? 'bg-slate-200 text-slate-400 cursor-not-allowed border-slate-200 dark:bg-slate-700 dark:border-slate-700' : 
+              isSelected ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105' : 
               'bg-white text-slate-600 border-slate-300 hover:border-blue-400 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'}
           `}
         >
@@ -293,7 +293,7 @@ function BookingContent() {
         seatStructure.push(
           <div key={i} className={`flex justify-between items-center mb-2 w-full ${mapWidth} mx-auto`}>
             <div className="flex gap-1">{renderSeat(`${i}A`)}{renderSeat(`${i}B`)}</div>
-            <div className="w-8 text-center text-[10px] text-slate-300">{i}</div>
+            <div className="w-8 text-center text-[10px] text-slate-300">{i}</div> 
             <div className="flex gap-1">{renderSeat(`${i}C`)}{renderSeat(`${i}D`)}</div>
           </div>
         );
@@ -309,7 +309,7 @@ function BookingContent() {
         seatStructure.push(
           <div key={i} className={`flex justify-between items-center mb-3 w-full ${mapWidth} mx-auto`}>
             {renderSeat(`${i}A`)}
-            <div className="w-8"></div>
+            <div className="w-8"></div> 
             {renderSeat(`${i}B`)}
           </div>
         );
@@ -333,10 +333,10 @@ function BookingContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
-      <AlertModal
-        isOpen={alertState.isOpen}
-        message={alertState.message}
-        onClose={() => setAlertState({...alertState, isOpen: false})}
+      <AlertModal 
+        isOpen={alertState.isOpen} 
+        message={alertState.message} 
+        onClose={() => setAlertState({...alertState, isOpen: false})} 
         type={alertState.type}
       />
 
@@ -357,7 +357,7 @@ function BookingContent() {
             </div>
           </div>
         </div>
-
+        
         <div className="hidden md:flex gap-2">
           <div className={`h-2 w-12 rounded-full ${step >= 1 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
           <div className={`h-2 w-12 rounded-full ${step >= 2 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
@@ -366,9 +366,9 @@ function BookingContent() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
+        
         <div className="md:col-span-2 space-y-6">
-
+          
           {step === 1 && (
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in slide-in-from-left">
               <h3 className="font-bold mb-4 flex items-center gap-2"><Armchair className="w-5 h-5 text-blue-600"/> Peta Kursi ({bus.seatLayout})</h3>
@@ -383,16 +383,16 @@ function BookingContent() {
 
           {step === 2 && (
             <div className="animate-in slide-in-from-right">
-
+              
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <h3 className="font-bold mb-6 flex items-center gap-2 text-lg border-b pb-4 border-slate-100 dark:border-slate-800">
+                <h3 className="font-bold mb-6 flex items-center gap-2 text-lg border-b pb-4 border-slate-100 dark:border-slate-800 text-slate-800 dark:text-white">
                   <Users className="w-5 h-5 text-blue-600"/> Lengkapi Data Penumpang
                 </h3>
-
+                
                 {passengers.map((p, idx) => (
                   <PassengerForm key={idx} index={idx} data={p} onChange={handlePassengerChange} isError={formErrors.includes(idx)}/>
                 ))}
-
+                
                 <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-6">
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-2">
@@ -400,19 +400,19 @@ function BookingContent() {
                         <Baby className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm">Bawa Bayi (Infant)?</h4>
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-white">Bawa Bayi (Infant)?</h4>
                         <p className="text-[10px] text-slate-500">Maks. 1 bayi per penumpang dewasa.</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <button
+                      <button 
                         onClick={() => infantCount > 0 && setInfantCount(infantCount - 1)}
-                        className="w-7 h-7 flex items-center justify-center bg-white dark:bg-slate-700 rounded shadow-sm hover:bg-slate-100"
+                        className="w-7 h-7 flex items-center justify-center bg-white dark:bg-slate-700 rounded shadow-sm hover:bg-slate-100 text-slate-800 dark:text-white"
                       >-</button>
-                      <span className="font-bold text-sm w-4 text-center">{infantCount}</span>
-                      <button
+                      <span className="font-bold text-sm w-4 text-center text-slate-800 dark:text-white">{infantCount}</span>
+                      <button 
                         onClick={() => infantCount < paxCount && setInfantCount(infantCount + 1)}
-                        className="w-7 h-7 flex items-center justify-center bg-white dark:bg-slate-700 rounded shadow-sm hover:bg-slate-100"
+                        className="w-7 h-7 flex items-center justify-center bg-white dark:bg-slate-700 rounded shadow-sm hover:bg-slate-100 text-slate-800 dark:text-white"
                       >+</button>
                     </div>
                   </div>
@@ -439,11 +439,11 @@ function BookingContent() {
                 <p className="font-bold text-slate-800 dark:text-slate-100 leading-tight">{bus.name}</p>
                 <p className="text-xs text-slate-500">{bus.type} • {bus.duration}</p>
               </div>
-
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Berangkat</span>
-                  <p className="text-sm font-medium">{date ? new Date(date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) : '-'}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-white">{date ? new Date(date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) : '-'}</p>
                 </div>
                 {isRoundTrip && (
                   <div>
@@ -452,15 +452,15 @@ function BookingContent() {
                   </div>
                 )}
               </div>
-
+              
               <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Kursi Dipilih</span>
                 <p className="text-lg font-black text-blue-600 tracking-wide">{selectedSeats.length > 0 ? selectedSeats.join(", ") : "-"}</p>
               </div>
             </div>
-
+            
             <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-2">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm text-slate-800 dark:text-slate-300">
                 <span className="text-slate-500">Tiket ({selectedSeats.length}x)</span>
                 <span className="font-medium">Rp {totalPerTrip.toLocaleString('id-ID')}</span>
               </div>
@@ -477,7 +477,7 @@ function BookingContent() {
             </div>
 
             {step === 1 ? (
-              <button
+              <button 
                 onClick={handleNextStep}
                 className={`w-full py-4 rounded-xl font-bold text-white transition shadow-lg flex items-center justify-center gap-2 transform active:scale-95
                   ${selectedSeats.length === paxCount ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 dark:shadow-none' : 'bg-slate-300 cursor-not-allowed'}
@@ -486,7 +486,7 @@ function BookingContent() {
                 Lanjut Isi Data <ChevronRight className="w-4 h-4"/>
               </button>
             ) : (
-              <button
+              <button 
                 onClick={handleProceedPayment}
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 dark:shadow-none transition flex items-center justify-center gap-2 transform active:scale-95"
               >
@@ -497,13 +497,5 @@ function BookingContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function BookingPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <BookingContent />
-    </Suspense>
   );
 }
