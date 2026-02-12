@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Eye, EyeOff, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -35,8 +38,18 @@ export default function SignupPage() {
 
     setLoading(true);
     setTimeout(() => {
+      // Simulasi sukses signup & auto-login
+      localStorage.setItem("userRole", "user");
+      localStorage.setItem("skybus_session", "skb_user_new_" + Date.now()); // Create fresh session
+
       setLoading(false);
-      router.push('/login');
+
+      // Redirect logic: Back to ticket if requested, else login or home
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else {
+        router.push('/login'); // Standard flow
+      }
     }, 1500);
   };
 
@@ -99,16 +112,24 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <button type="submit" disabled={loading || !isFormFilled} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? "MEMPROSES..." : "DAFTAR"}
+            <button type="submit" disabled={loading || !isFormFilled} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center gap-2 items-center">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "DAFTAR"}
             </button>
           </form>
 
           <div className="text-center text-sm font-bold text-slate-500 dark:text-slate-400">
-            Sudah punya akun? <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Masuk Saja</Link>
+            Sudah punya akun? <Link href={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : "/login"} className="text-blue-600 dark:text-blue-400 hover:underline">Masuk Saja</Link>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <SignupContent />
+    </Suspense>
   );
 }

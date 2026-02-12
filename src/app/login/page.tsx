@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, ArrowLeft, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,13 +25,21 @@ export default function LoginPage() {
     setTimeout(() => {
       if (email === "admin@skybus.id" && password === "admin123") {
         localStorage.setItem("userRole", "admin");
+        localStorage.setItem("skybus_session", "skb_admin_secure_8823_hash");
         router.push("/admin/dashboard");
       } else if (email === "mitra@sinarjaya.com" && password === "mitra123") {
         localStorage.setItem("userRole", "mitra");
+        localStorage.setItem("skybus_session", "skb_mitra_v2_9988_token");
         router.push("/admin/partner");
       } else if (email === "user@gmail.com" && password === "user123") {
         localStorage.setItem("userRole", "user");
-        router.push("/");
+        localStorage.setItem("skybus_session", "skb_user_v1_xy77_access");
+
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        } else {
+          router.push("/");
+        }
       } else {
         setError("Email atau password salah!");
         setLoading(false);
@@ -110,5 +121,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
