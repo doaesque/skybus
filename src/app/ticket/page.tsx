@@ -9,22 +9,25 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import { BUS_DATA, ALL_PARTNERS, LOCATIONS_DETAIL, POPULAR_LOCATIONS } from '@/constants/data'; 
 
 export default function TicketPage() {
   const router = useRouter();
-  const [isEditingSearch, setIsEditingSearch] = useState(false);
+  const searchParamsUrl = useSearchParams();
+
+  // --- STATE ---
   const [searchParams, setSearchParams] = useState({
-    origin: 'Jakarta',
-    originDetail: 'Semua Lokasi',
-    destination: 'Bandung',
-    destinationDetail: 'Semua Lokasi',
-    date: '2026-02-10',
-    returnDate: '', 
-    pax: 1
+    origin: searchParamsUrl.get('origin') || 'Jakarta',
+    originDetail: searchParamsUrl.get('originDetail') || 'Semua Lokasi',
+    destination: searchParamsUrl.get('destination') || 'Bandung',
+    destinationDetail: searchParamsUrl.get('destinationDetail') || 'Semua Lokasi',
+    date: searchParamsUrl.get('date') || '2026-02-10',
+    returnDate: searchParamsUrl.get('returnDate') || '', 
+    pax: parseInt(searchParamsUrl.get('pax') || '1')
   });
 
+  const [isEditingSearch, setIsEditingSearch] = useState(false);
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const originRef = useRef<HTMLDivElement>(null);
@@ -34,15 +37,11 @@ export default function TicketPage() {
   const [expandedBusId, setExpandedBusId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('points'); 
   const [showMobileFilter, setShowMobileFilter] = useState(false);
-  
-  // STATE MODAL LOGIN
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // --- STATE LIGHTBOX ---
+  // --- LIGHTBOX & FILTER STATES ---
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxImages, setLightboxImages] = useState<{src: string, type: string, title?: string}[]>([]);
-
-  // --- STATE FILTER LENGKAP ---
   const [filters, setFilters] = useState({
     pagi: false, siang: false, malam: false,
     selectedClasses: [] as string[], 
@@ -57,7 +56,21 @@ export default function TicketPage() {
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
 
-  // Helper untuk Ikon Fasilitas
+  // Helper function untuk generate URL Redirect saat Login
+  const getLoginRedirectUrl = () => {
+    const params = new URLSearchParams();
+    params.set("origin", searchParams.origin);
+    params.set("destination", searchParams.destination);
+    params.set("date", searchParams.date);
+    params.set("pax", searchParams.pax.toString());
+    if(searchParams.originDetail !== 'Semua Lokasi') params.set("originDetail", searchParams.originDetail);
+    if(searchParams.destinationDetail !== 'Semua Lokasi') params.set("destinationDetail", searchParams.destinationDetail);
+    if (searchParams.returnDate) params.set("returnDate", searchParams.returnDate);
+    
+    const returnUrl = `/ticket?${params.toString()}`;
+    return `/login?redirect=${encodeURIComponent(returnUrl)}`;
+  };
+
   const getFacilityIcon = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes('wifi')) return <Wifi className="w-3 h-3" />;
@@ -82,41 +95,32 @@ export default function TicketPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- HANDLER LIGHTBOX ---
   const handleNextImage = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (lightboxIndex !== null) {
-          setLightboxIndex((lightboxIndex + 1) % lightboxImages.length);
-      }
+      if (lightboxIndex !== null) setLightboxIndex((lightboxIndex + 1) % lightboxImages.length);
   };
-
   const handlePrevImage = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (lightboxIndex !== null) {
-          setLightboxIndex((lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length);
-      }
+      if (lightboxIndex !== null) setLightboxIndex((lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length);
   };
-
   const openLightbox = (images: {src: string, type: string, title?: string}[], index: number) => {
       setLightboxImages(images);
       setLightboxIndex(index);
   };
-
   const swapLocations = () => {
     setSearchParams(prev => ({
       ...prev,
-      origin: prev.destination,
-      originDetail: 'Semua Lokasi',
-      destination: prev.origin,
-      destinationDetail: 'Semua Lokasi'
+      origin: prev.destination, originDetail: 'Semua Lokasi',
+      destination: prev.origin, destinationDetail: 'Semua Lokasi'
     }));
   };
 
   const handleSelectTicket = (e: React.MouseEvent, busId: string, price: number) => {
     e.stopPropagation(); 
-    
-    const role = localStorage.getItem("userRole");
-    if (!role) {
+    const session = localStorage.getItem("skybus_session");
+    const isValidSession = session === 'skb_user_v1_xy77_access' || session === 'skb_admin_secure_8823_hash';
+
+    if (!isValidSession) {
         setShowLoginModal(true);
     } else {
         const params = new URLSearchParams();
@@ -126,9 +130,7 @@ export default function TicketPage() {
         params.set("pax", searchParams.pax.toString());
         params.set("from", searchParams.origin);
         params.set("to", searchParams.destination);
-        if (searchParams.returnDate) {
-            params.set("returnDate", searchParams.returnDate);
-        }
+        if (searchParams.returnDate) params.set("returnDate", searchParams.returnDate);
         router.push(`/booking?${params.toString()}`);
     }
   };
@@ -151,14 +153,12 @@ export default function TicketPage() {
 
   const sortedBusData = useMemo(() => {
     let data = [...busesOnRoute]; 
-    
     if (searchParams.originDetail !== 'Semua Lokasi') {
         data = data.filter(bus => bus.fromDetail === searchParams.originDetail);
     }
     if (searchParams.destinationDetail !== 'Semua Lokasi') {
         data = data.filter(bus => bus.toDetail === searchParams.destinationDetail);
     }
-
     if (filters.pagi || filters.siang || filters.malam) {
        data = data.filter(bus => {
           const hour = parseInt(bus.departureTime.replace('.', ':').split(':')[0]);
@@ -168,25 +168,12 @@ export default function TicketPage() {
           return false;
        });
     }
-
-    if (filters.selectedClasses.length > 0) {
-       data = data.filter(bus => filters.selectedClasses.includes(bus.type));
-    }
-    if (filters.boardingPoints.length > 0) {
-        data = data.filter(bus => filters.boardingPoints.includes(bus.fromDetail));
-    }
-    if (filters.droppingPoints.length > 0) {
-        data = data.filter(bus => filters.droppingPoints.includes(bus.toDetail));
-    }
-    if (filters.operators.length > 0) {
-        data = data.filter(bus => filters.operators.includes(bus.operator));
-    }
+    if (filters.selectedClasses.length > 0) data = data.filter(bus => filters.selectedClasses.includes(bus.type));
+    if (filters.boardingPoints.length > 0) data = data.filter(bus => filters.boardingPoints.includes(bus.fromDetail));
+    if (filters.droppingPoints.length > 0) data = data.filter(bus => filters.droppingPoints.includes(bus.toDetail));
+    if (filters.operators.length > 0) data = data.filter(bus => filters.operators.includes(bus.operator));
     if (filters.facilities.length > 0) {
-        data = data.filter(bus => {
-            return filters.facilities.every(filterFac => 
-                bus.facilities.some(busFac => busFac.toLowerCase().includes(filterFac.toLowerCase()))
-            );
-        });
+        data = data.filter(bus => filters.facilities.every(filterFac => bus.facilities.some(busFac => busFac.toLowerCase().includes(filterFac.toLowerCase()))));
     }
     if (filters.photoOnly) {
        data = data.filter(bus => {
@@ -194,12 +181,10 @@ export default function TicketPage() {
           return partner?.reviews?.some(r => r.images && r.images.length > 0);
        });
     }
-
     if (filters.promoOnly) {
         // @ts-ignore
         data = data.filter(bus => bus.isPromo === true);
     }
-
     data = data.filter(bus => bus.price <= filters.maxPrice);
 
     if (selectedSort === 'Terhemat') data.sort((a, b) => a.price - b.price);
@@ -215,12 +200,10 @@ export default function TicketPage() {
       return arr.includes(value) ? { ...prev, [key]: arr.filter(item => item !== value) } : { ...prev, [key]: [...arr, value] };
     });
   };
-  
   const toggleBoolFilter = (key: keyof typeof filters) => {
     // @ts-ignore
     setFilters(prev => ({...prev, [key]: !prev[key]}));
   };
-  
   const toggleDetails = (id: string) => {
     setExpandedBusId(expandedBusId === id ? null : id);
     if(expandedBusId !== id) setActiveTab('points');
@@ -383,11 +366,7 @@ export default function TicketPage() {
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h4 className="font-bold text-sm mb-4">Waktu Berangkat</h4>
             <div className="space-y-2">
-                {[
-                {id: 'pagi', label: 'Pagi (00:00 - 12:00)'},
-                {id: 'siang', label: 'Siang (12:00 - 18:00)'},
-                {id: 'malam', label: 'Malam (18:00 - 24:00)'}
-                ].map(opt => (
+                {[{id: 'pagi', label: 'Pagi (00:00 - 12:00)'}, {id: 'siang', label: 'Siang (12:00 - 18:00)'}, {id: 'malam', label: 'Malam (18:00 - 24:00)'}].map(opt => (
                 <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${filters[opt.id as keyof typeof filters] ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
                         {filters[opt.id as keyof typeof filters] && <Check className="w-3 h-3 text-white" />}
@@ -399,8 +378,8 @@ export default function TicketPage() {
             </div>
         </div>
 
-        {/* Titik Naik */}
-        {availableBoardingPoints.length > 0 && (
+        {/* Titik Naik - HANYA MUNCUL JIKA 'Semua Lokasi' */}
+        {searchParams.originDetail === 'Semua Lokasi' && availableBoardingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Titik Naik</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
@@ -417,8 +396,8 @@ export default function TicketPage() {
             </div>
         )}
 
-        {/* Titik Turun */}
-        {availableDroppingPoints.length > 0 && (
+        {/* Titik Turun - HANYA MUNCUL JIKA 'Semua Lokasi' */}
+        {searchParams.destinationDetail === 'Semua Lokasi' && availableDroppingPoints.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Titik Turun</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-2">
@@ -435,7 +414,7 @@ export default function TicketPage() {
             </div>
         )}
 
-        {/* Operator */}
+        {/* Operator & Spesial */}
         {availableOperators.length > 0 && (
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
                 <h4 className="font-bold text-sm mb-4">Nama Operator</h4>
@@ -452,8 +431,6 @@ export default function TicketPage() {
                 </div>
             </div>
         )}
-
-        {/* Spesial */}
         <div>
             <h4 className="font-bold text-sm mb-4">Fitur Spesial</h4>
             <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition">
@@ -474,6 +451,7 @@ export default function TicketPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
+      {/* ... (LIGHTBOX MODAL & LOGIN MODAL CODE UNCHANGED) ... */}
       {/* --- LIGHTBOX MODAL --- */}
       {lightboxIndex !== null && lightboxImages.length > 0 && (
           <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
@@ -530,7 +508,7 @@ export default function TicketPage() {
                 </p>
                 
                 <div className="space-y-4">
-                    <Link href="/login">
+                    <Link href={getLoginRedirectUrl()}> 
                         <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2">
                             <LogIn className="w-4 h-4" /> Masuk Sekarang
                         </button>
@@ -624,7 +602,7 @@ export default function TicketPage() {
       </div>
 
       {/* --- MAIN LAYOUT --- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex flex-col md:flex-row gap-8 relative">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 flex flex-col md:flex-row gap-16 relative"> {/* Updated gap-16 */}
         
         {/* LEFT SIDEBAR */}
         <aside className="hidden md:block w-72 shrink-0">
