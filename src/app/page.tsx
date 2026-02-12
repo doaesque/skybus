@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Users, ArrowRight, Ticket, ShieldCheck, MessageCircle,
-  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, X
+  BookOpen, Clock, MapPin, Bus, Check, ChevronDown, ChevronUp, ArrowUpDown, Armchair, User, LogOut, Settings, X, Calendar
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -44,7 +44,6 @@ export default function Home() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  // --- 1. GENERATE SEARCH OPTIONS (CITY + TERMINALS) ---
   const searchOptions = useMemo(() => {
     return POPULAR_LOCATIONS.flatMap(city => {
       const terminals = LOCATIONS_DETAIL[city] || [];
@@ -103,7 +102,6 @@ export default function Home() {
     router.refresh();
   };
 
-  // --- 2. FILTER LOGIC DENGAN RESET SUGGESTION ---
   const filteredOrigins = isOriginTyped
     ? searchOptions.filter(opt => opt.label.toLowerCase().includes(origin.toLowerCase()) && opt.city !== selectedDestCity)
     : searchOptions.filter(opt => opt.city !== selectedDestCity);
@@ -145,10 +143,9 @@ export default function Home() {
 
     if (!origin) { setShowOriginDropdown(true); originInputRef.current?.focus(); return; }
     if (!destination) { setShowDestDropdown(true); destInputRef.current?.focus(); return; }
-    // @ts-ignore
-    if (!departDate) { dateInputRef.current?.showPicker ? dateInputRef.current?.showPicker() : dateInputRef.current?.focus(); return; }
-    // @ts-ignore
-    if (tripType === 'round-trip' && !returnDate) { returnDateInputRef.current?.showPicker ? returnDateInputRef.current?.showPicker() : returnDateInputRef.current?.focus(); return; }
+    
+    if (!departDate) { (dateInputRef.current as any)?.showPicker ? (dateInputRef.current as any).showPicker() : dateInputRef.current?.focus(); return; }
+    if (tripType === 'round-trip' && !returnDate) { (returnDateInputRef.current as any)?.showPicker ? (returnDateInputRef.current as any).showPicker() : returnDateInputRef.current?.focus(); return; }
 
     const originObj = searchOptions.find(o => o.label === origin);
     const destObj = searchOptions.find(o => o.label === destination);
@@ -283,7 +280,6 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col gap-0">
-            {/* INPUT ORIGIN */}
             <div className="relative mb-2" ref={originWrapperRef}>
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
@@ -298,7 +294,7 @@ export default function Home() {
                     onFocus={(e) => { 
                       setShowOriginDropdown(true); 
                       setIsOriginTyped(false); 
-                      e.target.select(); // Select all text on click to allow easy clearing/replacement
+                      e.target.select(); 
                     }}
                     onChange={(e) => { setOrigin(e.target.value); setShowOriginDropdown(true); setIsOriginTyped(true); }} 
                   />
@@ -320,7 +316,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* SWAP BUTTON */}
             <div className="relative h-0 z-20 flex justify-center items-center">
               <button
                 onClick={swapLocations}
@@ -331,7 +326,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* INPUT DESTINATION */}
             <div className="relative mt-2 mb-4" ref={destWrapperRef}>
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center px-4 py-3 relative group focus-within:ring-2 focus-within:ring-blue-600/20 transition">
                 <MapPin className="w-5 h-5 text-slate-400 mr-3 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400" />
@@ -371,26 +365,30 @@ export default function Home() {
             <div className={`grid gap-4 mb-4 ${tripType === 'round-trip' ? 'grid-cols-1' : 'grid-cols-2'}`}>
               <div className="flex gap-4 w-full">
                 <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full">
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pergi</label>
+                  <label className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+                    <Calendar className="w-3 h-3 dark:text-white" /> Pergi
+                  </label>
                   <input
                     ref={dateInputRef}
                     type="date"
                     min={today}
                     value={departDate}
                     onChange={(e) => setDepartDate(e.target.value)}
-                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [scheme-light] dark:[scheme-dark]"
+                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:[color-scheme:dark] dark:[&::-webkit-calendar-picker-indicator]:invert"
                   />
                 </div>
                 {tripType === 'round-trip' && (
                   <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 w-full animate-in fade-in slide-in-from-left-4">
-                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Pulang</label>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+                      <Calendar className="w-3 h-3 dark:text-white" /> Pulang
+                    </label>
                     <input
                       ref={returnDateInputRef}
                       type="date"
                       min={departDate || today}
                       value={returnDate}
                       onChange={(e) => setReturnDate(e.target.value)}
-                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white [scheme-light] dark:[scheme-dark]"
+                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:[color-scheme:dark] dark:[&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
                 )}
