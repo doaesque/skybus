@@ -2,11 +2,10 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
-  ArrowLeft, ArrowRight, Star, Wifi, Zap, Armchair, ChevronDown, ChevronUp, 
-  Camera, MapPin, Calendar, User, SlidersHorizontal, Info, Clock, ShieldAlert,
-  Coffee, Tv, Filter, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag,
+  ArrowLeft, ArrowRight, Star, Wifi, Armchair, ChevronDown, ChevronUp, 
+  Camera, MapPin, Check, X, Bus, ArrowUpDown, LogIn, Lock, Tag,
   Utensils, Plug, Snowflake, Bath, Moon, Monitor, ExternalLink, Music, Droplets,
-  MessageSquare, ThumbsUp
+  MessageSquare, ThumbsUp, PlayCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Filter, ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,6 +38,10 @@ export default function TicketPage() {
   // STATE MODAL LOGIN
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // --- STATE LIGHTBOX ---
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxImages, setLightboxImages] = useState<{src: string, type: string, title?: string}[]>([]);
+
   // --- STATE FILTER LENGKAP ---
   const [filters, setFilters] = useState({
     pagi: false, siang: false, malam: false,
@@ -54,7 +57,7 @@ export default function TicketPage() {
 
   const commonFacilities = ["AC", "Toilet", "WiFi", "Makan", "Selimut", "USB Port", "Snack"];
 
-  // Helper untuk Ikon Fasilitas (Lebih Lengkap)
+  // Helper untuk Ikon Fasilitas
   const getFacilityIcon = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes('wifi')) return <Wifi className="w-3 h-3" />;
@@ -79,6 +82,26 @@ export default function TicketPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // --- HANDLER LIGHTBOX ---
+  const handleNextImage = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (lightboxIndex !== null) {
+          setLightboxIndex((lightboxIndex + 1) % lightboxImages.length);
+      }
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (lightboxIndex !== null) {
+          setLightboxIndex((lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length);
+      }
+  };
+
+  const openLightbox = (images: {src: string, type: string, title?: string}[], index: number) => {
+      setLightboxImages(images);
+      setLightboxIndex(index);
+  };
+
   const swapLocations = () => {
     setSearchParams(prev => ({
       ...prev,
@@ -90,7 +113,7 @@ export default function TicketPage() {
   };
 
   const handleSelectTicket = (e: React.MouseEvent, busId: string, price: number) => {
-    e.stopPropagation(); // Mencegah toggle card saat tombol PILIH diklik
+    e.stopPropagation(); 
     
     const role = localStorage.getItem("userRole");
     if (!role) {
@@ -451,6 +474,41 @@ export default function TicketPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
+      {/* --- LIGHTBOX MODAL --- */}
+      {lightboxIndex !== null && lightboxImages.length > 0 && (
+          <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
+              <button className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-20">
+                  <X className="w-8 h-8" />
+              </button>
+
+              <button onClick={handlePrevImage} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition z-20">
+                  <ChevronLeft className="w-8 h-8" />
+              </button>
+              <button onClick={handleNextImage} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition z-20">
+                  <ChevronRight className="w-8 h-8" />
+              </button>
+
+              <div className="relative max-w-5xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+                  {lightboxImages[lightboxIndex].type === 'video' ? (
+                      <div className="w-full aspect-video bg-black rounded-lg flex items-center justify-center border border-white/10">
+                          <PlayCircle className="w-20 h-20 text-white/50" />
+                          <p className="absolute bottom-4 text-white/50 text-sm">Video Playback Placeholder</p>
+                      </div>
+                  ) : (
+                      <img
+                        src={lightboxImages[lightboxIndex].src}
+                        alt="Gallery Preview"
+                        className="max-h-[80vh] max-w-full rounded-lg shadow-2xl object-contain"
+                      />
+                  )}
+                  {lightboxImages[lightboxIndex].title && (
+                      <p className="text-white mt-4 font-medium text-lg text-center">{lightboxImages[lightboxIndex].title}</p>
+                  )}
+                  <p className="text-white/50 text-sm mt-2">{lightboxIndex + 1} / {lightboxImages.length}</p>
+              </div>
+          </div>
+      )}
+
       {/* LOGIN MODAL */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
@@ -612,8 +670,13 @@ export default function TicketPage() {
 
           {sortedBusData.map((bus) => {
             const partnerData = getPartnerData(bus.operator);
-            const hasPhotos = partnerData?.reviews?.some(r => r.images && r.images.length > 0);
             const isExpanded = expandedBusId === bus.id;
+            
+            // Gabungkan foto gallery & review
+            const galleryImages = partnerData?.gallery?.map(g => ({ src: g.src, type: g.type, title: g.title })) || [];
+            const reviewImages = partnerData?.reviews?.flatMap(r => r.images || []).map(img => ({ src: img, type: 'image', title: 'Foto Ulasan' })) || [];
+            const allImages = [...galleryImages, ...reviewImages];
+            const hasPhotos = allImages.length > 0;
 
             return (
               <div 
@@ -768,14 +831,32 @@ export default function TicketPage() {
                               
                               {hasPhotos ? (
                                   <div className="grid grid-cols-3 gap-2 mb-4">
-                                      {partnerData?.gallery?.slice(0, 3).map((img, i) => (
-                                          <div key={i} className="aspect-video rounded-lg overflow-hidden relative group bg-slate-200">
+                                      {allImages.slice(0, 3).map((img, i) => (
+                                          <div 
+                                            key={i} 
+                                            className="aspect-video rounded-lg overflow-hidden relative group bg-slate-200 cursor-pointer border border-slate-100 dark:border-slate-800"
+                                            onClick={() => openLightbox(allImages, i)}
+                                          >
                                               <Image 
-                                                src={typeof img === 'string' ? img : img.src} 
-                                                alt="Bus Interior" 
+                                                src={img.src} 
+                                                alt={img.title || "Bus Image"} 
                                                 fill 
                                                 className="object-cover group-hover:scale-110 transition duration-500" 
                                               />
+                                              {/* Overlay jika ada lebih banyak foto */}
+                                              {i === 2 && allImages.length > 3 && (
+                                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                                      <span className="text-white font-bold text-sm">+{ allImages.length - 3 } Foto</span>
+                                                  </div>
+                                              )}
+                                              {/* Icon Play jika video */}
+                                              {img.type === 'video' && (
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                   <div className="bg-white/20 backdrop-blur-md p-2 rounded-full">
+                                                      <PlayCircle className="w-6 h-6 text-white fill-white/20" />
+                                                   </div>
+                                                </div>
+                                              )}
                                           </div>
                                       ))}
                                   </div>
@@ -788,7 +869,7 @@ export default function TicketPage() {
                               
                               <Link href={`/mitra/${bus.operator.toLowerCase().replace(/\s+/g, '-')}`} className="block">
                                 <button className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition flex items-center justify-center gap-2">
-                                    <ExternalLink className="w-3 h-3" /> Lihat Profil & Ulasan Lengkap Mitra
+                                    <ExternalLink className="w-3 h-3" /> Lihat Profil
                                 </button>
                               </Link>
                           </div>
@@ -798,7 +879,7 @@ export default function TicketPage() {
                       {activeTab === 'reviews' && (
                           <div className="space-y-4">
                               {partnerData?.reviews && partnerData.reviews.length > 0 ? (
-                                  partnerData.reviews.map((review) => (
+                                  partnerData.reviews.slice(0, 2).map((review) => (
                                       <div key={review.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                                           <div className="flex justify-between items-start mb-2">
                                               <div className="flex items-center gap-2">
@@ -814,7 +895,7 @@ export default function TicketPage() {
                                                   <Star className="w-3 h-3 fill-current" /> {review.rating}
                                               </div>
                                           </div>
-                                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
                                               &quot;{review.text}&quot;
                                           </p>
                                           {review.tags && review.tags.length > 0 && (
