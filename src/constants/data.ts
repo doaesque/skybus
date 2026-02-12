@@ -1,12 +1,8 @@
-// src/constants/data.ts
-
-// --- Data Lokasi & Rute ---
 export const POPULAR_LOCATIONS = [
   "Jakarta", "Bandung", "Semarang", "Yogyakarta", "Solo", "Surabaya", "Malang", "Denpasar", 
   "Medan", "Palembang", "Lampung", "Makassar"
 ];
 
-// Map detail lokasi (Terminal/Pool) untuk setiap kota
 export const LOCATIONS_DETAIL: Record<string, string[]> = {
   "Jakarta": ["Semua Lokasi", "Terminal Pulo Gebang", "Terminal Kp. Rambutan", "Terminal Kalideres", "Pool Pondok Pinang", "Agen Lebak Bulus"],
   "Bandung": ["Semua Lokasi", "Terminal Leuwi Panjang", "Terminal Cicaheum", "Pool Pasteur", "Pool Buah Batu"],
@@ -71,7 +67,6 @@ export const MITRA_STATS = {
   occupancyRate: "85%"
 };
 
-// --- Interfaces ---
 export interface Review {
   id: number;
   user: string;
@@ -97,13 +92,12 @@ export interface Partner {
   joined: string;
   description: string;
   classes: { name: string; price: string; seats: string; facilities: string[] }[];
-  departurePoints: { name: string; link: string }[];
+  departurePoints: { name: string }[];
   gallery: { type: string; src: string; title: string }[];
   reviews: Review[];
   usps?: string[];
 }
 
-// --- Data Detail Mitra ---
 export const ALL_PARTNERS: Partner[] = [
   { 
     id: 'sinar-jaya', 
@@ -132,9 +126,9 @@ Perjalanan jauh tidak lagi melelahkan bersama Sinar Jaya. Pesan tiket sekarang d
       { name: 'Suite Class', price: 'Rp 350rb - 450rb', seats: '21 Sleeper', facilities: ['Personal TV', 'Bantal & Selimut', 'Service Makan', 'WiFi', 'Toilet'] }
     ],
     departurePoints: [
-      { name: 'Terminal Pulo Gebang', link: 'https://goo.gl/maps/example' },
-      { name: 'Pool Cibitung', link: 'https://goo.gl/maps/example' },
-      { name: 'Agen Lebak Bulus', link: 'https://goo.gl/maps/example' }
+      { name: 'Terminal Pulo Gebang' },
+      { name: 'Pool Cibitung' },
+      { name: 'Agen Lebak Bulus' }
     ],
     gallery: [
        { type: 'video', src: "/img/hero-bus.jpg", title: "Profil Video Sinar Jaya" },
@@ -175,8 +169,8 @@ Pahala Kencana bukan pemain baru. Berdiri sejak 1976, kami telah melayani jutaan
       { name: 'Executive', price: 'Rp 280rb - 350rb', seats: '30 Seat (2-2)', facilities: ['Leg Rest', 'WiFi', 'Charging Point', 'Bantal'] }
     ],
     departurePoints: [
-      { name: 'Terminal Kampung Rambutan', link: 'https://goo.gl/maps/example' },
-      { name: 'Kantor Pusat Kudus', link: 'https://goo.gl/maps/example' }
+      { name: 'Terminal Kampung Rambutan' },
+      { name: 'Kantor Pusat Kudus' }
     ],
     gallery: [
         { type: 'video', src: "/img/hero-bus.jpg", title: "Video Pahala Kencana" },
@@ -212,8 +206,8 @@ X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indone
       { name: 'Shuttle Executive', price: 'Rp 100rb - 140rb', seats: '8-10 Seat', facilities: ['AC Dingin', 'Captain Seat', 'Air Mineral', 'Music'] }
     ],
     departurePoints: [
-      { name: 'Hotel Kartika Chandra', link: 'https://goo.gl/maps/example' },
-      { name: 'De Batara Bandung', link: 'https://goo.gl/maps/example' }
+      { name: 'Hotel Kartika Chandra' },
+      { name: 'De Batara Bandung' }
     ],
     gallery: [
         { type: 'video', src: "/img/hero-bus.jpg", title: "X-Trans Profile" },
@@ -225,19 +219,111 @@ X-Trans adalah pelopor layanan shuttle "Point to Point" (Pool to Pool) di Indone
     ],
     usps: []
   },
-  // Mitra Lainnya
-  { id: 'rosalia-indah', name: 'Rosalia Indah', type: 'PO Bus', rating: 4.9, routes: 150, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '1983', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'harapan-jaya', name: 'Harapan Jaya', type: 'PO Bus', rating: 4.7, routes: 90, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '1977', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'cititrans', name: 'Cititrans', type: 'Travel', rating: 4.9, routes: 30, image: '/img/travel-placeholder.png', address: '-', phone: '-', email: '-', founded: '2005', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'baraya', name: 'Baraya Travel', type: 'Travel', rating: 4.5, routes: 25, image: '/img/travel-placeholder.png', address: '-', phone: '-', email: '-', founded: '2006', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'efisiensi', name: 'Efisiensi', type: 'PO Bus', rating: 4.7, routes: 30, image: '/img/efisiensi.png', address: '-', phone: '-', email: '-', founded: '1996', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'san', name: 'SAN', type: 'PO Bus', rating: 4.6, routes: 60, image: '/img/san-group.png', address: '-', phone: '-', email: '-', founded: '1990', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'primajasa', name: 'Primajasa', type: 'PO Bus', rating: 4.5, routes: 100, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '1991', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'daytrans', name: 'DayTrans', type: 'Travel', rating: 4.7, routes: 40, image: '/img/travel-placeholder.png', address: '-', phone: '-', email: '-', founded: '2009', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
-  { id: 'juragan-99', name: 'Juragan 99', type: 'PO Bus', rating: 5.0, routes: 20, image: '/img/bus-placeholder.png', address: '-', phone: '-', email: '-', founded: '2018', joined: '2024', description: 'Deskripsi placeholder...', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { 
+    id: 'efisiensi', 
+    name: 'Efisiensi', 
+    type: 'PO Bus', 
+    rating: 4.7, 
+    routes: 30, 
+    image: '/img/efisiensi.png', 
+    address: 'Jl. Raya Kebumen - Purworejo, Kebumen', 
+    phone: '(0287) 384444', 
+    email: 'info@busefisiensi.com', 
+    founded: '1996', 
+    joined: '2024', 
+    description: 'Menjadi pilihan utama warga Jawa Tengah bagian selatan. Menghadirkan layanan premium dengan armada terbaru dan supir yang ramah. Nikmati perjalanan yang efisien dan aman bersama kami.', 
+    classes: [
+      { name: 'Patas AC', price: 'Rp 110rb - 150rb', seats: '40 Seat (2-2)', facilities: ['AC', 'Reclining Seat', 'Air Mineral'] }
+    ], 
+    departurePoints: [
+      { name: 'Terminal Cilacap' },
+      { name: 'Pool Kebumen' }
+    ], 
+    gallery: [], 
+    reviews: [], 
+    usps: [] 
+  },
+  { 
+    id: 'kramatdjati', 
+    name: 'Kramat Djati', 
+    type: 'PO Bus', 
+    rating: 4.6, 
+    routes: 90, 
+    image: '/img/kramatdjati.png', 
+    address: 'Jl. Ambon No. 3, Bandung', 
+    phone: '(022) 4200420', 
+    email: 'cs@kramatdjati.co.id', 
+    founded: '1968', 
+    joined: '2024', 
+    description: 'Dengan pengalaman puluhan tahun, Kramat Djati siap mengantar Anda melintasi berbagai kota di Jawa, Bali, dan Sumatera dengan standar keamanan dan kenyamanan tinggi.', 
+    classes: [
+      { name: 'VIP', price: 'Rp 160rb - 220rb', seats: '36 Seat (2-2)', facilities: ['AC', 'Toilet', 'Bantal', 'Selimut'] }
+    ], 
+    departurePoints: [
+      { name: 'Terminal Cicaheum' },
+      { name: 'Agen Ciputat' }
+    ], 
+    gallery: [], 
+    reviews: [], 
+    usps: [] 
+  },
+  { 
+    id: 'nusantara', 
+    name: 'Nusantara', 
+    type: 'PO Bus', 
+    rating: 4.7, 
+    routes: 70, 
+    image: '/img/nusantara.png', 
+    address: 'Jl. Getas Pejaten No.4, Kudus', 
+    phone: '(0291) 440020', 
+    email: 'info@nu3tara.co.id', 
+    founded: '1968', 
+    joined: '2024', 
+    description: 'Nu3tara selalu terdepan dalam menghadirkan sasis bus kelas dunia di Indonesia. Rasakan sensasi perjalanan senyap dan nyaman bersama armada premium kami.', 
+    classes: [
+      { name: 'Super Executive', price: 'Rp 250rb - 300rb', seats: '21 Seat (2-1)', facilities: ['AC', 'Leg Rest', 'Snack', 'Toilet', 'WiFi'] }
+    ], 
+    departurePoints: [
+      { name: 'Terminal Kudus' },
+      { name: 'Agen Daan Mogot' }
+    ], 
+    gallery: [], 
+    reviews: [], 
+    usps: [] 
+  },
+  { 
+    id: 'san-group', 
+    name: 'SAN Group', 
+    type: 'PO Bus', 
+    rating: 4.6, 
+    routes: 60, 
+    image: '/img/san-group.png', 
+    address: 'Jl. MT Haryono, Bengkulu', 
+    phone: '(0736) 21122', 
+    email: 'cs@po-san.co.id', 
+    founded: '1990', 
+    joined: '2024', 
+    description: 'Raja jalanan lintas Sumatera-Jawa. SAN Group berkomitmen memberikan pelayanan prima dengan sasis tronton terbaru yang tangguh membelah Sumatera.', 
+    classes: [
+      { name: 'Executive', price: 'Rp 450rb - 600rb', seats: '30 Seat (2-2)', facilities: ['AC', 'Bantal & Selimut', 'Toilet', 'Service Makan'] }
+    ], 
+    departurePoints: [
+      { name: 'Pool Pulo Mas' },
+      { name: 'Pool Bengkulu' }
+    ], 
+    gallery: [], 
+    reviews: [], 
+    usps: [] 
+  },
+  { id: 'rosalia-indah', name: 'Rosalia Indah', type: 'PO Bus', rating: 4.9, routes: 150, image: '/img/bus-placeholder.png', address: 'Karanganyar', phone: '-', email: '-', founded: '1983', joined: '2024', description: 'Pelopor layanan premium dan bus tingkat di Indonesia.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'harapan-jaya', name: 'Harapan Jaya', type: 'PO Bus', rating: 4.7, routes: 90, image: '/img/bus-placeholder.png', address: 'Tulungagung', phone: '-', email: '-', founded: '1977', joined: '2024', description: 'Sahabat perjalanan terpercaya untuk rute Jawa Timur.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'cititrans', name: 'Cititrans', type: 'Travel', rating: 4.9, routes: 30, image: '/img/travel-placeholder.png', address: 'Bandung', phone: '-', email: '-', founded: '2005', joined: '2024', description: 'Layanan executive shuttle yang aman dan terpercaya.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'baraya', name: 'Baraya Travel', type: 'Travel', rating: 4.5, routes: 25, image: '/img/travel-placeholder.png', address: 'Jakarta', phone: '-', email: '-', founded: '2006', joined: '2024', description: 'Solusi perjalanan hemat antara Jakarta dan Bandung.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'primajasa', name: 'Primajasa', type: 'PO Bus', rating: 4.5, routes: 100, image: '/img/bus-placeholder.png', address: 'Jakarta', phone: '-', email: '-', founded: '1991', joined: '2024', description: 'Melayani rute strategis di seluruh Jawa Barat dan Banten.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'daytrans', name: 'DayTrans', type: 'Travel', rating: 4.7, routes: 40, image: '/img/travel-placeholder.png', address: 'Jakarta', phone: '-', email: '-', founded: '2009', joined: '2024', description: 'Keberangkatan on-time dan rute point-to-point yang strategis.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
+  { id: 'juragan-99', name: 'Juragan 99', type: 'PO Bus', rating: 5.0, routes: 20, image: '/img/bus-placeholder.png', address: 'Malang', phone: '-', email: '-', founded: '2018', joined: '2024', description: 'Mendefinisikan ulang kemewahan bus AKAP di Indonesia.', classes: [], departurePoints: [], gallery: [], reviews: [], usps: [] },
 ];
 
-// --- Data Bus Expanded (dengan Promo & Layout) ---
 export const BUS_DATA = [
   {
     id: "1",
@@ -245,7 +331,7 @@ export const BUS_DATA = [
     operator: "Sinar Jaya", 
     type: "Executive Class",
     price: 200000,
-    originalPrice: 245000, // Harga coret
+    originalPrice: 245000,
     isPromo: true,
     seatLayout: "2-2",
     from: "Jakarta",
@@ -269,7 +355,7 @@ export const BUS_DATA = [
     price: 350000,
     originalPrice: null,
     isPromo: false,
-    seatLayout: "1-1", // Sleeper layout
+    seatLayout: "1-1",
     from: "Jakarta",
     fromDetail: "Pool Cibitung",
     to: "Bandung",
@@ -291,7 +377,7 @@ export const BUS_DATA = [
     price: 95000,
     originalPrice: null,
     isPromo: false,
-    seatLayout: "2-3", // Economy layout
+    seatLayout: "2-3",
     from: "Bandung",
     fromDetail: "Terminal Leuwi Panjang",
     to: "Jakarta",
@@ -313,7 +399,7 @@ export const BUS_DATA = [
     price: 110000,
     originalPrice: 135000,
     isPromo: true,
-    seatLayout: "shuttle", // Hiace layout
+    seatLayout: "shuttle",
     from: "Jakarta",
     fromDetail: "Hotel Kartika Chandra",
     to: "Bandung",
@@ -392,5 +478,5 @@ export const BUS_DATA = [
     facilities: ["AC", "WiFi", "Sleeper Seat", "Makan Malam", "Selimut", "Toilet"],
     seatsAvailable: 4,
     image: "/img/bus-placeholder.png"
-  },
+  }
 ];
