@@ -1,21 +1,28 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { 
-  ArrowLeft, Calendar, MapPin, Clock, MoreVertical, 
-  Star, MessageSquare, Ticket, AlertCircle, Search, 
-  Filter, CheckCircle, ChevronRight, X, Camera, Upload, Trash2
+import {
+  ArrowLeft, Calendar, MapPin, Clock, Star, Ticket, Search,
+  CheckCircle, X, Camera, Trash2, Bus
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function MyTicketsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Review States
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // New Success Modal
   const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviewImages, setReviewImages] = useState<string[]>([]);
+  const [reviewedIds, setReviewedIds] = useState<number[]>([]); // Track newly reviewed tickets
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Mock Data Tiket
@@ -69,7 +76,18 @@ export default function MyTicketsPage() {
     }
   ];
 
-  const filteredTickets = tickets.filter(t => t.status === activeTab);
+  // Logic Filtering: Tab + Search Query (Realtime)
+  const filteredTickets = tickets.filter(t => {
+    const matchesTab = t.status === activeTab;
+    const query = searchQuery.toLowerCase();
+    const matchesSearch =
+      t.busName.toLowerCase().includes(query) ||
+      t.bookingCode.toLowerCase().includes(query) ||
+      t.origin.toLowerCase().includes(query) ||
+      t.destination.toLowerCase().includes(query);
+
+    return matchesTab && matchesSearch;
+  });
 
   const handleOpenReview = (id: number) => {
     setSelectedTicket(id);
@@ -92,14 +110,54 @@ export default function MyTicketsPage() {
   };
 
   const submitReview = () => {
-    // Simulasi submit review
-    alert("Ulasan berhasil dikirim! Terima kasih.");
+    if (selectedTicket !== null) {
+      setReviewedIds([...reviewedIds, selectedTicket]);
+    }
     setShowReviewModal(false);
+    setTimeout(() => setShowSuccessModal(true), 300); // Small delay for smooth transition
+  };
+
+  const handleBookAgain = (origin: string, destination: string) => {
+    // Redirect to ticket search with params
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      date: new Date().toISOString().split('T')[0] // Default to today/tomorrow logic if needed
+    });
+    router.push(`/ticket?${params.toString()}`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-20">
-      
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-20 relative">
+
+      {/* Success Modal (Style match /mitra/register) */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-800">
+            <button onClick={() => setShowSuccessModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 dark:text-green-400">
+                <CheckCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Ulasan Terkirim!</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
+                Terima kasih telah membagikan pengalaman Anda. Ulasan Anda sangat membantu pengguna lain.
+              </p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-md md:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0">
@@ -109,13 +167,13 @@ export default function MyTicketsPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="flex flex-col items-center mb-6">
               <p className="text-sm text-slate-500 mb-3 font-medium">Bagaimana pengalaman perjalananmu?</p>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <button 
-                    key={star} 
+                  <button
+                    key={star}
                     onClick={() => setRating(star)}
                     className="p-1 transition transform hover:scale-110 focus:outline-none"
                   >
@@ -128,7 +186,7 @@ export default function MyTicketsPage() {
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Ceritakan Pengalamanmu</label>
-                <textarea 
+                <textarea
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-600 outline-none resize-none h-32"
                   placeholder="Busnya nyaman, AC dingin, supir ramah..."
                   value={reviewText}
@@ -139,7 +197,7 @@ export default function MyTicketsPage() {
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Foto (Opsional)</label>
                 <div className="flex gap-3 overflow-x-auto pb-2">
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="w-20 h-20 shrink-0 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-blue-500 hover:text-blue-500 transition"
                   >
@@ -147,11 +205,11 @@ export default function MyTicketsPage() {
                     <span className="text-[10px] font-bold">Upload</span>
                   </button>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                  
+
                   {reviewImages.map((img, idx) => (
                     <div key={idx} className="w-20 h-20 shrink-0 relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group">
                       <Image src={img} alt="Preview" fill className="object-cover" />
-                      <button 
+                      <button
                         onClick={() => removeImage(idx)}
                         className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                       >
@@ -163,7 +221,7 @@ export default function MyTicketsPage() {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={submitReview}
               disabled={rating === 0}
               className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:cursor-not-allowed transition shadow-lg shadow-blue-200 dark:shadow-none"
@@ -174,7 +232,7 @@ export default function MyTicketsPage() {
         </div>
       )}
 
-      {/* Header Consistent with /ticket */}
+      {/* Header Consistent with /about */}
       <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -186,12 +244,14 @@ export default function MyTicketsPage() {
                     <p className="text-xs text-slate-500 dark:text-slate-400">Riwayat & Pesanan Aktif</p>
                 </div>
             </div>
-            
-            {/* Functional Search Bar */}
+
+            {/* Realtime Search Bar */}
             <div className="relative">
-                <input 
-                    type="text" 
-                    placeholder="Cari..." 
+                <input
+                    type="text"
+                    placeholder="Cari..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold w-32 focus:w-48 transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-600/20"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -200,15 +260,15 @@ export default function MyTicketsPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        
+
         <div className="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl mb-6">
-          <button 
+          <button
             onClick={() => setActiveTab('active')}
             className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition ${activeTab === 'active' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
           >
             Sedang Aktif
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('history')}
             className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition ${activeTab === 'history' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
           >
@@ -220,7 +280,7 @@ export default function MyTicketsPage() {
           <div className="space-y-4">
             {filteredTickets.map((ticket) => (
               <div key={ticket.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition group">
-                
+
                 <div className="bg-slate-50 dark:bg-slate-800/50 px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                    <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -273,19 +333,24 @@ export default function MyTicketsPage() {
                         </>
                     ) : (
                         <>
-                            {!ticket.hasReviewed ? (
-                                <button 
+                            {/* Check if ticket is reviewed OR is in the newly reviewed list */}
+                            {(!ticket.hasReviewed && !reviewedIds.includes(ticket.id)) ? (
+                                <button
                                   onClick={() => handleOpenReview(ticket.id)}
                                   className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400 py-2.5 rounded-xl font-bold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
                                 >
                                     <Star className="w-4 h-4" /> Beri Nilai
                                 </button>
                             ) : (
-                                <div className="flex-1 flex items-center justify-center gap-2 bg-green-50 text-green-600 py-2.5 rounded-xl font-bold text-xs border border-green-100 cursor-default">
+                                <div className="flex-1 flex items-center justify-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 py-2.5 rounded-xl font-bold text-xs border border-green-100 dark:border-green-800 cursor-default">
                                     <CheckCircle className="w-4 h-4" /> Ulasan Terkirim
                                 </div>
                             )}
-                            <button className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none">
+
+                            <button
+                              onClick={() => handleBookAgain(ticket.origin, ticket.destination)}
+                              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none"
+                            >
                                 Pesan Lagi
                             </button>
                         </>
@@ -301,7 +366,7 @@ export default function MyTicketsPage() {
                 <Ticket className="w-10 h-10 text-slate-300" />
              </div>
              <h3 className="font-bold text-slate-800 dark:text-white mb-2">Belum ada tiket</h3>
-             <p className="text-sm text-slate-500 max-w-xs mx-auto mb-6">Kamu belum memiliki tiket pada kategori ini. Yuk mulai perjalananmu!</p>
+             <p className="text-sm text-slate-500 max-w-xs mx-auto mb-6">Kamu belum memiliki tiket yang cocok dengan pencarian ini.</p>
              <Link href="/ticket">
                 <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700 transition">
                     Cari Tiket Sekarang

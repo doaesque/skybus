@@ -23,6 +23,36 @@ function LoginContent() {
     setLoading(true);
 
     setTimeout(() => {
+      // 1. Cek di daftar user hasil signup (skybus_users)
+      const storedUsersJSON = localStorage.getItem("skybus_users");
+      let foundUser = null;
+
+      if (storedUsersJSON) {
+        try {
+          const storedUsers = JSON.parse(storedUsersJSON);
+          if (Array.isArray(storedUsers)) {
+            // Cari user yang email & passwordnya cocok
+            foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
+          }
+        } catch (err) {
+          console.error("Error parsing users", err);
+        }
+      }
+
+      // 2. Jika ketemu user dari signup
+      if (foundUser) {
+        localStorage.setItem("userRole", foundUser.role || "user");
+        localStorage.setItem("skybus_session", "skb_user_" + Date.now());
+        
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        } else {
+          router.push("/");
+        }
+        return;
+      }
+
+      // 3. Fallback: Cek akun demo (Hardcoded)
       if (email === "admin@skybus.id" && password === "admin123") {
         localStorage.setItem("userRole", "admin");
         localStorage.setItem("skybus_session", "skb_admin_secure_8823_hash");
@@ -34,13 +64,14 @@ function LoginContent() {
       } else if (email === "user@gmail.com" && password === "user123") {
         localStorage.setItem("userRole", "user");
         localStorage.setItem("skybus_session", "skb_user_v1_xy77_access");
-
+        
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
           router.push("/");
         }
       } else {
+        // Jika semua gagal
         setError("Email atau password salah!");
         setLoading(false);
       }

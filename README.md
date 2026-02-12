@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkyBus - Platform Pemesanan Tiket Bus Online
 
-## Getting Started
+SkyBus adalah aplikasi web modern untuk layanan pemesanan tiket bus dan travel antar kota di Indonesia. Proyek ini dikembangkan untuk mendemonstrasikan implementasi teknologi web terbaru dengan fokus pada performa tinggi, desain responsif, dan pengalaman pengguna yang intuitif.
 
-First, run the development server:
+Aplikasi ini dibangun menggunakan arsitektur Next.js 16 (App Router) dan gaya antarmuka menggunakan Tailwind CSS v4.
+
+## Fitur Utama
+
+* **Pencarian Tiket Real-time:** Memungkinkan pengguna mencari ketersediaan tiket berdasarkan asal, tujuan, tanggal keberangkatan, dan jumlah penumpang.
+* **Filter Pencarian Lanjutan:** Pengguna dapat menyaring hasil berdasarkan lokasi spesifik (Terminal/Pool) dan jenis perjalanan (Sekali Jalan atau Pulang Pergi).
+* **Antarmuka Modern & Responsif:** Desain yang sepenuhnya responsif untuk perangkat mobile dan desktop, dilengkapi dengan dukungan Mode Gelap (Dark Mode).
+* **Integrasi Data Mitra:** Menampilkan simulasi data dari berbagai operator bus populer dengan detail fasilitas armada (Executive, Sleeper, Shuttle).
+* **Sistem Kode Promo:** Fitur interaktif untuk penerapan diskon pada transaksi.
+* **Halaman Informasi Lengkap:** Mencakup halaman Bantuan (FAQ), Tentang Kami, Daftar Mitra, dan Panduan Pemesanan.
+
+## Teknologi yang Digunakan
+
+Proyek ini dibangun menggunakan teknologi berikut:
+
+* **Framework:** Next.js 16.1 (App Router)
+* **Library UI:** React 19
+* **Styling:** Tailwind CSS v4
+* **Bahasa:** TypeScript
+* **Ikon:** Lucide React
+* **Animasi:** Framer Motion
+* **Utilitas PDF:** jspdf & html2canvas (untuk pembuatan E-Ticket)
+
+## Struktur Proyek
+
+Berikut adalah gambaran umum struktur direktori proyek:
+
+* `src/app`: Berisi halaman aplikasi dan layout (Next.js App Router).
+* `src/components`: Komponen UI yang dapat digunakan kembali (reusable).
+* `src/constants`: Data statis (mock data) untuk rute, bus, dan promo.
+* `src/lib`: Fungsi utilitas dan helper.
+* `public`: Aset statis seperti gambar dan logo.
+
+## Instalasi dan Penggunaan
+
+Ikuti langkah-langkah berikut untuk menjalankan proyek ini di lingkungan lokal Anda:
+
+1. **Clone repositori**
+
+```bash
+git clone [https://github.com/username-anda/skybus.git](https://github.com/username-anda/skybus.git)
+cd skybus
+```
+
+1. **Instal dependensi**
+
+```bash
+npm install
+```
+
+1. **Jalankan server pengembangan**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Akses aplikasi**
+Buka peramban web dan kunjungi `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Lisensi
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proyek ini didistribusikan di bawah Lisensi MIT. Lihat file LICENSE untuk informasi lebih lanjut.

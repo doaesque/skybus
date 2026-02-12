@@ -1,86 +1,74 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, Suspense } from 'react';
 import { 
-  ArrowLeft, Download, Share2, MapPin, User, Bus, QrCode, ShieldCheck, X, CheckCircle 
+  ArrowLeft, Download, Share2, MapPin, User, Bus, QrCode, ShieldCheck, Check, Loader2 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { BUS_DATA } from '../../constants/data'; // Mengambil data dari modul yang sudah ada
 
-const ActionModal = ({ isOpen, title, message, onClose }: { isOpen: boolean; title: string; message: string; onClose: () => void }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-            <X className="w-5 h-5" />
-        </button>
-        <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8" />
-        </div>
-        <h3 className="text-lg font-black mb-2 text-slate-800 dark:text-white">{title}</h3>
-        <p className="text-sm text-slate-500 mb-6 leading-relaxed">{message}</p>
-        <button onClick={onClose} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold transition hover:opacity-90">
-          Tutup
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default function ETicketPage() {
+function ETicketContent() {
   const searchParams = useSearchParams();
   const ticketRef = useRef<HTMLDivElement>(null);
-  const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+  
+  // State untuk feedback button tanpa popup
+  const [downloadStatus, setDownloadStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
+  // Ambil ID dari URL
+  const ticketId = searchParams.get('id');
+  
+  // Cari data bus yang sesuai dari constants/data.ts, fallback ke data pertama jika tidak ketemu
+  const busInfo = BUS_DATA.find(b => b.id === ticketId) || BUS_DATA[1]; // Fallback ke Sinar Jaya Suite Class (index 1) agar terlihat bagus
+
+  // Gabungkan data statis (mockup) dengan data real dari constants
   const ticketData = {
-    id: searchParams.get('id') || 'SKY-8829301',
-    busName: "Sinar Jaya Suite Class",
+    bookingCode: "SKY-" + (ticketId ? ticketId.toUpperCase() : "8829301"),
+    busName: busInfo.name,
+    operator: busInfo.operator,
+    class: busInfo.type,
+    plateNumber: "B 7789 TGA", // Data mockup
+    seat: "1A", // Data mockup
+    passenger: "Budi Santoso", // Data mockup (ideally from localStorage/User Context)
     date: "10 Feb 2026",
-    time: "07:00",
-    origin: "Jakarta (Pulo Gebang)",
-    destination: "Yogyakarta (Giwangan)",
-    seat: "1A",
-    passenger: "Budi Santoso",
-    bookingCode: "SJ-JKT-YOG-001",
-    class: "Sleeper Class",
-    plateNumber: "B 7789 TGA"
+    time: busInfo.departureTime,
+    arrivalTime: busInfo.arrivalTime,
+    origin: busInfo.fromDetail || busInfo.from,
+    destination: busInfo.toDetail || busInfo.to,
+    image: busInfo.image
   };
 
   const handleDownload = () => {
-    setModalState({
-      isOpen: true,
-      title: "Mengunduh...",
-      message: "E-Ticket sedang diproses dan akan tersimpan di perangkat Anda."
-    });
+    if (downloadStatus !== 'idle') return;
+    
+    setDownloadStatus('loading');
+    // Simulasi proses download
+    setTimeout(() => {
+      setDownloadStatus('success');
+      // Reset status setelah 2 detik
+      setTimeout(() => setDownloadStatus('idle'), 2000);
+    }, 1500);
   };
 
   const handleShare = () => {
-    setModalState({
-      isOpen: true,
-      title: "Link Disalin",
-      message: "Tautan E-Ticket berhasil disalin ke clipboard."
-    });
+    // Copy URL ke clipboard
+    navigator.clipboard.writeText(window.location.href);
+    setShareStatus('copied');
+    // Reset status setelah 2 detik
+    setTimeout(() => setShareStatus('idle'), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-20">
+    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
-      <ActionModal 
-        isOpen={modalState.isOpen} 
-        title={modalState.title} 
-        message={modalState.message} 
-        onClose={() => setModalState({ ...modalState, isOpen: false })} 
-      />
-
-      <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
-        <div className="max-w-md mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/my-tickets" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
-            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          </Link>
-          <h1 className="text-lg font-black text-slate-900 dark:text-white">E-Ticket</h1>
-        </div>
+      {/* Header disamakan dengan /about (Rata Kiri) */}
+      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
+        <Link href="/my-tickets" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+          <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+        </Link>
+        <h1 className="font-black text-lg">E-Ticket</h1>
       </div>
 
       <div className="max-w-md mx-auto px-4 py-8">
@@ -89,7 +77,7 @@ export default function ETicketPage() {
           <p className="text-sm text-slate-500">Tunjukkan QR Code ini kepada petugas.</p>
         </div>
 
-        <div ref={ticketRef} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden relative border border-slate-200 dark:border-slate-800">
+        <div ref={ticketRef} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden relative border border-slate-200 dark:border-slate-800 transition-colors">
           <div className="bg-blue-600 p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
             <div className="relative z-10 flex justify-between items-start">
@@ -104,7 +92,7 @@ export default function ETicketPage() {
           <div className="p-6">
             <div className="flex items-center gap-4 mb-6 border-b border-dashed border-slate-200 dark:border-slate-700 pb-6">
               <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
-                <Image src="/img/sinar-jaya.png" width={40} height={40} alt="Logo Bus" className="object-contain" />
+                <Image src={ticketData.image} width={40} height={40} alt="Logo Bus" className="object-contain" />
               </div>
               <div>
                 <h3 className="font-bold text-lg leading-tight">{ticketData.busName}</h3>
@@ -140,7 +128,7 @@ export default function ETicketPage() {
                     <p className="font-bold text-slate-800 dark:text-white text-sm mt-0.5">{ticketData.destination}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-lg text-slate-400">14:30</p>
+                    <p className="font-black text-lg text-slate-400">{ticketData.arrivalTime}</p>
                     <p className="text-xs text-slate-400 font-bold">{ticketData.date}</p>
                   </div>
                 </div>
@@ -177,15 +165,44 @@ export default function ETicketPage() {
         <div className="grid grid-cols-2 gap-4 mt-6">
           <button 
             onClick={handleDownload}
-            className="flex items-center justify-center gap-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-300 dark:hover:bg-slate-700 transition"
+            disabled={downloadStatus !== 'idle'}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+              downloadStatus === 'success' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-700'
+            }`}
           >
-            <Download className="w-4 h-4" /> Unduh PDF
+            {downloadStatus === 'loading' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : downloadStatus === 'success' ? (
+              <>
+                <Check className="w-4 h-4" /> Tersimpan
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" /> Unduh PDF
+              </>
+            )}
           </button>
+
           <button 
             onClick={handleShare}
-            className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none"
+            disabled={shareStatus === 'copied'}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+              shareStatus === 'copied'
+                ? 'bg-green-600 text-white shadow-none'
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none'
+            }`}
           >
-            <Share2 className="w-4 h-4" /> Bagikan
+             {shareStatus === 'copied' ? (
+              <>
+                <Check className="w-4 h-4" /> Disalin
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4" /> Bagikan
+              </>
+            )}
           </button>
         </div>
 
@@ -194,5 +211,13 @@ export default function ETicketPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ETicketPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 text-slate-500 font-sans">Memuat Tiket...</div>}>
+      <ETicketContent />
+    </Suspense>
   );
 }
