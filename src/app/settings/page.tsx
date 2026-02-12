@@ -86,9 +86,8 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-20 relative">
 
-      {/* MODAL LOADING SIMPAN */}
       {isSaving && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 px-8 py-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-100 dark:border-slate-800">
             <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
             <p className="font-bold text-slate-800 dark:text-white">Menyimpan Perubahan...</p>
@@ -140,7 +139,7 @@ export default function SettingsPage() {
         
         <div className="flex flex-col items-center mb-10">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-200 dark:shadow-none">
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-200 dark:shadow-none">
               {formData.name.charAt(0)}
             </div>
             <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-md text-blue-600 hover:scale-110 transition">
@@ -152,7 +151,7 @@ export default function SettingsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 dark:bg-red-900/20 text-red-600 text-sm p-4 rounded-xl font-bold flex items-center gap-2 animate-in slide-in-from-top-2">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm p-4 rounded-xl font-bold flex items-center gap-2 animate-in slide-in-from-top-2 border border-red-100 dark:border-red-900/50">
             <AlertTriangle className="w-4 h-4" /> {error}
           </div>
         )}
@@ -260,7 +259,7 @@ export default function SettingsPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" checked={notifSettings.emailNotif} onChange={()=>setNotifSettings({...notifSettings, emailNotif: !notifSettings.emailNotif})} aria-label="Aktifkan Notifikasi Email"/>
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between">
@@ -270,7 +269,7 @@ export default function SettingsPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" checked={notifSettings.waNotif} onChange={()=>setNotifSettings({...notifSettings, waNotif: !notifSettings.waNotif})} aria-label="Aktifkan Notifikasi WhatsApp"/>
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between">
@@ -280,7 +279,7 @@ export default function SettingsPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" checked={notifSettings.promoNotif} onChange={()=>setNotifSettings({...notifSettings, promoNotif: !notifSettings.promoNotif})} aria-label="Aktifkan Info Promo"/>
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
           </div>

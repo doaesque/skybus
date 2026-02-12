@@ -40,7 +40,7 @@ const ReservationTimerHeader = ({ duration, onExpire }: { duration: number; onEx
 const AlertModal = ({ isOpen, message, onClose }: { isOpen: boolean; message: string; onClose: () => void }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <X className="w-5 h-5" />
@@ -63,7 +63,7 @@ const PromoModal = ({ isOpen, onClose, onSelect }: { isOpen: boolean; onClose: (
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <h3 className="font-bold text-lg">Promo Tersedia</h3>
@@ -142,7 +142,7 @@ const TimeoutModal = ({ isOpen }: { isOpen: boolean }) => {
   const router = useRouter();
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center">
         <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <Timer className="w-8 h-8" />
@@ -158,7 +158,7 @@ const TimeoutModal = ({ isOpen }: { isOpen: boolean }) => {
 const SuccessModal = ({ isOpen }: { isOpen: boolean }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden">
                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-in zoom-in">
                     <CheckCircle className="w-10 h-10" />
@@ -397,7 +397,6 @@ function PaymentContent() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
              
-             {/* LEFT COLUMN - CONTACT FORM & PAYMENT METHODS */}
              <div className="md:col-span-2 space-y-6">
                  
                  {paymentStep === 'select' && (
@@ -581,7 +580,6 @@ function PaymentContent() {
                  )}
              </div>
 
-             {/* RIGHT COLUMN - ORDER SUMMARY (Sticky) */}
              <div className="w-full md:w-96 shrink-0 md:col-span-1">
                  <div className="sticky top-24 space-y-4"> 
                      
@@ -609,13 +607,13 @@ function PaymentContent() {
                             
                             <div className="relative pl-6 border-l-2 border-dashed border-slate-300 dark:border-slate-700 space-y-4 py-1">
                                 <div className="relative">
-                                    <div className="absolute -left-7.25 top-1 w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-600 border-2 border-white dark:border-slate-900"></div>
+                                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-600 border-2 border-white dark:border-slate-900"></div>
                                     <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Berangkat</p>
                                     <p className="text-sm font-bold">{bus.departureTime} • {bus.from}</p>
                                     <p className="text-xs text-slate-500">{date ? new Date(date).toLocaleDateString('id-ID', {weekday: 'short', day: 'numeric', month: 'short'}) : '-'}</p>
                                 </div>
                                 <div className="relative">
-                                    <div className="absolute -left-7.25 top-1 w-3 h-3 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900"></div>
+                                    <div className="absolute -left-[29px] top-1 w-3 h-3 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900"></div>
                                     <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Tiba</p>
                                     <p className="text-sm font-bold">{bus.arrivalTime} • {bus.to}</p>
                                     <p className="text-xs text-slate-500">{date ? new Date(date).toLocaleDateString('id-ID', {weekday: 'short', day: 'numeric', month: 'short'}) : '-'}</p>

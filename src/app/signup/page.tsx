@@ -60,13 +60,10 @@ function SignupContent() {
       const updatedUsers = [...existingUsers, newUser];
       localStorage.setItem("skybus_users", JSON.stringify(updatedUsers));
 
-      localStorage.setItem("userRole", "user");
-      localStorage.setItem("skybus_session", "skb_user_new_" + Date.now());
-
       setLoading(false);
 
       if (redirectUrl) {
-        router.push(redirectUrl);
+        router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
       } else {
         router.push('/login');
       }

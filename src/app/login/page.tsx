@@ -23,7 +23,6 @@ function LoginContent() {
     setLoading(true);
 
     setTimeout(() => {
-      // 1. Cek di daftar user hasil signup (skybus_users)
       const storedUsersJSON = localStorage.getItem("skybus_users");
       let foundUser = null;
 
@@ -31,7 +30,6 @@ function LoginContent() {
         try {
           const storedUsers = JSON.parse(storedUsersJSON);
           if (Array.isArray(storedUsers)) {
-            // Cari user yang email & passwordnya cocok
             foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
           }
         } catch (err) {
@@ -39,7 +37,6 @@ function LoginContent() {
         }
       }
 
-      // 2. Jika ketemu user dari signup
       if (foundUser) {
         localStorage.setItem("userRole", foundUser.role || "user");
         localStorage.setItem("skybus_session", "skb_user_" + Date.now());
@@ -52,7 +49,6 @@ function LoginContent() {
         return;
       }
 
-      // 3. Fallback: Cek akun demo (Hardcoded)
       if (email === "admin@skybus.id" && password === "admin123") {
         localStorage.setItem("userRole", "admin");
         localStorage.setItem("skybus_session", "skb_admin_secure_8823_hash");
@@ -71,7 +67,6 @@ function LoginContent() {
           router.push("/");
         }
       } else {
-        // Jika semua gagal
         setError("Email atau password salah!");
         setLoading(false);
       }
@@ -139,6 +134,15 @@ function LoginContent() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Ingat Saya</span>
+                </label>
+                <Link href="#" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                  Lupa Kata Sandi?
+                </Link>
               </div>
             </div>
             <button type="submit" disabled={loading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-slate-200 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">

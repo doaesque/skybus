@@ -135,7 +135,7 @@ function TicketContent() {
     }
 
     const session = localStorage.getItem("skybus_session");
-    const isValidSession = session === 'skb_user_v1_xy77_access' || session === 'skb_admin_secure_8823_hash';
+    const isValidSession = session && session.startsWith("skb_");
 
     if (!isValidSession) {
       setShowLoginModal(true);
