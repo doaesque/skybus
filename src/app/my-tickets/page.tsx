@@ -2,8 +2,8 @@
 
 import React, { useState, useRef } from 'react';
 import {
-  ArrowLeft, Calendar, MapPin, Clock, Star, Ticket, Search,
-  CheckCircle, X, Camera, Trash2, Bus
+  ArrowLeft, Calendar, Clock, Star, Ticket, Search,
+  CheckCircle, X, Camera, Trash2, Armchair
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,18 +14,16 @@ export default function MyTicketsPage() {
   const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Review States
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // New Success Modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<number | null>(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviewImages, setReviewImages] = useState<string[]>([]);
-  const [reviewedIds, setReviewedIds] = useState<number[]>([]); // Track newly reviewed tickets
+  const [reviewedIds, setReviewedIds] = useState<number[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Mock Data Tiket
   const tickets = [
     {
       id: 1,
@@ -76,7 +74,6 @@ export default function MyTicketsPage() {
     }
   ];
 
-  // Logic Filtering: Tab + Search Query (Realtime)
   const filteredTickets = tickets.filter(t => {
     const matchesTab = t.status === activeTab;
     const query = searchQuery.toLowerCase();
@@ -114,15 +111,14 @@ export default function MyTicketsPage() {
       setReviewedIds([...reviewedIds, selectedTicket]);
     }
     setShowReviewModal(false);
-    setTimeout(() => setShowSuccessModal(true), 300); // Small delay for smooth transition
+    setTimeout(() => setShowSuccessModal(true), 300);
   };
 
   const handleBookAgain = (origin: string, destination: string) => {
-    // Redirect to ticket search with params
     const params = new URLSearchParams({
       origin: origin,
       destination: destination,
-      date: new Date().toISOString().split('T')[0] // Default to today/tomorrow logic if needed
+      date: new Date().toISOString().split('T')[0]
     });
     router.push(`/ticket?${params.toString()}`);
   };
@@ -130,9 +126,8 @@ export default function MyTicketsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 transition-colors pb-20 relative">
 
-      {/* Success Modal (Style match /mitra/register) */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-800">
             <button onClick={() => setShowSuccessModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
               <X className="w-5 h-5" />
@@ -157,7 +152,6 @@ export default function MyTicketsPage() {
         </div>
       )}
 
-      {/* Review Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-md md:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0">
@@ -232,34 +226,27 @@ export default function MyTicketsPage() {
         </div>
       )}
 
-      {/* Header Consistent with /about */}
-      <div className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-40 border-b border-slate-100 dark:border-slate-800">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
-                    <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                </Link>
-                <div>
-                    <h1 className="text-lg font-black text-slate-900 dark:text-white leading-tight">Tiket Saya</h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Riwayat & Pesanan Aktif</p>
-                </div>
-            </div>
-
-            {/* Realtime Search Bar */}
-            <div className="relative">
-                <input
-                    type="text"
-                    placeholder="Cari..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold w-32 focus:w-48 transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-600/20"
-                />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            </div>
-        </div>
+      {/* HEADER BARU - KONSISTEN DENGAN HALAMAN LAIN */}
+      <div className="bg-white dark:bg-slate-900 p-4 shadow-sm sticky top-0 z-40 flex items-center gap-4 border-b dark:border-slate-800">
+        <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
+          <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+        </Link>
+        <h1 className="font-black text-lg">Tiket Saya</h1>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
+
+        {/* SEARCH BAR DIPINDAH KE KONTEN */}
+        <div className="relative mb-6">
+          <input
+            type="text"
+            placeholder="Cari tiket, tujuan, atau kode booking..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold shadow-sm focus:ring-2 focus:ring-blue-600 outline-none transition"
+          />
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        </div>
 
         <div className="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl mb-6">
           <button
@@ -294,67 +281,73 @@ export default function MyTicketsPage() {
                 </div>
 
                 <div className="p-5">
-                    <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-black text-lg text-slate-800 dark:text-white">{ticket.busName}</h3>
-                        <p className="font-black text-blue-600">{ticket.price}</p>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-black text-lg text-slate-800 dark:text-white">{ticket.busName}</h3>
+                    <p className="font-black text-blue-600">{ticket.price}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5">
+                      <Armchair className="w-3 h-3" />
+                      {ticket.seat}
                     </div>
+                  </div>
 
-                    <div className="relative border-l-2 border-dashed border-slate-300 dark:border-slate-700 ml-1.5 space-y-6 my-2 pl-6">
-                        <div className="relative">
-                            <div className="absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-600 border-2 border-white dark:border-slate-900"></div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Dari</p>
-                                <p className="font-bold text-sm text-slate-800 dark:text-white leading-tight">{ticket.origin}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{ticket.originDetail}</p>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <div className="absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900"></div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Ke</p>
-                                <p className="font-bold text-sm text-slate-800 dark:text-white leading-tight">{ticket.destination}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{ticket.destinationDetail}</p>
-                            </div>
-                        </div>
+                  <div className="relative border-l-2 border-dashed border-slate-300 dark:border-slate-700 ml-1.5 space-y-6 my-2 pl-6">
+                    <div className="relative">
+                      <div className="absolute -left-7.75 top-1 w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-600 border-2 border-white dark:border-slate-900"></div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Dari</p>
+                        <p className="font-bold text-sm text-slate-800 dark:text-white leading-tight">{ticket.origin}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{ticket.originDetail}</p>
+                      </div>
                     </div>
+                    <div className="relative">
+                      <div className="absolute -left-7.75 top-1 w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900"></div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase mb-0.5">Ke</p>
+                        <p className="font-bold text-sm text-slate-800 dark:text-white leading-tight">{ticket.destination}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{ticket.destinationDetail}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-slate-900/50">
-                    {ticket.status === 'active' ? (
-                        <>
-                           <Link href={`/eticket?id=${ticket.bookingCode}`} className="flex-1">
-                              <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none">
-                                  <Ticket className="w-4 h-4" /> Lihat E-Ticket
-                              </button>
-                           </Link>
-                           <button className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-                               Reschedule
-                           </button>
-                        </>
-                    ) : (
-                        <>
-                            {/* Check if ticket is reviewed OR is in the newly reviewed list */}
-                            {(!ticket.hasReviewed && !reviewedIds.includes(ticket.id)) ? (
-                                <button
-                                  onClick={() => handleOpenReview(ticket.id)}
-                                  className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400 py-2.5 rounded-xl font-bold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
-                                >
-                                    <Star className="w-4 h-4" /> Beri Nilai
-                                </button>
-                            ) : (
-                                <div className="flex-1 flex items-center justify-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 py-2.5 rounded-xl font-bold text-xs border border-green-100 dark:border-green-800 cursor-default">
-                                    <CheckCircle className="w-4 h-4" /> Ulasan Terkirim
-                                </div>
-                            )}
+                  {ticket.status === 'active' ? (
+                    <>
+                       <Link href={`/eticket?id=${ticket.bookingCode}`} className="flex-1">
+                          <button className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none">
+                              <Ticket className="w-4 h-4" /> Lihat E-Ticket
+                          </button>
+                       </Link>
+                       <button className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                           Reschedule
+                       </button>
+                    </>
+                  ) : (
+                    <>
+                      {(!ticket.hasReviewed && !reviewedIds.includes(ticket.id)) ? (
+                        <button
+                          onClick={() => handleOpenReview(ticket.id)}
+                          className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 text-blue-600 dark:text-blue-400 py-2.5 rounded-xl font-bold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
+                        >
+                            <Star className="w-4 h-4" /> Beri Nilai
+                        </button>
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 py-2.5 rounded-xl font-bold text-xs border border-green-100 dark:border-green-800 cursor-default">
+                            <CheckCircle className="w-4 h-4" /> Ulasan Terkirim
+                        </div>
+                      )}
 
-                            <button
-                              onClick={() => handleBookAgain(ticket.origin, ticket.destination)}
-                              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none"
-                            >
-                                Pesan Lagi
-                            </button>
-                        </>
-                    )}
+                      <button
+                        onClick={() => handleBookAgain(ticket.origin, ticket.destination)}
+                        className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-200 dark:shadow-none"
+                      >
+                          Pesan Lagi
+                      </button>
+                    </>
+                  )}
                 </div>
 
               </div>

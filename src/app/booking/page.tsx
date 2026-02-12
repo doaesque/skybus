@@ -9,7 +9,7 @@ import Link from 'next/link';
 const AlertModal = ({ isOpen, message, onClose, type = 'error' }: { isOpen: boolean; message: string; onClose: () => void; type?: 'error' | 'info' }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <X className="w-5 h-5" />
@@ -166,7 +166,7 @@ function BookingContent() {
   }, [bus, date]);
 
   useEffect(() => {
-    const mockUser = { name: "Serena", idNumber: "320428192830001" };
+    const mockUser = { name: "Budi Santoso", idNumber: "320428192830001" };
     const initialPassengers = Array(paxCount).fill({ name: '', idNumber: '' });
     if(paxCount > 0) initialPassengers[0] = { ...mockUser };
     setPassengers(initialPassengers);
@@ -350,14 +350,14 @@ function BookingContent() {
               {step === 1 ? 'Pilih Kursi' : 'Data Penumpang'}
             </h1>
             <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm text-slate-500">Langkah {step} dari 3</p>
-                {step === 2 && (
-                    <ReservationTimerHeader duration={300} onExpire={handleReservationExpire} />
-                )}
+              <p className="text-sm text-slate-500">Langkah {step} dari 3</p>
+              {step === 2 && (
+                <ReservationTimerHeader duration={300} onExpire={handleReservationExpire} />
+              )}
             </div>
           </div>
         </div>
-        {/* 3 Steps Indicator to match Payment */}
+        
         <div className="hidden md:flex gap-2">
           <div className={`h-2 w-12 rounded-full ${step >= 1 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
           <div className={`h-2 w-12 rounded-full ${step >= 2 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
@@ -383,8 +383,7 @@ function BookingContent() {
 
           {step === 2 && (
             <div className="animate-in slide-in-from-right">
-              {/* Removed Timer from here, moved to Header */}
-
+              
               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <h3 className="font-bold mb-6 flex items-center gap-2 text-lg border-b pb-4 border-slate-100 dark:border-slate-800">
                   <Users className="w-5 h-5 text-blue-600"/> Lengkapi Data Penumpang
@@ -503,10 +502,8 @@ function BookingContent() {
 
 export default function BookingPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
-      <Suspense fallback={<div className="p-10 text-center font-bold text-slate-400">Memuat Data Booking...</div>}>
-        <BookingContent />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <BookingContent />
+    </Suspense>
   );
 }

@@ -374,7 +374,7 @@ export default function Home() {
                     min={today}
                     value={departDate}
                     onChange={(e) => setDepartDate(e.target.value)}
-                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:[color-scheme:dark] dark:[&::-webkit-calendar-picker-indicator]:invert"
+                    className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:scheme-dark dark:[&::-webkit-calendar-picker-indicator]:invert"
                   />
                 </div>
                 {tripType === 'round-trip' && (
@@ -388,7 +388,7 @@ export default function Home() {
                       min={departDate || today}
                       value={returnDate}
                       onChange={(e) => setReturnDate(e.target.value)}
-                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:[color-scheme:dark] dark:[&::-webkit-calendar-picker-indicator]:invert"
+                      className="w-full outline-none text-sm font-bold bg-transparent text-slate-800 dark:text-white dark:scheme-dark dark:[&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
                 )}
@@ -427,7 +427,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[200px] mx-auto">{item.desc}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-50 mx-auto">{item.desc}</p>
                 </div>
               </div>
             ))}

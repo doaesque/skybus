@@ -465,7 +465,7 @@ function TicketContent() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-20 text-slate-800 dark:text-slate-100 transition-colors">
       
       {seatWarning.isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center relative">
             <button onClick={() => setSeatWarning({...seatWarning, isOpen: false})} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
               <X className="w-5 h-5" />
@@ -483,7 +483,7 @@ function TicketContent() {
       )}
 
       {lightboxIndex !== null && lightboxImages.length > 0 && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
+        <div className="fixed inset-0 z-100 bg-black/95 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setLightboxIndex(null)}>
           <button className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full hover:bg-white/20 transition z-20">
             <X className="w-8 h-8" />
           </button>
@@ -515,7 +515,7 @@ function TicketContent() {
       )}
 
       {showLoginModal && (
-        <div className="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative text-center">
             <button 
               onClick={() => setShowLoginModal(false)}
@@ -709,7 +709,7 @@ function TicketContent() {
                     </div>
                     <div className="flex-1 flex flex-col items-center relative">
                       <span className="text-[10px] text-slate-400 font-bold mb-4">{bus.duration}</span>
-                      <div className="w-full h-[2px] bg-slate-200 dark:bg-slate-700 relative flex items-center justify-between px-1">
+                      <div className="w-full h-0.5 bg-slate-200 dark:bg-slate-700 relative flex items-center justify-between px-1">
                         <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600 ring-2 ring-white dark:ring-slate-900"></div>
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 px-1">
                           <div className="w-6 h-6 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-700 text-blue-600">
@@ -775,14 +775,14 @@ function TicketContent() {
                       ))}
                     </div>
 
-                    <div className="p-5 min-h-[150px]">
+                    <div className="p-5 min-h-37.5">
                       {activeTab === 'points' && (
                         <div className="grid grid-cols-2 gap-8">
                           <div>
                             <h4 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Titik Keberangkatan</h4>
                             <div className="border-l-2 border-slate-200 dark:border-slate-800 ml-1 space-y-4">
                               <div className="relative pl-4">
-                                <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></div>
+                                <div className="absolute -left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></div>
                                 <span className="block text-sm font-bold text-slate-800 dark:text-white">{bus.departureTime}</span>
                                 <span className="text-xs text-slate-500">{bus.fromDetail}</span>
                               </div>
@@ -792,7 +792,7 @@ function TicketContent() {
                             <h4 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Titik Turun</h4>
                             <div className="border-l-2 border-slate-200 dark:border-slate-800 ml-1">
                               <div className="relative pl-4">
-                                <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-blue-600"></div>
+                                <div className="absolute -left-1.25 top-1.5 w-2 h-2 rounded-full bg-blue-600"></div>
                                 <span className="block text-sm font-bold text-slate-800 dark:text-white">{bus.arrivalTime}</span>
                                 <span className="text-xs text-slate-500">{bus.toDetail}</span>
                               </div>
