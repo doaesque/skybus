@@ -6,7 +6,7 @@ import { BUS_DATA, ALL_PARTNERS, PROMO_DATA } from '@/constants/data';
 import { 
   CheckCircle, Loader2, Lock, ShieldCheck, 
   Ticket, Clock, ChevronDown, ChevronUp, Tag, Copy, Smartphone, 
-  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw, X
+  Landmark, Store, Wallet, AlertCircle, Timer, RotateCcw, X, Check
 } from 'lucide-react';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
@@ -74,8 +74,8 @@ const TimeoutModal = ({ isOpen }: { isOpen: boolean }) => {
           <Timer className="w-8 h-8" />
         </div>
         <h2 className="text-xl font-black mb-2">Waktu Habis!</h2>
-        <p className="text-slate-500 text-sm mb-6">Sesi pembayaran Anda telah berakhir. Kursi telah dilepas kembali.</p>
-        <button onClick={() => router.push('/login')} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold">Kembali Login</button>
+        <p className="text-slate-500 text-sm mb-6">Maaf, waktu reservasi kursi Anda telah berakhir. Silakan ulangi pemesanan.</p>
+        <button onClick={() => router.push('/')} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 rounded-xl font-bold">Kembali ke Beranda</button>
       </div>
     </div>
   );
@@ -206,8 +206,9 @@ function PaymentContent() {
   const [voucherError, setVoucherError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  // New State for Alert Modal
+  // New State for Modals
   const [alertInfo, setAlertInfo] = useState({ isOpen: false, message: '' });
 
   useEffect(() => {
@@ -228,6 +229,12 @@ function PaymentContent() {
       const m = Math.floor(seconds / 60);
       const s = seconds % 60;
       return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleCopy = (text: string) => {
+      navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
   };
 
   if (!bus) return null;
@@ -255,10 +262,9 @@ function PaymentContent() {
       }
   };
 
-  const handleCreatePayment = () => {
+  const handleRequestPayment = () => {
       if (!selectedMethod) return;
       if (selectedMethod === 'va' && !subMethod) {
-          // REPLACED ALERT WITH MODAL
           setAlertInfo({ isOpen: true, message: 'Silakan pilih Bank terlebih dahulu untuk melanjutkan pembayaran VA.' });
           return;
       }
@@ -270,8 +276,11 @@ function PaymentContent() {
       }, 1500);
   };
 
+  // --- LOGIC PEMBAYARAN OTOMATIS (Simulasi) ---
   const handleConfirmPayment = () => {
-      setIsProcessing(true);
+      setIsProcessing(true); // Ganti tombol jadi loading
+      
+      // Simulasi delay pengecekan ke gateway
       setTimeout(() => {
           setIsProcessing(false);
           setShowSuccess(true);
@@ -284,7 +293,7 @@ function PaymentContent() {
             params.set('source', 'payment');
             router.push(`/eticket?${params.toString()}`);
           }, 2000);
-      }, 2000);
+      }, 3000);
   };
 
   return (
@@ -296,10 +305,10 @@ function PaymentContent() {
             message={alertInfo.message} 
             onClose={() => setAlertInfo({ ...alertInfo, isOpen: false })} 
        />
-
-       {/* Removed items-start to allow columns to stretch, enabling sticky behavior inside */}
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+       
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
            
+           {/* KOLOM KIRI: Konten */}
            <div className="md:col-span-2 space-y-6">
                
                {/* STEP 1: PAYMENT SELECTION */}
@@ -314,7 +323,10 @@ function PaymentContent() {
                                <div>
                                    <h4 className="font-bold text-lg leading-tight">{bus.name}</h4>
                                    <p className="text-sm text-slate-500">{bus.type}</p>
-                                   <p className="text-xs text-slate-400 mt-1">{date ? new Date(date).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'}) : ''} • {bus.departureTime}</p>
+                                   <p className="text-xs text-slate-400 mt-1">
+                                       {/* UPDATE: Tanggal lebih spesifik dengan Tahun */}
+                                       {date ? new Date(date).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}) : ''} • {bus.departureTime}
+                                   </p>
                                    {isRoundTrip && (
                                        <span className="inline-block mt-1 bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded">Pulang Pergi</span>
                                    )}
@@ -400,9 +412,12 @@ function PaymentContent() {
                                        <span className="font-bold text-lg">{subMethod} Virtual Account</span>
                                    </div>
                                    <p className="text-xs text-slate-400 mb-2 text-left uppercase font-bold tracking-wider">Nomor Virtual Account</p>
-                                   <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-2 shadow-sm">
+                                   <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-2 shadow-sm relative group cursor-pointer" onClick={() => handleCopy("8801234567890")}>
                                        <span className="font-mono text-2xl font-black tracking-wider text-blue-600">8801234567890</span>
-                                       <button className="text-slate-400 hover:text-blue-600 transition"><Copy className="w-5 h-5"/></button>
+                                       <button className="text-slate-400 group-hover:text-blue-600 transition">
+                                            {copied ? <Check className="w-5 h-5 text-green-500"/> : <Copy className="w-5 h-5"/>}
+                                       </button>
+                                       {copied && <span className="absolute -top-8 right-0 bg-black text-white text-[10px] py-1 px-2 rounded">Tersalin!</span>}
                                    </div>
                                    <p className="text-xs text-slate-400 text-left">Total: <span className="text-slate-900 dark:text-white font-bold">Rp {totalPrice.toLocaleString('id-ID')}</span></p>
                                </div>
@@ -411,14 +426,23 @@ function PaymentContent() {
                            {selectedMethod === 'retail' && (
                                <div className="bg-orange-50 dark:bg-orange-900/10 p-6 rounded-2xl border border-orange-200 dark:border-orange-800 max-w-sm mx-auto">
                                    <p className="font-bold text-sm mb-4 uppercase tracking-widest text-orange-600 dark:text-orange-400">Kode Pembayaran</p>
-                                   <div className="text-4xl font-mono font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 p-4 rounded-xl mb-4 border-2 border-orange-500 border-dashed">SKY-99281</div>
+                                   <div className="text-4xl font-mono font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 p-4 rounded-xl mb-4 border-2 border-orange-500 border-dashed flex justify-between items-center cursor-pointer" onClick={() => handleCopy("SKY-99281")}>
+                                       <span>SKY-99281</span>
+                                       <button className="text-slate-400 hover:text-orange-600">
+                                            {copied ? <Check className="w-5 h-5 text-green-500"/> : <Copy className="w-5 h-5"/>}
+                                       </button>
+                                   </div>
                                    <p className="text-xs text-slate-500">Tunjukkan kode ini ke kasir Indomaret/Alfamart terdekat.</p>
                                </div>
                            )}
                        </div>
 
                        <div className="space-y-3 max-w-sm mx-auto mb-8">
-                           <button onClick={handleConfirmPayment} disabled={isProcessing} className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 dark:shadow-none transition flex items-center justify-center gap-2">{isProcessing ? <Loader2 className="w-5 h-5 animate-spin"/> : <CheckCircle className="w-5 h-5"/>} Saya Sudah Bayar</button>
+                           {/* UPDATE: Hapus Confirm Modal, Ganti jadi Action Button Langsung */}
+                           <button onClick={handleConfirmPayment} disabled={isProcessing} className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin"/> Mengecek Pembayaran...</> : <><CheckCircle className="w-5 h-5"/> Saya Sudah Bayar</>}
+                           </button>
+                           
                            <button onClick={() => setPaymentStep('select')} className="w-full py-3 text-slate-500 font-bold hover:text-blue-600 transition flex items-center justify-center gap-2 text-sm"><RotateCcw className="w-4 h-4" /> Ganti Metode Pembayaran</button>
                        </div>
 
@@ -428,7 +452,7 @@ function PaymentContent() {
                )}
            </div>
 
-           {/* RIGHT COLUMN (Sticky Sidebar) */}
+           {/* KOLOM KANAN: STICKY SIDEBAR */}
            <div className="md:col-span-1">
                <div className="sticky top-24 space-y-4"> 
                    
@@ -450,9 +474,18 @@ function PaymentContent() {
                            {appliedVoucher && (<div className="flex justify-between text-green-600"><span className="flex items-center gap-1"><Tag className="w-3 h-3"/> Diskon</span><span>- Rp {appliedVoucher.amount.toLocaleString('id-ID')}</span></div>)}
                            <div className="border-t border-dashed pt-3 mt-2 flex justify-between font-black text-xl"><span>Total</span><span className="text-blue-600">Rp {totalPrice.toLocaleString('id-ID')}</span></div>
                        </div>
+                       
+                       {/* TOMBOL BAYAR (Hanya muncul di Step 1) */}
                        {paymentStep === 'select' && (
-                           <button onClick={handleCreatePayment} disabled={isProcessing || !selectedMethod} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95">{isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}</button>
+                           <button 
+                                onClick={handleRequestPayment} 
+                                disabled={isProcessing || !selectedMethod} 
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-95"
+                           >
+                                {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Memproses...</>) : (<><Lock className="w-5 h-5" /> Bayar Sekarang</>)}
+                           </button>
                        )}
+                       
                        <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg text-center"><ShieldCheck className="w-3 h-3" /> Transaksi Anda dilindungi enkripsi SSL 256-bit.</div>
                    </div>
                </div>
