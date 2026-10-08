@@ -53,7 +53,7 @@ src/app/
 ## 🚀 Setup
 
 ```bash
-git clone [https://github.com/doaesque/skybus.git](https://github.com/doaesque/skybus.git)
+git clone https://github.com/doaesque/skybus.git
 cd skybus
 npm install
 npm run dev
