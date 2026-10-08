@@ -1,66 +1,61 @@
-# SkyBus - Platform Pemesanan Tiket Bus Online
+# 🚌 SkyBus — Intercity Transit Booking Architecture
 
-SkyBus adalah aplikasi web modern untuk layanan pemesanan tiket bus dan travel antar kota di Indonesia. Proyek ini dikembangkan untuk mendemonstrasikan implementasi teknologi web terbaru dengan fokus pada performa tinggi, desain responsif, dan pengalaman pengguna yang intuitif.
+[![Next.js](https://img.shields.io/badge/Next.js-16_(App_Router)-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS_v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-Aplikasi ini dibangun menggunakan arsitektur Next.js 16 (App Router) dan gaya antarmuka menggunakan Tailwind CSS v4.
+SkyBus is an engineering showcase modeling the architectural scale and interface complexity of modern Online Travel Agent (OTA) platforms for intercity transit across Indonesia.
 
-## Fitur Utama
+---
 
-* **Pencarian Tiket Real-time:** Memungkinkan pengguna mencari ketersediaan tiket berdasarkan asal, tujuan, tanggal keberangkatan, dan jumlah penumpang.
-* **Filter Pencarian Lanjutan:** Pengguna dapat menyaring hasil berdasarkan lokasi spesifik (Terminal/Pool) dan jenis perjalanan (Sekali Jalan atau Pulang Pergi).
-* **Antarmuka Modern & Responsif:** Desain yang sepenuhnya responsif untuk perangkat mobile dan desktop, dilengkapi dengan dukungan Mode Gelap (Dark Mode).
-* **Integrasi Data Mitra:** Menampilkan simulasi data dari berbagai operator bus populer dengan detail fasilitas armada (Executive, Sleeper, Shuttle).
-* **Sistem Kode Promo:** Fitur interaktif untuk penerapan diskon pada transaksi.
-* **Halaman Informasi Lengkap:** Mencakup halaman Bantuan (FAQ), Tentang Kami, Daftar Mitra, dan Panduan Pemesanan.
+## ⚡ Architectural Highlights
 
-## Teknologi yang Digunakan
+Instead of treating booking as a single isolated view, SkyBus implements a multi-tenant portal pattern designed around nested App Router structures:
 
-Proyek ini dibangun menggunakan teknologi berikut:
+* **Triple-Tier Layout Segregation:** Independent route hierarchies and layout boundaries for End Customers (`/booking`), Bus Operators/Partners (`/admin/partner`), and Platform Operators (`/admin/dashboard`).
+* **Interactive Fleet Seat Matrix:** Real-time visual seat selector parsing multi-class layouts (Executive $2+2$, Sleeper $1+1$, Shuttle configs) with state reservation locking.
+* **Deterministic Search & Multi-Param Filtering:** High-performance route filtering engine handling origin/destination terminal hubs, departure time windows, operator tiers, and promotional discount application.
+* **Client-Side E-Ticket Compilation:** Generates structured printable/downloadable PDF tickets (`jspdf` + `html2canvas`) dynamically upon checkout verification.
+* **Production Polish & Compliance:** Complete, production-ready legal and informational scaffolding (`/terms`, `/privacy`, `/cookie-policy`, `/help`).
 
-* **Framework:** Next.js 16.1 (App Router)
-* **Library UI:** React 19
-* **Styling:** Tailwind CSS v4
-* **Bahasa:** TypeScript
-* **Ikon:** Lucide React
-* **Animasi:** Framer Motion
-* **Utilitas PDF:** jspdf & html2canvas (untuk pembuatan E-Ticket)
+---
 
-## Struktur Proyek
+## 🛠️ Stack
 
-Berikut adalah gambaran umum struktur direktori proyek:
+* **Framework:** Next.js (App Router, Server & Client Components)
+* **Language:** TypeScript
+* **Design System & Styling:** Tailwind CSS v4, Lucide React
+* **Document Engine:** `jspdf`, `html2canvas`
 
-* `src/app`: Berisi halaman aplikasi dan layout (Next.js App Router).
-* `src/components`: Komponen UI yang dapat digunakan kembali (reusable).
-* `src/constants`: Data statis (mock data) untuk rute, bus, dan promo.
-* `src/lib`: Fungsi utilitas dan helper.
-* `public`: Aset statis seperti gambar dan logo.
+---
 
-## Instalasi dan Penggunaan
+## 📂 Route Architecture
 
-Ikuti langkah-langkah berikut untuk menjalankan proyek ini di lingkungan lokal Anda:
+```text
+src/app/
+├── (public)/
+│   ├── booking/        # Search filters, bus selection, seat matrix
+│   ├── payment/        # Multi-method transaction simulation
+│   └── eticket/        # Rendered client-side ticket artifact
+├── mitra/              # Fleet partner landing & registration portal
+├── admin/
+│   ├── dashboard/      # Platform revenue & fleet metrics
+│   ├── partner/fleets/ # Partner fleet schedule & seat allocation
+│   └── users/          # Account verification registry
+└── (policies)/         # Terms, Privacy, Cookie, and Guide routes
 
-1. **Clone repositori**
+```
+
+---
+
+## 🚀 Setup
 
 ```bash
-git clone [https://github.com/username-anda/skybus.git](https://github.com/username-anda/skybus.git)
+git clone [https://github.com/doaesque/skybus.git](https://github.com/doaesque/skybus.git)
 cd skybus
-```
-
-1. **Instal dependensi**
-
-```bash
 npm install
-```
-
-1. **Jalankan server pengembangan**
-
-```bash
 npm run dev
+
 ```
-
-1. **Akses aplikasi**
-Buka peramban web dan kunjungi `http://localhost:3000`.
-
-## Lisensi
-
-Proyek ini didistribusikan di bawah Lisensi MIT. Lihat file LICENSE untuk informasi lebih lanjut.
